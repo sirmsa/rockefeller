@@ -1,0 +1,71 @@
+﻿@page "/"
+
+<MudText Typo="Typo.h3" Class="mb-4">Welcome to Rockefeller</MudText>
+
+<MudPaper Class="pa-4 mb-4" Elevation="2">
+    <MudText Typo="Typo.h5" Class="mb-3">Getting Started</MudText>
+    <MudText Typo="Typo.body1" Class="mb-3">
+        This is your new app built with .NET MAUI Blazor and MudBlazor.
+    </MudText>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Rocket">
+        Get Started
+    </MudButton>
+</MudPaper>
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="4">
+        <MudCard Elevation="2" Class="ma-2">
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">Fast Development</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.body2">
+                    Build beautiful, responsive applications quickly with MudBlazor components.
+                </MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    
+    <MudItem xs="12" sm="6" md="4">
+        <MudCard Elevation="2" Class="ma-2">
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">Cross Platform</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.body2">
+                    Deploy to Android, iOS, macOS, and Windows with a single codebase.
+                </MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    
+    <MudItem xs="12" sm="6" md="4">
+        <MudCard Elevation="2" Class="ma-2">
+            <MudCardHeader>
+                <MudText Typo="Typo.h6">Modern UI</MudText>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText Typo="Typo.body2">
+                    Material Design components that look great on all devices.
+                </MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+</MudGrid>
+
+<MudDivider Class="my-6" />
+
+<MudPaper Class="pa-4" Elevation="1">
+    <MudText Typo="Typo.h5" Class="mb-3">Quick Actions</MudText>
+    <MudStack Row="true" Spacing="2">
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Settings">
+            Settings
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Info" StartIcon="@Icons.Material.Filled.Help">
+            Help
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Success" StartIcon="@Icons.Material.Filled.CheckCircle">
+            Tutorial
+        </MudButton>
+    </MudStack>
+</MudPaper>
