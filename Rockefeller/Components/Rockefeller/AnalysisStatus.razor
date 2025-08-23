@@ -1,0 +1,102 @@
+@if (SelectedSymbol != null)
+{
+    <div class="rockefeller-card rockefeller-mt-4" style="background: var(--rockefeller-bg-secondary);">
+        <div class="rockefeller-flex-between rockefeller-mb-3">
+            <h4 class="rockefeller-heading">
+                <MudIcon Icon="@Icons.Material.Filled.Analytics" Size="Size.Small" style="margin-right: 8px;" />
+                Analysis Status
+            </h4>
+            @if (IsInitialAnalysisInProgress)
+            {
+                <MudChip Color="Color.Warning" Icon="@Icons.Material.Filled.Refresh" Size="Size.Small">
+                    Analysis in Progress...
+                </MudChip>
+            }
+        </div>
+        
+        @if (SymbolLoadingStates.ContainsKey(SelectedSymbol))
+        {
+            @switch (SymbolLoadingStates[SelectedSymbol])
+            {
+                case SymbolLoadingState.Loading:
+                    <div class="rockefeller-analysis-loading">
+                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+                        <div class="rockefeller-mt-3">
+                            <MudText Typo="Typo.body1">Performing initial analysis for @SelectedSymbol...</MudText>
+                            <MudText Typo="Typo.body2" Class="rockefeller-text-secondary">This may take a few moments</MudText>
+                        </div>
+                    </div>
+                    break;
+                    
+                case SymbolLoadingState.AnalysisComplete:
+                    <div class="rockefeller-analysis-complete">
+                        <div class="rockefeller-grid rockefeller-grid-3">
+                            <div>
+                                <div class="rockefeller-text-secondary">Market Trend</div>
+                                <div class="rockefeller-text-primary">@(SymbolAnalysisCache?.MarketTrend ?? "N/A")</div>
+                            </div>
+                            <div>
+                                <div class="rockefeller-text-secondary">AI Confidence</div>
+                                <div class="rockefeller-text-primary">@(SymbolAnalysisCache?.AIConfidence ?? 0)%</div>
+                            </div>
+                            <div>
+                                <div class="rockefeller-text-secondary">Sentiment</div>
+                                <div class="rockefeller-text-primary">@(MarketSentimentCache?.MarketMood ?? "N/A")</div>
+                            </div>
+                            <div>
+                                <div class="rockefeller-text-secondary">Current Price</div>
+                                <div class="rockefeller-text-primary">$@(SymbolAnalysisCache?.CurrentPrice.ToString("N4") ?? "N/A")</div>
+                            </div>
+                            <div>
+                                <div class="rockefeller-text-secondary">24h Change</div>
+                                <div class="rockefeller-text-primary @(SymbolAnalysisCache?.PriceChange24h >= 0 ? "rockefeller-text-success" : "rockefeller-text-danger")">
+                                    @(SymbolAnalysisCache?.PriceChange24h.ToString("N2") ?? "N/A")%
+                                </div>
+            </div>
+                            <div>
+                                <div class="rockefeller-text-secondary">Analysis Time</div>
+                                <div class="rockefeller-text-primary">@(SymbolAnalysisCache?.AnalysisTime.ToString("HH:mm") ?? "N/A")</div>
+                            </div>
+                        </div>
+                    </div>
+                    break;
+                    
+                case SymbolLoadingState.AnalysisFailed:
+                    <div class="rockefeller-analysis-failed">
+                        <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Large" Color="Color.Error" />
+                        <div class="rockefeller-mt-3">
+                            <MudText Typo="Typo.body1" Color="Color.Error">Analysis failed for @SelectedSymbol</MudText>
+                            <MudText Typo="Typo.body2" Class="rockefeller-text-secondary">Please try again or contact support</MudText>
+                        </div>
+                        <MudButton Variant="Variant.Outlined" 
+                                   Color="Color.Primary" 
+                                   OnClick="OnRetryAnalysis"
+                                   Class="rockefeller-mt-3">
+                            Retry Analysis
+                        </MudButton>
+                    </div>
+                    break;
+                    
+                case SymbolLoadingState.NoData:
+                    <div class="rockefeller-analysis-no-data">
+                        <MudIcon Icon="@Icons.Material.Filled.HourglassEmpty" Size="Size.Large" Color="Color.Secondary" />
+                        <div class="rockefeller-mt-3">
+                            <MudText Typo="Typo.body1">No analysis data available for @SelectedSymbol</MudText>
+                            <MudText Typo="Typo.body2" Class="rockefeller-text-secondary">Click "Start Trading" to perform initial analysis</MudText>
+                        </div>
+                    </div>
+                    break;
+            }
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string? SelectedSymbol { get; set; }
+    [Parameter] public bool IsInitialAnalysisInProgress { get; set; }
+    [Parameter] public Dictionary<string, SymbolLoadingState> SymbolLoadingStates { get; set; } = new();
+    [Parameter] public SymbolAnalysisCache? SymbolAnalysisCache { get; set; }
+    [Parameter] public MarketSentimentCache? MarketSentimentCache { get; set; }
+    
+    [Parameter] public EventCallback OnRetryAnalysis { get; set; }
+}

@@ -1,0 +1,71 @@
+@if (SelectedSymbol != null && ActiveProfile != null)
+{
+    var symbolSettings = ActiveProfile.SymbolSettings.ContainsKey(SelectedSymbol) ? ActiveProfile.SymbolSettings[SelectedSymbol] : null;
+    
+    <div class="rockefeller-card rockefeller-mt-4" style="background: var(--rockefeller-bg-secondary);">
+        <div class="rockefeller-flex-between rockefeller-mb-3">
+            <h4 class="rockefeller-heading">
+                <MudIcon Icon="@Icons.Material.Filled.PowerSettingsNew" Size="Size.Small" style="margin-right: 8px;" />
+                Trading Status
+            </h4>
+            <div class="rockefeller-trading-status @(IsTradingActive ? "active" : "inactive")">
+                @(IsTradingActive ? "ACTIVE" : "INACTIVE")
+            </div>
+        </div>
+        
+        <div class="rockefeller-grid rockefeller-grid-3">
+            <div>
+                <div class="rockefeller-text-secondary">Symbol</div>
+                <div class="rockefeller-text-primary rockefeller-symbol">@SelectedSymbol</div>
+            </div>
+            <div>
+                <div class="rockefeller-text-secondary">Profile</div>
+                <div class="rockefeller-text-primary">@ActiveProfile.Name</div>
+            </div>
+            <div>
+                <div class="rockefeller-text-secondary">Auto Trading</div>
+                <div class="rockefeller-text-primary @(ActiveProfile.EnableAutoTrading ? "rockefeller-text-success" : "rockefeller-text-warning")">
+                    @(ActiveProfile.EnableAutoTrading ? "Enabled" : "Disabled")
+                </div>
+            </div>
+            <div>
+                <div class="rockefeller-text-secondary">Portfolio Value</div>
+                <div class="rockefeller-text-primary">$@ActiveProfile.InitialPortfolioValue.ToString("N2")</div>
+            </div>
+            <div>
+                <div class="rockefeller-text-secondary">Max Trade Size</div>
+                <div class="rockefeller-text-primary">$@(symbolSettings != null ? (ActiveProfile.InitialPortfolioValue * symbolSettings.PositionSize / 100).ToString("N2") : "N/A")</div>
+            </div>
+            <div>
+                <div class="rockefeller-text-secondary">AI Confidence</div>
+                <div class="rockefeller-text-primary">@ActiveProfile.MinAIConfidence%</div>
+            </div>
+        </div>
+        
+        @if (IsTradingActive)
+        {
+            <div class="rockefeller-trading-activity rockefeller-mt-3">
+                <div class="rockefeller-flex-between">
+                    <div>
+                        <MudIcon Icon="@Icons.Material.Filled.Timer" Size="Size.Small" style="margin-right: 4px;" />
+                        <span class="rockefeller-text-secondary">Trading Started:</span>
+                        <span class="rockefeller-text-primary">@TradingStartTime?.ToString("HH:mm:ss")</span>
+                    </div>
+                    <div>
+                        <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" style="margin-right: 4px;" />
+                        <span class="rockefeller-text-primary">Active Positions:</span>
+                        <span class="rockefeller-text-primary">@ActivePositionsCount</span>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string? SelectedSymbol { get; set; }
+    [Parameter] public TradingProfile? ActiveProfile { get; set; }
+    [Parameter] public bool IsTradingActive { get; set; }
+    [Parameter] public DateTime? TradingStartTime { get; set; }
+    [Parameter] public int ActivePositionsCount { get; set; }
+}

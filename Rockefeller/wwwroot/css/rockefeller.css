@@ -105,9 +105,23 @@ html, body {
     color: var(--rockefeller-text-primary);
     margin: 0;
     padding: 0;
+    height: 100%;
+    overflow: hidden;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.status-bar-safe-area {
+    height: env(safe-area-inset-top);
+    background: var(--rockefeller-bg-surface);
 }
 
 /* Rockefeller Components */
@@ -135,6 +149,320 @@ html, body {
     color: var(--rockefeller-primary);
     border-bottom-color: var(--rockefeller-primary);
     background: rgba(220, 38, 38, 0.1);
+}
+
+/* MudBlazor Tab Customization */
+.mud-tabs {
+    background: var(--rockefeller-bg-surface) !important;
+    border-bottom: 1px solid var(--rockefeller-border-primary) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+}
+
+/* Full Width Tab Container */
+.mud-tabs-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.mud-tabs-toolbar {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+}
+
+.mud-tabs .mud-tab {
+    color: var(--rockefeller-text-secondary) !important;
+    font-family: var(--rockefeller-font-primary) !important;
+    font-weight: 500 !important;
+    font-size: var(--rockefeller-text-base) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    padding: var(--rockefeller-space-4) var(--rockefeller-space-6) !important;
+    transition: var(--rockefeller-transition-normal) !important;
+    border-bottom: 2px solid transparent !important;
+    background: transparent !important;
+    min-height: 48px !important;
+}
+
+.mud-tabs .mud-tab:hover {
+    color: var(--rockefeller-text-primary) !important;
+    background: rgba(220, 38, 38, 0.05) !important;
+    border-bottom-color: rgba(220, 38, 38, 0.3) !important;
+}
+
+.mud-tabs .mud-tab.mud-selected {
+    color: var(--rockefeller-primary) !important;
+    border-bottom-color: var(--rockefeller-primary) !important;
+    background: rgba(220, 38, 38, 0.1) !important;
+    font-weight: 600 !important;
+}
+
+.mud-tabs .mud-tab .mud-tab-icon {
+    color: inherit !important;
+    margin-right: var(--rockefeller-space-2) !important;
+}
+
+.mud-tabs .mud-tab .mud-tab-icon.mud-selected {
+    color: var(--rockefeller-primary) !important;
+}
+
+.mud-tabs .mud-tab .mud-tab-text {
+    color: inherit !important;
+}
+
+.mud-tabs .mud-tab-panels {
+    background: var(--rockefeller-bg-primary) !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+}
+
+.mud-tabs .mud-tab-panel {
+    background: var(--rockefeller-bg-primary) !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Custom scrollbar for tab panels */
+.mud-tabs .mud-tab-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.mud-tabs .mud-tab-panel::-webkit-scrollbar-track {
+    background: var(--rockefeller-bg-secondary);
+}
+
+.mud-tabs .mud-tab-panel::-webkit-scrollbar-thumb {
+    background: var(--rockefeller-border-primary);
+    border-radius: var(--rockefeller-radius-sm);
+}
+
+.mud-tabs .mud-tab-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--rockefeller-border-secondary);
+}
+
+/* Tab Panel Content Styling */
+.mud-tab-panel .rockefeller-p-6 {
+    padding: var(--rockefeller-space-6) !important;
+}
+
+/* Active Tab Indicator */
+.mud-tabs .mud-tab.mud-selected::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--rockefeller-gradient-primary) !important;
+    border-radius: 1px;
+}
+
+/* Tab Hover Effects */
+.mud-tabs .mud-tab:hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(220, 38, 38, 0.05) 0%, transparent 100%) !important;
+    pointer-events: none;
+}
+
+/* Tab Focus States */
+.mud-tabs .mud-tab:focus-visible {
+    outline: 2px solid var(--rockefeller-primary) !important;
+    outline-offset: 2px !important;
+    border-radius: var(--rockefeller-radius-sm) !important;
+}
+
+/* Tab Panel Transitions */
+.mud-tab-panel {
+    transition: opacity var(--rockefeller-transition-normal) ease-in-out !important;
+}
+
+.mud-tab-panel.mud-transition-fade-enter {
+    opacity: 0;
+}
+
+.mud-tab-panel.mud-transition-fade-enter-active {
+    opacity: 1;
+}
+
+.mud-tab-panel.mud-transition-fade-exit {
+    opacity: 1;
+}
+
+.mud-tab-panel.mud-transition-fade-exit-active {
+    opacity: 0;
+}
+
+/* Additional Tab Container Styling */
+.mud-tabs-container {
+    background: var(--rockefeller-bg-surface) !important;
+    border-radius: var(--rockefeller-radius-lg) var(--rockefeller-radius-lg) 0 0 !important;
+    overflow: hidden !important;
+}
+
+.mud-tabs-toolbar {
+    background: var(--rockefeller-bg-surface) !important;
+    border-bottom: 1px solid var(--rockefeller-border-primary) !important;
+    min-height: 56px !important;
+}
+
+.mud-tabs-toolbar .mud-tabs-toolbar-content {
+    background: var(--rockefeller-bg-surface) !important;
+}
+
+/* Tab Text and Icon Alignment */
+.mud-tabs .mud-tab .mud-tab-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: var(--rockefeller-space-2) !important;
+    height: 100% !important;
+}
+
+/* Tab Ripple Effects */
+.mud-tabs .mud-tab .mud-ripple {
+    color: var(--rockefeller-primary) !important;
+}
+
+/* Tab Disabled State */
+.mud-tabs .mud-tab.mud-disabled {
+    color: var(--rockefeller-text-disabled) !important;
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+}
+
+/* Tab Loading State */
+.mud-tabs .mud-tab.mud-loading {
+    position: relative !important;
+}
+
+.mud-tabs .mud-tab.mud-loading::after {
+    content: '';
+    position: absolute !important;
+    top: 50% !important;
+    right: var(--rockefeller-space-3) !important;
+    width: 16px !important;
+    height: 16px !important;
+    margin-top: -8px !important;
+    border: 2px solid var(--rockefeller-border-primary) !important;
+    border-top-color: var(--rockefeller-primary) !important;
+    border-radius: 50% !important;
+    animation: rockefeller-spin 1s linear infinite !important;
+}
+
+@keyframes rockefeller-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Tab Panel Content Enhancement */
+.mud-tab-panel .rockefeller-container {
+    background: var(--rockefeller-bg-primary) !important;
+    min-height: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* Full Width Content */
+.mud-tab-panel > div {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.rockefeller-p-6 {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: var(--rockefeller-space-6) !important;
+}
+
+/* Tab Header Enhancement */
+.mud-tabs .mud-tabs-toolbar {
+    box-shadow: var(--rockefeller-shadow-sm) !important;
+}
+
+/* Tab Icon Enhancement */
+.mud-tabs .mud-tab .mud-icon-root {
+    font-size: 1.2em !important;
+    margin-right: var(--rockefeller-space-2) !important;
+}
+
+/* Tab Text Enhancement */
+.mud-tabs .mud-tab .mud-typography {
+    font-weight: 500 !important;
+    letter-spacing: 0.025em !important;
+}
+
+/* Tab Hover Animation */
+.mud-tabs .mud-tab {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.mud-tabs .mud-tab::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.1), transparent) !important;
+    transition: left 0.5s ease-in-out !important;
+}
+
+.mud-tabs .mud-tab:hover::before {
+    left: 100% !important;
+}
+
+/* Tab Selection Animation */
+.mud-tabs .mud-tab.mud-selected {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--rockefeller-shadow-sm) !important;
+}
+
+/* Tab Content Fade In */
+.mud-tab-panel {
+    animation: rockefeller-fade-in 0.3s ease-in-out !important;
+}
+
+@keyframes rockefeller-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Cards */
@@ -615,7 +943,8 @@ html, body {
 .rockefeller-container {
     position: relative;
     display: flex;
-    min-height: 100vh;
+    min-height: 100%;
+    flex: 1;
 }
 
 .rockefeller-main-content {
@@ -630,10 +959,10 @@ html, body {
 
 .rockefeller-analytics-drawer {
     position: fixed;
-    top: 0;
+    top: 56px;
     right: -320px;
     width: 320px;
-    height: 100vh;
+    height: calc(100vh - 56px);
     background: var(--rockefeller-gradient-surface);
     border-left: 1px solid var(--rockefeller-border-primary);
     box-shadow: var(--rockefeller-shadow-xl);
@@ -649,7 +978,7 @@ html, body {
 .rockefeller-drawer-toggle {
     position: absolute;
     left: -40px;
-    top: 50%;
+    top: calc(50% - 28px);
     transform: translateY(-50%);
     width: 40px;
     height: 80px;
@@ -779,6 +1108,631 @@ html, body {
     .rockefeller-main-content.drawer-open {
         padding-right: 280px;
     }
+}
+
+/* Trading Profile Styles */
+.rockefeller-profile-card {
+    background: var(--rockefeller-gradient-surface);
+    border: 1px solid var(--rockefeller-border-subtle);
+    border-radius: var(--rockefeller-radius-lg);
+    padding: var(--rockefeller-space-4);
+    margin-bottom: var(--rockefeller-space-4);
+    transition: var(--rockefeller-transition-normal);
+}
+
+.rockefeller-profile-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--rockefeller-shadow-md);
+    border-color: var(--rockefeller-border-accent);
+}
+
+.rockefeller-profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--rockefeller-space-3);
+}
+
+.rockefeller-profile-name {
+    font-size: var(--rockefeller-text-lg);
+    font-weight: 600;
+    color: var(--rockefeller-text-primary);
+}
+
+.rockefeller-profile-risk {
+    padding: var(--rockefeller-space-1) var(--rockefeller-space-2);
+    border-radius: var(--rockefeller-radius-sm);
+    font-size: var(--rockefeller-text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.rockefeller-profile-risk.conservative {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--rockefeller-success);
+}
+
+.rockefeller-profile-risk.moderate {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--rockefeller-warning);
+}
+
+.rockefeller-profile-risk.aggressive {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--rockefeller-danger);
+}
+
+.rockefeller-profile-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--rockefeller-space-3);
+}
+
+.rockefeller-profile-metric {
+    text-align: center;
+}
+
+.rockefeller-profile-metric-label {
+    font-size: var(--rockefeller-text-xs);
+    color: var(--rockefeller-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--rockefeller-space-1);
+}
+
+.rockefeller-profile-metric-value {
+    font-size: var(--rockefeller-text-lg);
+    font-weight: 600;
+    color: var(--rockefeller-text-primary);
+    font-family: var(--rockefeller-font-mono);
+}
+
+/* Quick Actions Styling */
+.rockefeller-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--rockefeller-space-4);
+    margin-top: var(--rockefeller-space-4);
+}
+
+.rockefeller-quick-action-btn {
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--rockefeller-space-2);
+    text-align: center;
+}
+
+.rockefeller-quick-action-btn .mud-icon-root {
+    font-size: 1.5rem;
+}
+
+/* Symbol Selector Styling */
+.rockefeller-symbol-selector {
+    background: var(--rockefeller-bg-secondary);
+    border: 2px solid var(--rockefeller-border-primary);
+    border-radius: var(--rockefeller-radius-md);
+    transition: var(--rockefeller-transition-normal);
+}
+
+.rockefeller-symbol-selector:focus-within {
+    border-color: var(--rockefeller-primary);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Profile Dialog Styling */
+.rockefeller-profile-dialog .mud-dialog-content {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.rockefeller-profile-dialog .mud-grid {
+    gap: var(--rockefeller-space-4);
+}
+
+.rockefeller-profile-dialog .mud-text-field,
+.rockefeller-profile-dialog .mud-select,
+.rockefeller-profile-dialog .mud-numeric-field {
+    margin-bottom: 0;
+}
+
+/* Symbol Settings Dialog Styling */
+.rockefeller-symbol-settings-dialog .mud-dialog-content {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.rockefeller-symbol-settings-dialog .mud-table {
+    font-size: var(--rockefeller-text-sm);
+}
+
+.rockefeller-symbol-settings-dialog .mud-table th {
+    padding: var(--rockefeller-space-2);
+    font-size: var(--rockefeller-text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.rockefeller-symbol-settings-dialog .mud-table td {
+    padding: var(--rockefeller-space-2);
+    vertical-align: middle;
+}
+
+.rockefeller-symbol-settings-dialog .mud-numeric-field {
+    min-width: 120px;
+}
+
+.rockefeller-symbol-settings-dialog .mud-numeric-field input {
+    font-size: var(--rockefeller-text-sm);
+    font-family: var(--rockefeller-font-mono);
+}
+
+/* Portfolio Value Display */
+.rockefeller-portfolio-value {
+    font-family: var(--rockefeller-font-mono);
+    font-size: var(--rockefeller-text-xl);
+    font-weight: 700;
+    color: var(--rockefeller-primary);
+    text-shadow: 0 0 10px rgba(220, 38, 38, 0.3);
+}
+
+.rockefeller-portfolio-metric {
+    background: var(--rockefeller-gradient-surface);
+    border: 1px solid var(--rockefeller-border-subtle);
+    border-radius: var(--rockefeller-radius-md);
+    padding: var(--rockefeller-space-3);
+    text-align: center;
+    transition: var(--rockefeller-transition-normal);
+}
+
+.rockefeller-portfolio-metric:hover {
+    border-color: var(--rockefeller-border-accent);
+    transform: translateY(-1px);
+}
+
+/* Symbol Settings Table Enhancements */
+.rockefeller-symbol-settings-table .mud-table-container {
+    border-radius: var(--rockefeller-radius-md);
+    overflow: hidden;
+    border: 1px solid var(--rockefeller-border-subtle);
+}
+
+.rockefeller-symbol-settings-table .mud-table-head {
+    background: var(--rockefeller-bg-secondary);
+}
+
+.rockefeller-symbol-settings-table .mud-table-body tr:hover {
+    background: var(--rockefeller-bg-hover);
+}
+
+.rockefeller-symbol-settings-table .mud-table-body tr:nth-child(even) {
+    background: var(--rockefeller-bg-secondary);
+}
+
+/* Active Symbol Indicator */
+.rockefeller-symbol-active {
+    color: var(--rockefeller-success);
+    font-weight: 600;
+}
+
+.rockefeller-symbol-inactive {
+    color: var(--rockefeller-text-secondary);
+    opacity: 0.6;
+}
+
+/* Custom Settings Indicators */
+.rockefeller-custom-setting {
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid rgba(220, 38, 38, 0.3);
+    border-radius: var(--rockefeller-radius-sm);
+    padding: var(--rockefeller-space-1) var(--rockefeller-space-2);
+    font-size: var(--rockefeller-text-xs);
+    color: var(--rockefeller-primary);
+    font-weight: 600;
+}
+
+.rockefeller-profile-default {
+    background: rgba(107, 114, 128, 0.1);
+    border: 1px solid rgba(107, 114, 128, 0.3);
+    border-radius: var(--rockefeller-radius-sm);
+    padding: var(--rockefeller-space-1) var(--rockefeller-space-2);
+    font-size: var(--rockefeller-text-xs);
+    color: var(--rockefeller-text-secondary);
+    font-weight: 600;
+}
+
+/* Trading Status Styling */
+.rockefeller-trading-status {
+    padding: var(--rockefeller-space-2) var(--rockefeller-space-3);
+    border-radius: var(--rockefeller-radius-md);
+    font-size: var(--rockefeller-text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: center;
+    min-width: 80px;
+    transition: var(--rockefeller-transition-normal);
+}
+
+.rockefeller-trading-status.active {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--rockefeller-success);
+    border: 2px solid var(--rockefeller-success);
+    animation: rockefeller-pulse 2s infinite;
+}
+
+.rockefeller-trading-status.inactive {
+    background: rgba(107, 114, 128, 0.2);
+    color: var(--rockefeller-text-secondary);
+    border: 2px solid var(--rockefeller-text-secondary);
+}
+
+@keyframes rockefeller-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+}
+
+.rockefeller-trading-activity {
+    background: var(--rockefeller-bg-primary);
+    border: 1px solid var(--rockefeller-border-accent);
+    border-radius: var(--rockefeller-radius-md);
+    padding: var(--rockefeller-space-3);
+    border-left: 4px solid var(--rockefeller-success);
+}
+
+.rockefeller-trading-activity .rockefeller-flex-between {
+    align-items: center;
+}
+
+.rockefeller-trading-activity .rockefeller-text-secondary {
+    font-size: var(--rockefeller-text-sm);
+    margin-right: var(--rockefeller-space-2);
+}
+
+.rockefeller-trading-activity .rockefeller-text-primary {
+    font-weight: 600;
+    font-family: var(--rockefeller-font-mono);
+}
+
+/* Start/Stop Button Styling */
+.rockefeller-btn-success {
+    background: linear-gradient(135deg, var(--rockefeller-success), #059669);
+    border: none;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: var(--rockefeller-transition-normal);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.rockefeller-btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.rockefeller-btn-danger {
+    background: linear-gradient(135deg, var(--rockefeller-danger), #dc2626);
+    border: none;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: var(--rockefeller-transition-normal);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.rockefeller-btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+.rockefeller-btn-success:disabled,
+.rockefeller-btn-danger:disabled {
+    opacity: 0.6;
+    transform: none;
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+/* Trading Status Card Enhancements */
+.rockefeller-trading-status-card {
+    background: var(--rockefeller-gradient-surface);
+    border: 2px solid var(--rockefeller-border-subtle);
+    border-radius: var(--rockefeller-radius-lg);
+    transition: var(--rockefeller-transition-normal);
+}
+
+.rockefeller-trading-status-card:hover {
+    border-color: var(--rockefeller-border-accent);
+    transform: translateY(-1px);
+    box-shadow: var(--rockefeller-shadow-lg);
+}
+
+.rockefeller-trading-status-card.active {
+    border-color: var(--rockefeller-success);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+/* Position Count Display */
+.rockefeller-position-count {
+    background: var(--rockefeller-primary);
+    color: white;
+    padding: var(--rockefeller-space-1) var(--rockefeller-space-2);
+    border-radius: var(--rockefeller-radius-sm);
+    font-weight: 600;
+    font-family: var(--rockefeller-font-mono);
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Stop Trading Dialog Styling */
+.rockefeller-stop-trading-content {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.rockefeller-warning-box {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: var(--rockefeller-radius-md);
+    padding: var(--rockefeller-space-3);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rockefeller-space-2);
+}
+
+.rockefeller-info-box {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--rockefeller-radius-md);
+    padding: var(--rockefeller-space-3);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rockefeller-space-2);
+}
+
+.rockefeller-positions-summary {
+    background: var(--rockefeller-bg-secondary);
+    border: 1px solid var(--rockefeller-border-subtle);
+    border-radius: var(--rockefeller-radius-md);
+    padding: var(--rockefeller-space-3);
+}
+
+.rockefeller-positions-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--rockefeller-space-2);
+    margin-top: var(--rockefeller-space-2);
+}
+
+.rockefeller-position-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--rockefeller-space-2);
+    background: var(--rockefeller-bg-primary);
+    border-radius: var(--rockefeller-radius-sm);
+    border: 1px solid var(--rockefeller-border-subtle);
+}
+
+.rockefeller-radio-option {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--rockefeller-space-2);
+    padding: var(--rockefeller-space-2);
+    border-radius: var(--rockefeller-radius-sm);
+    transition: var(--rockefeller-transition-normal);
+}
+
+.rockefeller-radio-option:hover {
+    background: var(--rockefeller-bg-hover);
+}
+
+.rockefeller-radio-label {
+    font-weight: 600;
+    color: var(--rockefeller-text-primary);
+    margin-bottom: var(--rockefeller-space-1);
+}
+
+.rockefeller-radio-description {
+    font-size: var(--rockefeller-text-sm);
+    color: var(--rockefeller-text-secondary);
+    line-height: 1.4;
+}
+
+/* Radio button customization */
+.rockefeller-stop-trading-content .mud-radio {
+    margin-bottom: var(--rockefeller-space-3);
+}
+
+.rockefeller-stop-trading-content .mud-radio .mud-radio-input {
+    margin-top: 2px;
+}
+
+/* Dialog title styling */
+.rockefeller-stop-trading-content .mud-dialog-title {
+    color: var(--rockefeller-danger);
+    font-weight: 600;
+}
+
+/* Warning and info box icons */
+.rockefeller-warning-box .mud-icon-root,
+.rockefeller-info-box .mud-icon-root {
+    color: var(--rockefeller-danger);
+    margin-top: 2px;
+}
+
+.rockefeller-info-box .mud-icon-root {
+    color: var(--rockefeller-info);
+}
+
+/* Symbol Item Styling */
+.rockefeller-symbol-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.rockefeller-symbol-item span {
+    flex: 1;
+}
+
+.rockefeller-symbol-item .mud-chip {
+    margin-left: var(--rockefeller-space-2);
+}
+
+/* Profile Item Styling */
+.rockefeller-profile-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.rockefeller-profile-item span {
+    flex: 1;
+}
+
+.rockefeller-profile-item .mud-chip {
+    margin-left: var(--rockefeller-space-2);
+}
+
+/* Analysis Status Styling */
+.rockefeller-analysis-loading,
+.rockefeller-analysis-complete,
+.rockefeller-analysis-failed,
+.rockefeller-analysis-no-data {
+    text-align: center;
+    padding: var(--rockefeller-space-4);
+}
+
+.rockefeller-analysis-loading .mud-progress-circular {
+    margin-bottom: var(--rockefeller-space-2);
+}
+
+.rockefeller-analysis-complete .rockefeller-grid {
+    text-align: left;
+}
+
+.rockefeller-analysis-failed .mud-icon-root {
+    margin-bottom: var(--rockefeller-space-2);
+}
+
+.rockefeller-analysis-no-data .mud-icon-root {
+    margin-bottom: var(--rockefeller-space-2);
+    opacity: 0.7;
+}
+
+/* Analysis Status Cards */
+.rockefeller-analysis-status-card {
+    background: var(--rockefeller-gradient-surface);
+    border: 1px solid var(--rockefeller-border-subtle);
+    border-radius: var(--rockefeller-radius-lg);
+    transition: var(--rockefeller-transition-normal);
+}
+
+.rockefeller-analysis-status-card:hover {
+    border-color: var(--rockefeller-border-accent);
+    transform: translateY(-1px);
+    box-shadow: var(--rockefeller-shadow-md);
+}
+
+/* Loading Animation */
+@keyframes rockefeller-analysis-pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.rockefeller-analysis-loading .mud-progress-circular {
+    animation: rockefeller-analysis-pulse 2s infinite;
+}
+
+/* Status Chip Colors */
+.rockefeller-status-chip.loading {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--rockefeller-warning);
+    border: 1px solid var(--rockefeller-warning);
+}
+
+.rockefeller-status-chip.ready {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--rockefeller-success);
+    border: 1px solid var(--rockefeller-success);
+}
+
+.rockefeller-status-chip.failed {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--rockefeller-danger);
+    border: 1px solid var(--rockefeller-danger);
+}
+
+.rockefeller-status-chip.no-data {
+    background: rgba(107, 114, 128, 0.1);
+    color: var(--rockefeller-text-secondary);
+    border: 1px solid var(--rockefeller-text-secondary);
+}
+
+/* Analysis Progress Indicator */
+.rockefeller-analysis-progress {
+    background: var(--rockefeller-bg-secondary);
+    border-radius: var(--rockefeller-radius-md);
+    padding: var(--rockefeller-space-3);
+    margin-top: var(--rockefeller-space-3);
+}
+
+.rockefeller-analysis-progress .mud-progress-linear {
+    margin-bottom: var(--rockefeller-space-2);
+}
+
+/* Analysis Results Grid */
+.rockefeller-analysis-results {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--rockefeller-space-3);
+    margin-top: var(--rockefeller-space-3);
+}
+
+.rockefeller-analysis-result-item {
+    background: var(--rockefeller-bg-primary);
+    border: 1px solid var(--rockefeller-border-subtle);
+    border-radius: var(--rockefeller-radius-sm);
+    padding: var(--rockefeller-space-3);
+    text-align: center;
+    transition: var(--rockefeller-transition-normal);
+}
+
+.rockefeller-analysis-result-item:hover {
+    border-color: var(--rockefeller-border-accent);
+    transform: translateY(-1px);
+}
+
+.rockefeller-analysis-result-label {
+    font-size: var(--rockefeller-text-xs);
+    color: var(--rockefeller-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--rockefeller-space-1);
+}
+
+.rockefeller-analysis-result-value {
+    font-size: var(--rockefeller-text-lg);
+    font-weight: 600;
+    color: var(--rockefeller-text-primary);
+    font-family: var(--rockefeller-font-mono);
 }
 
 @media (max-width: 768px) {

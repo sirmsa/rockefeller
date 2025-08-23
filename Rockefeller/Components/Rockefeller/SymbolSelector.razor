@@ -1,0 +1,115 @@
+<div class="rockefeller-card rockefeller-mb-6">
+    <div class="rockefeller-flex-between rockefeller-mb-4">
+        <h2 class="rockefeller-subtitle">
+            <MudIcon Icon="@Icons.Material.Filled.ShowChart" Size="Size.Small" style="margin-right: 8px;" />
+            Trading Symbol & Profile
+        </h2>
+        <MudButton Variant="Variant.Outlined" 
+                   Color="Color.Primary" 
+                   OnClick="OnNewProfileRequested"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   Class="rockefeller-btn-outline">
+            New Profile
+        </MudButton>
+    </div>
+    
+    <MudGrid>
+        <MudItem xs="12" md="4">
+            <MudSelect @bind-Value="SelectedSymbol" 
+                       Label="Trading Symbol" 
+                       Variant="Variant.Outlined" 
+                       Class="mb-3"
+                       AdornmentIcon="@Icons.Material.Filled.CurrencyExchange"
+                       Adornment="Adornment.Start">
+                @foreach (var symbol in AvailableSymbols)
+                {
+                    <MudSelectItem Value="@symbol">
+                        <div class="rockefeller-symbol-item">
+                            <span>@symbol</span>
+                            @if (SymbolLoadingStates.ContainsKey(symbol))
+                            {
+                                @switch (SymbolLoadingStates[symbol])
+                                {
+                                    case SymbolLoadingState.Loading:
+                                        <MudChip Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Refresh">
+                                            Loading
+                                        </MudChip>
+                                        break;
+                                    case SymbolLoadingState.AnalysisComplete:
+                                        <MudChip Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle">
+                                            Ready
+                                        </MudChip>
+                                        break;
+                                    case SymbolLoadingState.AnalysisFailed:
+                                        <MudChip Size="Size.Small" Color="Color.Error" Icon="@Icons.Material.Filled.Error">
+                                            Failed
+                                        </MudChip>
+                                        break;
+                                    case SymbolLoadingState.NoData:
+                                        <MudChip Size="Size.Small" Color="Color.Secondary" Icon="@Icons.Material.Filled.HourglassEmpty">
+                                            Initial Analysis
+                                        </MudChip>
+                                        break;
+                                }
+                            }
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudSelect @bind-Value="ActiveProfileName" 
+                       Label="Active Trading Profile" 
+                       Variant="Variant.Outlined" 
+                       Class="mb-3"
+                       AdornmentIcon="@Icons.Material.Filled.Person"
+                       Adornment="Adornment.Start"
+                       OnChange="OnProfileActivated">
+                @foreach (var profile in TradingProfiles)
+                {
+                    <MudSelectItem Value="@profile.Name">
+                        <div class="rockefeller-profile-item">
+                            <span>@profile.Name</span>
+                            @if (profile.IsActive)
+                            {
+                                <MudChip Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle">
+                                    Active
+                                </MudChip>
+                            }
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        
+        <MudItem xs="12" md="4">
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       OnClick="OnApplyProfileRequested"
+                       StartIcon="@Icons.Material.Filled.Check"
+                       Class="rockefeller-btn-primary"
+                       Disabled="@(SelectedSymbol == null || ActiveProfile == null)">
+                Apply Profile
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+</div>
+
+@code {
+    [Parameter] public string? SelectedSymbol { get; set; }
+    [Parameter] public EventCallback<string?> SelectedSymbolChanged { get; set; }
+    
+    [Parameter] public string ActiveProfileName { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> ActiveProfileNameChanged { get; set; }
+    
+    [Parameter] public List<string> AvailableSymbols { get; set; } = new();
+    [Parameter] public List<TradingProfile> TradingProfiles { get; set; } = new();
+    [Parameter] public Dictionary<string, SymbolLoadingState> SymbolLoadingStates { get; set; } = new();
+    
+    [Parameter] public EventCallback OnNewProfileRequested { get; set; }
+    [Parameter] public EventCallback<string> OnProfileActivated { get; set; }
+    [Parameter] public EventCallback OnApplyProfileRequested { get; set; }
+    
+    private TradingProfile? ActiveProfile => TradingProfiles.FirstOrDefault(p => p.IsActive);
+}

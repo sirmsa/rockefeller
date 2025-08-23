@@ -1,0 +1,126 @@
+<MudDialog @bind-IsVisible="IsVisible" Options="DialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Manage Symbol Settings - @(ActiveProfile?.Name ?? "")</MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (ActiveProfile != null)
+        {
+            <!-- Portfolio Settings -->
+            <div class="rockefeller-card rockefeller-mb-4" style="background: var(--rockefeller-bg-secondary);">
+                <h5 class="rockefeller-heading">Portfolio Settings</h5>
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField T="decimal" @bind-Value="ActiveProfile.InitialPortfolioValue" 
+                                         Label="Initial Portfolio Value ($)" 
+                                         Variant="Variant.Outlined" 
+                                         Class="mb-3"
+                                         Min="1000m" Max="1000000m" Step="1000m"
+                                         Required="true" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField T="int" @bind-Value="ActiveProfile.MaxTotalPositions" 
+                                         Label="Max Total Positions" 
+                                         Variant="Variant.Outlined" 
+                                         Class="mb-3"
+                                         Min="1" Max="50" Step="1"
+                                         Required="true" />
+                    </MudItem>
+                </MudGrid>
+            </div>
+            
+            <!-- Symbol Settings Table -->
+            <div class="rockefeller-card">
+                <h5 class="rockefeller-heading">Symbol Settings</h5>
+                <MudTable Items="@ActiveProfile.SymbolSettings.Values" 
+                          Striped="true" 
+                          Hover="true" 
+                          Class="rockefeller-symbol-settings-table">
+                    <HeaderContent>
+                        <MudTh>Symbol</MudTh>
+                        <MudTh>Active</MudTh>
+                        <MudTh>Position Size (%)</MudTh>
+                        <MudTh>Stop Loss (%)</MudTh>
+                        <MudTh>Take Profit (%)</MudTh>
+                        <MudTh>Max Positions</MudTh>
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.Symbol</MudTd>
+                        <MudTd>
+                            <MudChip Size="Size.Small" 
+                                     Color="@(context.IsActive ? Color.Success : Color.Default)"
+                                     Icon="@(context.IsActive ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Cancel)">
+                                @(context.IsActive ? "Active" : "Inactive")
+                            </MudChip>
+                        </MudTd>
+                        <MudTd>
+                            <MudNumericField T="decimal" @bind-Value="context.PositionSize" 
+                                             Variant="Variant.Outlined" 
+                                             Min="0.1m" Max="100m" Step="0.1m"
+                                             Class="rockefeller-custom-setting" />
+                        </MudTd>
+                        <MudTd>
+                            <MudNumericField T="decimal" @bind-Value="context.StopLoss" 
+                                             Variant="Variant.Outlined" 
+                                             Min="0.1m" Max="50m" Step="0.1m"
+                                             Class="rockefeller-custom-setting" />
+                        </MudTd>
+                        <MudTd>
+                            <MudNumericField T="decimal" @bind-Value="context.TakeProfit" 
+                                             Variant="Variant.Outlined" 
+                                             Min="0.1m" Max="100m" Step="0.1m"
+                                             Class="rockefeller-custom-setting" />
+                        </MudTd>
+                        <MudTd>
+                            <MudNumericField T="int" @bind-Value="context.MaxPositionsOverride" 
+                                             Variant="Variant.Outlined" 
+                                             Min="1" Max="10" Step="1"
+                                             Class="rockefeller-custom-setting" />
+                        </MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Tune" 
+                                           Size="Size.Small" 
+                                           Color="Color.Primary"
+                                           OnClick="@(() => OnCustomizeSettings(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </div>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="OnCancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="OnSave">Save Settings</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public bool IsVisible { get; set; }
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+    [Parameter] public TradingProfile? ActiveProfile { get; set; }
+    [Parameter] public EventCallback<TradingProfile> OnSaveRequested { get; set; }
+    [Parameter] public EventCallback<SymbolSettings> OnCustomizeSettingsRequested { get; set; }
+    
+    private DialogOptions DialogOptions => new() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Large };
+    
+    private async Task OnCancel()
+    {
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+    
+    private async Task OnSave()
+    {
+        if (ActiveProfile != null)
+        {
+            await OnSaveRequested.InvokeAsync(ActiveProfile);
+        }
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+    
+    private async Task OnCustomizeSettings(SymbolSettings settings)
+    {
+        await OnCustomizeSettingsRequested.InvokeAsync(settings);
+    }
+}

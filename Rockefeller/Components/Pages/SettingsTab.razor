@@ -1,6 +1,5 @@
 @page "/settings"
 @using Microsoft.Maui.Storage
-@inject IPreferences Preferences
 
 <div class="rockefeller-p-6">
     <h1 class="rockefeller-title">
@@ -55,8 +54,8 @@
                            Class="mb-3"
                            AdornmentIcon="@Icons.Material.Filled.Cloud"
                            Adornment="Adornment.Start">
-                    <MudSelectItem Value="@("live")">Live Trading</MudSelectItem>
-                    <MudSelectItem Value="@("testnet")">Testnet</MudSelectItem>
+                    <MudSelectItem Value="@TradingEnvironment.Live">Live Trading</MudSelectItem>
+                    <MudSelectItem Value="@TradingEnvironment.Testnet">Testnet</MudSelectItem>
                 </MudSelect>
             </MudItem>
         </MudGrid>
@@ -120,9 +119,9 @@
                            Class="mb-3"
                            AdornmentIcon="@Icons.Material.Filled.Speed"
                            Adornment="Adornment.Start">
-                    <MudSelectItem Value="@("fast")">Fast (5 min intervals)</MudSelectItem>
-                    <MudSelectItem Value="@("medium")">Medium (15 min intervals)</MudSelectItem>
-                    <MudSelectItem Value="@("slow")">Slow (30 min intervals)</MudSelectItem>
+                    <MudSelectItem Value="@AnalysisSpeed.Fast">Fast (5 min intervals)</MudSelectItem>
+                    <MudSelectItem Value="@AnalysisSpeed.Medium">Medium (15 min intervals)</MudSelectItem>
+                    <MudSelectItem Value="@AnalysisSpeed.Slow">Slow (30 min intervals)</MudSelectItem>
                 </MudSelect>
             </MudItem>
         </MudGrid>
@@ -263,9 +262,9 @@
                            Class="mb-3"
                            AdornmentIcon="@Icons.Material.Filled.Security"
                            Adornment="Adornment.Start">
-                    <MudSelectItem Value="@("conservative")">Conservative</MudSelectItem>
-                    <MudSelectItem Value="@("moderate")">Moderate</MudSelectItem>
-                    <MudSelectItem Value="@("aggressive")">Aggressive</MudSelectItem>
+                    <MudSelectItem Value="@RiskLevel.Conservative">Conservative</MudSelectItem>
+                    <MudSelectItem Value="@RiskLevel.Moderate">Moderate</MudSelectItem>
+                    <MudSelectItem Value="@RiskLevel.Aggressive">Aggressive</MudSelectItem>
                 </MudSelect>
             </MudItem>
         </MudGrid>
@@ -330,15 +329,44 @@
 </div>
 
 @code {
+    // Enums for better type safety
+    public enum TradingEnvironment
+    {
+        Live,
+        Testnet
+    }
+    
+    public enum AnalysisSpeed
+    {
+        Fast,
+        Medium,
+        Slow
+    }
+    
+    public enum RiskLevel
+    {
+        Conservative,
+        Moderate,
+        Aggressive
+    }
+    
+    public enum Severity
+    {
+        Info,
+        Success,
+        Warning,
+        Error
+    }
+
     // API Settings
     private string apiKey = string.Empty;
     private string secretKey = string.Empty;
     private string testnetUrl = string.Empty;
-    private string environment = "live";
+    private TradingEnvironment environment = TradingEnvironment.Live;
     
     // AI Configuration
     private int aiConfidenceThreshold = 70;
-    private string aiAnalysisSpeed = "medium";
+    private AnalysisSpeed aiAnalysisSpeed = AnalysisSpeed.Medium;
     private bool enableNewsAnalysis = true;
     private bool enableSocialMediaAnalysis = true;
     private bool enableTechnicalAnalysis = true;
@@ -354,7 +382,7 @@
     private decimal defaultPositionSize = 5.0m;
     private decimal stopLossPercentage = 2.0m;
     private decimal takeProfitPercentage = 6.0m;
-    private string riskLevel = "moderate";
+    private RiskLevel riskLevel = RiskLevel.Moderate;
     
     // Notifications
     private bool emailNotifications = true;
@@ -374,86 +402,86 @@
     private void LoadSettings()
     {
         // Load API Settings
-        apiKey = Preferences.Get("binance_api_key", string.Empty);
-        secretKey = Preferences.Get("binance_secret_key", string.Empty);
-        testnetUrl = Preferences.Get("binance_testnet_url", string.Empty);
-        environment = Preferences.Get("binance_environment", "live");
+        apiKey = Microsoft.Maui.Storage.Preferences.Get("binance_api_key", string.Empty);
+        secretKey = Microsoft.Maui.Storage.Preferences.Get("binance_secret_key", string.Empty);
+        testnetUrl = Microsoft.Maui.Storage.Preferences.Get("binance_testnet_url", string.Empty);
+        environment = Enum.Parse<TradingEnvironment>(Microsoft.Maui.Storage.Preferences.Get("binance_environment", TradingEnvironment.Live.ToString()));
         
         // Load AI Configuration
-        aiConfidenceThreshold = Preferences.Get("ai_confidence_threshold", 70);
-        aiAnalysisSpeed = Preferences.Get("ai_analysis_speed", "medium");
-        enableNewsAnalysis = Preferences.Get("ai_news_analysis", true);
-        enableSocialMediaAnalysis = Preferences.Get("ai_social_media_analysis", true);
-        enableTechnicalAnalysis = Preferences.Get("ai_technical_analysis", true);
-        enableAutoTrading = Preferences.Get("ai_auto_trading", false);
+        aiConfidenceThreshold = Microsoft.Maui.Storage.Preferences.Get("ai_confidence_threshold", 70);
+        aiAnalysisSpeed = Enum.Parse<AnalysisSpeed>(Microsoft.Maui.Storage.Preferences.Get("ai_analysis_speed", AnalysisSpeed.Medium.ToString()));
+        enableNewsAnalysis = Microsoft.Maui.Storage.Preferences.Get("ai_news_analysis", true);
+        enableSocialMediaAnalysis = Microsoft.Maui.Storage.Preferences.Get("ai_social_media_analysis", true);
+        enableTechnicalAnalysis = Microsoft.Maui.Storage.Preferences.Get("ai_technical_analysis", true);
+        enableAutoTrading = Microsoft.Maui.Storage.Preferences.Get("ai_auto_trading", false);
         
         // Load Risk Management Settings
-        dailyLossLimit = Preferences.Get("risk_daily_loss_limit", 1000m);
-        maxPositionSize = Preferences.Get("risk_max_position_size", 10m);
-        enableCircuitBreaker = Preferences.Get("risk_circuit_breaker", true);
-        enableAuditLogging = Preferences.Get("risk_audit_logging", true);
+        dailyLossLimit = (decimal)Microsoft.Maui.Storage.Preferences.Get("risk_daily_loss_limit", 1000.0);
+        maxPositionSize = (decimal)Microsoft.Maui.Storage.Preferences.Get("risk_max_position_size", 10.0);
+        enableCircuitBreaker = Microsoft.Maui.Storage.Preferences.Get("risk_circuit_breaker", true);
+        enableAuditLogging = Microsoft.Maui.Storage.Preferences.Get("risk_audit_logging", true);
         
         // Load Trading Preferences
-        defaultPositionSize = Preferences.Get("trading_position_size", 5.0m);
-        stopLossPercentage = Preferences.Get("trading_stop_loss", 2.0m);
-        takeProfitPercentage = Preferences.Get("trading_take_profit", 6.0m);
-        riskLevel = Preferences.Get("trading_risk_level", "moderate");
+        defaultPositionSize = (decimal)Microsoft.Maui.Storage.Preferences.Get("trading_position_size", 5.0);
+        stopLossPercentage = (decimal)Microsoft.Maui.Storage.Preferences.Get("trading_stop_loss", 2.0);
+        takeProfitPercentage = (decimal)Microsoft.Maui.Storage.Preferences.Get("trading_take_profit", 6.0);
+        riskLevel = Enum.Parse<RiskLevel>(Microsoft.Maui.Storage.Preferences.Get("trading_risk_level", RiskLevel.Moderate.ToString()));
         
         // Load Notification Settings
-        emailNotifications = Preferences.Get("notifications_email", true);
-        pushNotifications = Preferences.Get("notifications_push", true);
-        tradeAlerts = Preferences.Get("notifications_trade_alerts", true);
-        performanceReports = Preferences.Get("notifications_performance_reports", false);
+        emailNotifications = Microsoft.Maui.Storage.Preferences.Get("notifications_email", true);
+        pushNotifications = Microsoft.Maui.Storage.Preferences.Get("notifications_push", true);
+        tradeAlerts = Microsoft.Maui.Storage.Preferences.Get("notifications_trade_alerts", true);
+        performanceReports = Microsoft.Maui.Storage.Preferences.Get("notifications_performance_reports", false);
     }
     
     private void SaveApiSettings()
     {
-        Preferences.Set("binance_api_key", apiKey);
-        Preferences.Set("binance_secret_key", secretKey);
-        Preferences.Set("binance_testnet_url", testnetUrl);
-        Preferences.Set("binance_environment", environment);
+        Microsoft.Maui.Storage.Preferences.Set("binance_api_key", apiKey);
+        Microsoft.Maui.Storage.Preferences.Set("binance_secret_key", secretKey);
+        Microsoft.Maui.Storage.Preferences.Set("binance_testnet_url", testnetUrl);
+        Microsoft.Maui.Storage.Preferences.Set("binance_environment", environment.ToString());
         
         ShowStatus("API settings saved successfully!", Severity.Success);
     }
     
     private void SaveAISettings()
     {
-        Preferences.Set("ai_confidence_threshold", aiConfidenceThreshold);
-        Preferences.Set("ai_analysis_speed", aiAnalysisSpeed);
-        Preferences.Set("ai_news_analysis", enableNewsAnalysis);
-        Preferences.Set("ai_social_media_analysis", enableSocialMediaAnalysis);
-        Preferences.Set("ai_technical_analysis", enableTechnicalAnalysis);
-        Preferences.Set("ai_auto_trading", enableAutoTrading);
+        Microsoft.Maui.Storage.Preferences.Set("ai_confidence_threshold", aiConfidenceThreshold);
+        Microsoft.Maui.Storage.Preferences.Set("ai_analysis_speed", aiAnalysisSpeed.ToString());
+        Microsoft.Maui.Storage.Preferences.Set("ai_news_analysis", enableNewsAnalysis);
+        Microsoft.Maui.Storage.Preferences.Set("ai_social_media_analysis", enableSocialMediaAnalysis);
+        Microsoft.Maui.Storage.Preferences.Set("ai_technical_analysis", enableTechnicalAnalysis);
+        Microsoft.Maui.Storage.Preferences.Set("ai_auto_trading", enableAutoTrading);
         
         ShowStatus("AI settings saved successfully!", Severity.Success);
     }
     
     private void SaveRiskSettings()
     {
-        Preferences.Set("risk_daily_loss_limit", dailyLossLimit);
-        Preferences.Set("risk_max_position_size", maxPositionSize);
-        Preferences.Set("risk_circuit_breaker", enableCircuitBreaker);
-        Preferences.Set("risk_audit_logging", enableAuditLogging);
+        Microsoft.Maui.Storage.Preferences.Set("risk_daily_loss_limit", (double)dailyLossLimit);
+        Microsoft.Maui.Storage.Preferences.Set("risk_max_position_size", (double)maxPositionSize);
+        Microsoft.Maui.Storage.Preferences.Set("risk_circuit_breaker", enableCircuitBreaker);
+        Microsoft.Maui.Storage.Preferences.Set("risk_audit_logging", enableAuditLogging);
         
         ShowStatus("Risk management settings saved successfully!", Severity.Success);
     }
     
     private void SaveTradingPreferences()
     {
-        Preferences.Set("trading_position_size", defaultPositionSize);
-        Preferences.Set("trading_stop_loss", stopLossPercentage);
-        Preferences.Set("trading_take_profit", takeProfitPercentage);
-        Preferences.Set("trading_risk_level", riskLevel);
+        Microsoft.Maui.Storage.Preferences.Set("trading_position_size", (double)defaultPositionSize);
+        Microsoft.Maui.Storage.Preferences.Set("trading_stop_loss", (double)stopLossPercentage);
+        Microsoft.Maui.Storage.Preferences.Set("trading_take_profit", (double)takeProfitPercentage);
+        Microsoft.Maui.Storage.Preferences.Set("trading_risk_level", riskLevel.ToString());
         
         ShowStatus("Trading preferences saved successfully!", Severity.Success);
     }
     
     private void SaveNotificationSettings()
     {
-        Preferences.Set("notifications_email", emailNotifications);
-        Preferences.Set("notifications_push", pushNotifications);
-        Preferences.Set("notifications_trade_alerts", tradeAlerts);
-        Preferences.Set("notifications_performance_reports", performanceReports);
+        Microsoft.Maui.Storage.Preferences.Set("notifications_email", emailNotifications);
+        Microsoft.Maui.Storage.Preferences.Set("notifications_push", pushNotifications);
+        Microsoft.Maui.Storage.Preferences.Set("notifications_trade_alerts", tradeAlerts);
+        Microsoft.Maui.Storage.Preferences.Set("notifications_performance_reports", performanceReports);
         
         ShowStatus("Notification settings saved successfully!", Severity.Success);
     }
@@ -476,15 +504,15 @@
     
     private void ClearSettings()
     {
-        Preferences.Remove("binance_api_key");
-        Preferences.Remove("binance_secret_key");
-        Preferences.Remove("binance_testnet_url");
-        Preferences.Remove("binance_environment");
+        Microsoft.Maui.Storage.Preferences.Remove("binance_api_key");
+        Microsoft.Maui.Storage.Preferences.Remove("binance_secret_key");
+        Microsoft.Maui.Storage.Preferences.Remove("binance_testnet_url");
+        Microsoft.Maui.Storage.Preferences.Remove("binance_environment");
         
         apiKey = string.Empty;
         secretKey = string.Empty;
         testnetUrl = string.Empty;
-        environment = "live";
+        environment = TradingEnvironment.Live;
         
         ShowStatus("API settings cleared successfully!", Severity.Info);
     }

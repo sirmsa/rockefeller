@@ -1,0 +1,120 @@
+
+<div class="rockefeller-analytics-drawer @(IsOpen ? "open" : "")">
+    <div class="rockefeller-drawer-header">
+        <div class="rockefeller-flex-between">
+            <h3 class="rockefeller-heading">
+                <MudIcon Icon="@Icons.Material.Filled.Analytics" Size="Size.Small" style="margin-right: 8px;" />
+                Live Analytics
+            </h3>
+            <MudIconButton Icon="@Icons.Material.Filled.Close" 
+                           Size="Size.Small" 
+                           OnClick="OnClose"
+                           Class="rockefeller-drawer-close" />
+        </div>
+    </div>
+    
+    <div class="rockefeller-drawer-content">
+        <!-- Portfolio Overview -->
+        <div class="rockefeller-drawer-section">
+            <h4 class="rockefeller-drawer-subtitle">Portfolio Overview</h4>
+            <div class="rockefeller-drawer-metrics">
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">Total Value</div>
+                    <div class="rockefeller-drawer-metric-value rockefeller-price">$@PortfolioValue.ToString("N2")</div>
+                </div>
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">24h Change</div>
+                    <div class="rockefeller-drawer-metric-value @(PortfolioChange24h >= 0 ? "rockefeller-text-success" : "rockefeller-text-danger")">
+                        @(PortfolioChange24h >= 0 ? "+" : "")@PortfolioChange24h.ToString("N2")%
+                    </div>
+                </div>
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">Active Positions</div>
+                    <div class="rockefeller-drawer-metric-value">@ActivePositionsCount</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Trading Performance -->
+        <div class="rockefeller-drawer-section">
+            <h4 class="rockefeller-drawer-subtitle">Trading Performance</h4>
+            <div class="rockefeller-drawer-metrics">
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">Win Rate</div>
+                    <div class="rockefeller-drawer-metric-value">@WinRate.ToString("N1")%</div>
+                </div>
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">Profit Factor</div>
+                    <div class="rockefeller-drawer-metric-value">@ProfitFactor.ToString("N2")</div>
+                </div>
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">Max Drawdown</div>
+                    <div class="rockefeller-drawer-metric-value rockefeller-text-danger">@MaxDrawdown.ToString("N2")%</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- AI Performance -->
+        <div class="rockefeller-drawer-section">
+            <h4 class="rockefeller-drawer-subtitle">AI Performance</h4>
+            <div class="rockefeller-drawer-metrics">
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">Signal Accuracy</div>
+                    <div class="rockefeller-drawer-metric-value">@SignalAccuracy.ToString("N1")%</div>
+                </div>
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">Avg Confidence</div>
+                    <div class="rockefeller-drawer-metric-value">@AverageConfidence.ToString("N1")%</div>
+                </div>
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">Signals Today</div>
+                    <div class="rockefeller-drawer-metric-value">@SignalsToday</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Market Overview -->
+        <div class="rockefeller-drawer-section">
+            <h4 class="rockefeller-drawer-subtitle">Market Overview</h4>
+            <div class="rockefeller-drawer-metrics">
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">BTC/USDT</div>
+                    <div class="rockefeller-drawer-metric-value rockefeller-price">$@BtcPrice.ToString("N2")</div>
+                </div>
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">ETH/USDT</div>
+                    <div class="rockefeller-drawer-metric-value rockefeller-price">$@EthPrice.ToString("N2")</div>
+                </div>
+                <div class="rockefeller-drawer-metric">
+                    <div class="rockefeller-drawer-metric-label">SOL/USDT</div>
+                    <div class="rockefeller-drawer-metric-value rockefeller-price">$@SolPrice.ToString("N2")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    
+    // Portfolio data
+    [Parameter] public decimal PortfolioValue { get; set; } = 100000.0m;
+    [Parameter] public decimal PortfolioChange24h { get; set; } = 2.5m;
+    [Parameter] public int ActivePositionsCount { get; set; } = 3;
+    
+    // Trading performance
+    [Parameter] public decimal WinRate { get; set; } = 65.5m;
+    [Parameter] public decimal ProfitFactor { get; set; } = 1.85m;
+    [Parameter] public decimal MaxDrawdown { get; set; } = 8.2m;
+    
+    // AI performance
+    [Parameter] public decimal SignalAccuracy { get; set; } = 72.3m;
+    [Parameter] public decimal AverageConfidence { get; set; } = 78.5m;
+    [Parameter] public int SignalsToday { get; set; } = 12;
+    
+    // Market prices
+    [Parameter] public decimal BtcPrice { get; set; } = 43256.78m;
+    [Parameter] public decimal EthPrice { get; set; } = 2847.65m;
+    [Parameter] public decimal SolPrice { get; set; } = 98.45m;
+}
