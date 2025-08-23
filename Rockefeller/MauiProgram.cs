@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
+using Rockefeller.Services;
 
 namespace Rockefeller;
 
@@ -16,6 +17,15 @@ public static class MauiProgram
         
         // Add MudBlazor services
         builder.Services.AddMudServices();
+        
+        // Add Rockefeller services
+        builder.Services.AddScoped<IAnalyticsService, MockAnalyticsService>();
+        builder.Services.AddScoped<ITradingService, MockTradingService>();
+        builder.Services.AddScoped<IAIService, MockAIService>();
+        builder.Services.AddScoped<IMarketDataService, MockMarketDataService>();
+        
+        // Rockefeller AI Monolith Service
+        builder.Services.AddScoped<IRockefellerAIService, RockefellerAIService>();
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();

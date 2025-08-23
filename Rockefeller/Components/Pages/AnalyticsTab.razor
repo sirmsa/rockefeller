@@ -1,0 +1,250 @@
+@page "/analytics"
+@using Rockefeller.Services
+@inject IAnalyticsService AnalyticsService
+
+<div class="rockefeller-p-6">
+    <h1 class="rockefeller-title">
+        <MudIcon Icon="@Icons.Material.Filled.Psychology" Size="Size.Large" style="margin-right: 16px;" />
+        AI Performance Analytics
+    </h1>
+    
+    <!-- AI Performance Overview -->
+    <div class="rockefeller-grid rockefeller-grid-4 rockefeller-mb-6">
+        <div class="rockefeller-metric">
+            <div class="rockefeller-metric-icon" style="color: var(--rockefeller-success);">
+                <MudIcon Icon="@Icons.Material.Filled.SmartToy" Size="Size.Large" />
+            </div>
+            <div class="rockefeller-metric-value rockefeller-text-success">@analyticsData.TotalReturn.ToString("P2")</div>
+            <div class="rockefeller-metric-label">AI Total Return</div>
+        </div>
+        
+        <div class="rockefeller-metric">
+            <div class="rockefeller-metric-icon" style="color: var(--rockefeller-primary);">
+                <MudIcon Icon="@Icons.Material.Filled.Psychology" Size="Size.Large" />
+            </div>
+            <div class="rockefeller-metric-value" style="color: var(--rockefeller-primary);">@analyticsData.WinRate.ToString("P1")</div>
+            <div class="rockefeller-metric-label">Signal Accuracy</div>
+        </div>
+        
+        <div class="rockefeller-metric">
+            <div class="rockefeller-metric-icon" style="color: var(--rockefeller-info);">
+                <MudIcon Icon="@Icons.Material.Filled.Analytics" Size="Size.Large" />
+            </div>
+            <div class="rockefeller-metric-value" style="color: var(--rockefeller-info);">@analyticsData.TotalTrades</div>
+            <div class="rockefeller-metric-label">AI Decisions</div>
+        </div>
+        
+        <div class="rockefeller-metric">
+            <div class="rockefeller-metric-icon" style="color: var(--rockefeller-warning);">
+                <MudIcon Icon="@Icons.Material.Filled.Speed" Size="Size.Large" />
+            </div>
+            <div class="rockefeller-metric-value" style="color: var(--rockefeller-warning);">@analyticsData.AverageHoldTime</div>
+            <div class="rockefeller-metric-label">Avg Decision Time</div>
+        </div>
+    </div>
+
+    <!-- Performance Chart -->
+    <div class="rockefeller-card rockefeller-mb-6">
+        <h2 class="rockefeller-subtitle">Performance Over Time</h2>
+        <MudChart ChartType="ChartType.Line" ChartSeries="@chartSeries" XAxisLabels="@xAxisLabels" Width="100%" Height="300px" />
+    </div>
+
+    <!-- AI Trading Decisions -->
+    <div class="rockefeller-card rockefeller-mb-6">
+        <h2 class="rockefeller-subtitle">
+            <MudIcon Icon="@Icons.Material.Filled.SmartToy" Size="Size.Small" style="margin-right: 8px;" />
+            Recent AI Trading Decisions
+        </h2>
+        <MudTable Items="@analyticsData.RecentTrades" Hover="true" Striped="true" Elevation="0" Class="rockefeller-table">
+            <HeaderContent>
+                <MudTh><span class="rockefeller-text-secondary">Symbol</span></MudTh>
+                <MudTh><span class="rockefeller-text-secondary">Type</span></MudTh>
+                <MudTh><span class="rockefeller-text-secondary">Entry Price</span></MudTh>
+                <MudTh><span class="rockefeller-text-secondary">Exit Price</span></MudTh>
+                <MudTh><span class="rockefeller-text-secondary">P&L</span></MudTh>
+                <MudTh><span class="rockefeller-text-secondary">Duration</span></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Symbol">
+                    <span class="rockefeller-symbol">@context.Symbol</span>
+                </MudTd>
+                <MudTd DataLabel="Type">
+                    <span class="@(context.Type == "Long" ? "rockefeller-position-long" : "rockefeller-position-short")">
+                        @context.Type
+                    </span>
+                </MudTd>
+                <MudTd DataLabel="Entry Price"><span class="rockefeller-price">@context.EntryPrice.ToString("F4")</span></MudTd>
+                <MudTd DataLabel="Exit Price"><span class="rockefeller-price">@(context.ExitPrice?.ToString("F4") ?? "N/A")</span></MudTd>
+                <MudTd DataLabel="P&L">
+                    <span class="rockefeller-pnl @(context.PnL >= 0 ? "positive" : "negative")">
+                        @context.PnL.ToString("F2")
+                    </span>
+                </MudTd>
+                <MudTd DataLabel="Duration"><span class="rockefeller-text-mono">@context.Duration</span></MudTd>
+            </RowTemplate>
+        </MudTable>
+    </div>
+
+    <!-- ROI Analysis -->
+    <div class="rockefeller-card rockefeller-mb-6">
+        <h2 class="rockefeller-subtitle">
+            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" style="margin-right: 8px;" />
+            ROI Performance Analysis
+        </h2>
+        
+        <div class="rockefeller-grid rockefeller-grid-4 rockefeller-mb-4">
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-success);">
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-success">+24.7%</div>
+                <div class="rockefeller-metric-label">Total ROI</div>
+            </div>
+            
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-info);">
+                    <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-success">+8.3%</div>
+                <div class="rockefeller-metric-label">Monthly ROI</div>
+            </div>
+            
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-warning);">
+                    <MudIcon Icon="@Icons.Material.Filled.DateRange" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-danger">-2.1%</div>
+                <div class="rockefeller-metric-label">Weekly ROI</div>
+            </div>
+            
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-primary);">
+                    <MudIcon Icon="@Icons.Material.Filled.Today" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value" style="color: var(--rockefeller-primary);">+6.8%</div>
+                <div class="rockefeller-metric-label">Daily ROI</div>
+            </div>
+        </div>
+        
+        <div class="rockefeller-grid rockefeller-grid-3">
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-success);">
+                    <MudIcon Icon="@Icons.Material.Filled.ShowChart" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-success">+156.8%</div>
+                <div class="rockefeller-metric-label">Annualized ROI</div>
+            </div>
+            
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-info);">
+                    <MudIcon Icon="@Icons.Material.Filled.Speed" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-primary">+12.5%</div>
+                <div class="rockefeller-metric-label">Avg Trade ROI</div>
+            </div>
+            
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-warning);">
+                    <MudIcon Icon="@Icons.Material.Filled.Timeline" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-warning">+45.2%</div>
+                <div class="rockefeller-metric-label">Best Month ROI</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI Model Performance -->
+    <div class="rockefeller-grid rockefeller-grid-2">
+        <div class="rockefeller-card">
+            <h3 class="rockefeller-heading">
+                <MudIcon Icon="@Icons.Material.Filled.Psychology" Size="Size.Small" style="margin-right: 8px;" />
+                AI Model ROI
+            </h3>
+            <MudList>
+                @foreach (var strategy in analyticsData.StrategyPerformance)
+                {
+                    <MudListItem>
+                        <div class="rockefeller-flex-between">
+                            <div>
+                                <div class="rockefeller-text-primary" style="font-weight: 600;">@strategy.Name</div>
+                                <div class="rockefeller-text-secondary" style="font-size: var(--rockefeller-text-sm);">
+                                    @strategy.TradeCount Trades • ROI: @((strategy.Return * 100).ToString("F1"))%
+                                </div>
+                            </div>
+                            <div class="rockefeller-text-right">
+                                <div class="rockefeller-pnl positive" style="font-size: var(--rockefeller-text-lg);">
+                                    @strategy.Return.ToString("P2")
+                                </div>
+                            </div>
+                        </div>
+                    </MudListItem>
+                }
+            </MudList>
+        </div>
+        
+        <div class="rockefeller-card">
+            <h3 class="rockefeller-heading">
+                <MudIcon Icon="@Icons.Material.Filled.Security" Size="Size.Small" style="margin-right: 8px;" />
+                Risk-Adjusted ROI
+            </h3>
+            <MudList>
+                <MudListItem>
+                    <div class="rockefeller-flex-between">
+                        <span class="rockefeller-text-primary" style="font-weight: 600;">Sharpe Ratio</span>
+                        <span class="rockefeller-text-mono rockefeller-text-primary">@analyticsData.SharpeRatio.ToString("F2")</span>
+                    </div>
+                </MudListItem>
+                <MudListItem>
+                    <div class="rockefeller-flex-between">
+                        <span class="rockefeller-text-primary" style="font-weight: 600;">ROI per Risk Unit</span>
+                        <span class="rockefeller-text-mono rockefeller-text-success">+4.8%</span>
+                    </div>
+                </MudListItem>
+                <MudListItem>
+                    <div class="rockefeller-flex-between">
+                        <span class="rockefeller-text-primary" style="font-weight: 600;">Max Drawdown</span>
+                        <span class="rockefeller-text-mono rockefeller-text-danger">@analyticsData.MaxDrawdown.ToString("P2")</span>
+                    </div>
+                </MudListItem>
+                <MudListItem>
+                    <div class="rockefeller-flex-between">
+                        <span class="rockefeller-text-primary" style="font-weight: 600;">Volatility</span>
+                        <span class="rockefeller-text-mono rockefeller-text-secondary">@analyticsData.Volatility.ToString("P2")</span>
+                    </div>
+                </MudListItem>
+                <MudListItem>
+                    <div class="rockefeller-flex-between">
+                        <span class="rockefeller-text-primary" style="font-weight: 600;">Calmar Ratio</span>
+                        <span class="rockefeller-text-mono rockefeller-text-primary">2.34</span>
+                    </div>
+                </MudListItem>
+            </MudList>
+        </div>
+    </div>
+</div>
+
+@code {
+    private AnalyticsData analyticsData = new();
+    private List<ChartSeries> chartSeries = new();
+    private string[] xAxisLabels = new string[0];
+
+    protected override async Task OnInitializedAsync()
+    {
+        analyticsData = await AnalyticsService.GetAnalyticsDataAsync();
+        InitializeChartData();
+    }
+
+    private void InitializeChartData()
+    {
+        chartSeries = new List<ChartSeries>
+        {
+            new ChartSeries
+            {
+                Name = "Portfolio Value",
+                Data = analyticsData.PerformanceHistory.Points.Select(p => (double)p.Value).ToArray()
+            }
+        };
+
+        xAxisLabels = analyticsData.PerformanceHistory.Points.Select(p => p.Date.ToString("MMM dd")).ToArray();
+    }
+}

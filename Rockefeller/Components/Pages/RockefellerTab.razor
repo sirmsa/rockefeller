@@ -1,0 +1,323 @@
+@using Rockefeller.Services
+
+<div class="rockefeller-container">
+    <div class="rockefeller-main-content @(isDrawerOpen ? "drawer-open" : "")">
+        <h1 class="rockefeller-title">Rockefeller-AI Trading System</h1>
+        
+        <!-- AI Trading Overview -->
+        <div class="rockefeller-grid rockefeller-grid-4 rockefeller-mb-6">
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-primary);">
+                    <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-primary">$125,430.50</div>
+                <div class="rockefeller-metric-label">Portfolio Value</div>
+            </div>
+            
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-success);">
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-success">+24.7%</div>
+                <div class="rockefeller-metric-label">Total ROI</div>
+            </div>
+            
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-info);">
+                    <MudIcon Icon="@Icons.Material.Filled.ShowChart" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-success">+8.3%</div>
+                <div class="rockefeller-metric-label">Monthly ROI</div>
+            </div>
+            
+            <div class="rockefeller-metric">
+                <div class="rockefeller-metric-icon" style="color: var(--rockefeller-warning);">
+                    <MudIcon Icon="@Icons.Material.Filled.SmartToy" Size="Size.Large" />
+                </div>
+                <div class="rockefeller-metric-value rockefeller-text-warning">87%</div>
+                <div class="rockefeller-metric-label">AI Confidence</div>
+            </div>
+        </div>
+
+        <!-- Open Positions -->
+        <div class="rockefeller-card rockefeller-mb-6">
+            <h2 class="rockefeller-subtitle">Open Positions</h2>
+            <MudTable Items="@openPositions" Hover="true" Striped="true" Elevation="0" Class="rockefeller-table">
+                <HeaderContent>
+                    <MudTh><span class="rockefeller-text-secondary">Symbol</span></MudTh>
+                    <MudTh><span class="rockefeller-text-secondary">Type</span></MudTh>
+                    <MudTh><span class="rockefeller-text-secondary">Size</span></MudTh>
+                    <MudTh><span class="rockefeller-text-secondary">Entry Price</span></MudTh>
+                    <MudTh><span class="rockefeller-text-secondary">Current Price</span></MudTh>
+                    <MudTh><span class="rockefeller-text-secondary">P&L</span></MudTh>
+                    <MudTh><span class="rockefeller-text-secondary">ROI</span></MudTh>
+                    <MudTh><span class="rockefeller-text-secondary">Actions</span></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Symbol">
+                        <span class="rockefeller-symbol">@context.Symbol</span>
+                    </MudTd>
+                    <MudTd DataLabel="Type">
+                        <span class="@(context.Type == "Long" ? "rockefeller-position-long" : "rockefeller-position-short")">
+                            @context.Type
+                        </span>
+                    </MudTd>
+                    <MudTd DataLabel="Size"><span class="rockefeller-text-mono">@context.Size.ToString("F2")</span></MudTd>
+                    <MudTd DataLabel="Entry Price"><span class="rockefeller-price">@context.EntryPrice.ToString("F4")</span></MudTd>
+                    <MudTd DataLabel="Current Price"><span class="rockefeller-price">@context.CurrentPrice.ToString("F4")</span></MudTd>
+                    <MudTd DataLabel="P&L">
+                        <span class="rockefeller-pnl @(context.PnL >= 0 ? "positive" : "negative")">
+                            @context.PnL.ToString("F2")
+                        </span>
+                    </MudTd>
+                    <MudTd DataLabel="ROI">
+                        <span class="rockefeller-pnl @(context.ROI >= 0 ? "positive" : "negative")">
+                            @context.ROI.ToString("F1")%
+                        </span>
+                    </MudTd>
+                    <MudTd DataLabel="Actions">
+                        <div class="rockefeller-flex rockefeller-gap-2">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Error" />
+                        </div>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </div>
+
+        <!-- AI Insights & Activity -->
+        <div class="rockefeller-grid rockefeller-grid-2">
+            <div class="rockefeller-card">
+                <h3 class="rockefeller-heading">
+                    <MudIcon Icon="@Icons.Material.Filled.SmartToy" Size="Size.Small" style="margin-right: 8px;" />
+                    AI Trading Signals
+                </h3>
+                <MudList>
+                    @foreach (var signal in aiSignals.Take(5))
+                    {
+                        <MudListItem>
+                            <div class="rockefeller-flex-between">
+                                <div>
+                                    <div class="rockefeller-text-primary" style="font-weight: 600;">@signal.Symbol</div>
+                                    <div class="rockefeller-text-secondary" style="font-size: var(--rockefeller-text-sm);">
+                                        @signal.Reason
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="rockefeller-status @(signal.Action == "BUY" ? "rockefeller-status-success" : "rockefeller-status-danger")">
+                                        @signal.Action
+                                    </span>
+                                    <div class="rockefeller-text-secondary" style="font-size: var(--rockefeller-text-xs);">
+                                        @signal.Time
+                                    </div>
+                                </div>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </div>
+            
+            <div class="rockefeller-card">
+                <h3 class="rockefeller-heading">
+                    <MudIcon Icon="@Icons.Material.Filled.Psychology" Size="Size.Small" style="margin-right: 8px;" />
+                    Market Sentiment
+                </h3>
+                <MudList>
+                    @foreach (var sentiment in marketSentiments)
+                    {
+                        <MudListItem>
+                            <div class="rockefeller-flex-between">
+                                <div>
+                                    <div class="rockefeller-text-primary" style="font-weight: 600;">@sentiment.Source</div>
+                                    <div class="rockefeller-text-secondary" style="font-size: var(--rockefeller-text-sm);">
+                                        @sentiment.Summary
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="rockefeller-status @(sentiment.Score > 0.6 ? "rockefeller-status-success" : sentiment.Score < 0.4 ? "rockefeller-status-danger" : "rockefeller-status-warning")">
+                                        @((sentiment.Score * 100).ToString("F0"))%
+                                    </span>
+                                </div>
+                            </div>
+                        </MudListItem>
+                    }
+                </MudList>
+            </div>
+        </div>
+        
+        <!-- Analytics Drawer -->
+        <div class="rockefeller-analytics-drawer @(isDrawerOpen ? "open" : "")">
+            <div class="rockefeller-drawer-toggle" @onclick="ToggleDrawer">
+                <MudIcon Icon="@(isDrawerOpen ? Icons.Material.Filled.ChevronRight : Icons.Material.Filled.ChevronLeft)" />
+                <span class="rockefeller-drawer-toggle-text">Analytics</span>
+            </div>
+            
+            <div class="rockefeller-drawer-content">
+                <div class="rockefeller-drawer-header">
+                    <h3 class="rockefeller-heading">Quick Analytics</h3>
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" 
+                                   Size="Size.Small" 
+                                   OnClick="ToggleDrawer"
+                                   Class="rockefeller-drawer-close" />
+                </div>
+                
+                <!-- ROI & Performance -->
+                <div class="rockefeller-drawer-section">
+                    <h4 class="rockefeller-drawer-section-title">ROI Statistics</h4>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Total ROI</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-pnl positive">+24.7%</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Monthly ROI</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-pnl positive">+8.3%</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Weekly ROI</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-pnl negative">-2.1%</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Daily ROI</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-pnl positive">+6.8%</div>
+                    </div>
+                </div>
+                
+                <!-- Real-time P&L -->
+                <div class="rockefeller-drawer-section">
+                    <h4 class="rockefeller-drawer-section-title">Real-time P&L</h4>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Total P&L</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-pnl positive">+$12,847.65</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Daily P&L</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-pnl positive">+$8,245.30</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Weekly P&L</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-pnl negative">-$2,156.78</div>
+                    </div>
+                </div>
+                
+                <!-- Position Summary -->
+                <div class="rockefeller-drawer-section">
+                    <h4 class="rockefeller-drawer-section-title">Position Summary</h4>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Long Positions</div>
+                        <div class="rockefeller-drawer-metric-value">8</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Short Positions</div>
+                        <div class="rockefeller-drawer-metric-value">4</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Total Exposure</div>
+                        <div class="rockefeller-drawer-metric-value">$89,432.10</div>
+                    </div>
+                </div>
+                
+                <!-- Performance -->
+                <div class="rockefeller-drawer-section">
+                    <h4 class="rockefeller-drawer-section-title">Performance</h4>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Win Rate</div>
+                        <div class="rockefeller-drawer-metric-value">68%</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Avg Trade</div>
+                        <div class="rockefeller-drawer-metric-value">$1,247.85</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">Sharpe Ratio</div>
+                        <div class="rockefeller-drawer-metric-value">1.42</div>
+                    </div>
+                </div>
+                
+                <!-- Market Overview -->
+                <div class="rockefeller-drawer-section">
+                    <h4 class="rockefeller-drawer-section-title">Market Overview</h4>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">BTC/USDT</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-price">$43,256.78</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">ETH/USDT</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-price">$2,847.65</div>
+                    </div>
+                    <div class="rockefeller-drawer-metric">
+                        <div class="rockefeller-drawer-metric-label">SOL/USDT</div>
+                        <div class="rockefeller-drawer-metric-value rockefeller-price">$98.45</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<OpenPosition> openPositions = new();
+    private List<AISignal> aiSignals = new();
+    private List<MarketSentiment> marketSentiments = new();
+    private bool isDrawerOpen = false;
+    
+    private void ToggleDrawer()
+    {
+        isDrawerOpen = !isDrawerOpen;
+    }
+
+    protected override void OnInitialized()
+    {
+        // Mock AI-driven trading data
+        openPositions = new List<OpenPosition>
+        {
+            new OpenPosition { Symbol = "BTC/USDT", Type = "Long", Size = 0.5m, EntryPrice = 43250.50m, CurrentPrice = 44520.75m, PnL = 635.13m, ROI = 2.94m },
+            new OpenPosition { Symbol = "ETH/USDT", Type = "Short", Size = 2.0m, EntryPrice = 2650.75m, CurrentPrice = 2580.25m, PnL = 140.00m, ROI = 2.66m },
+            new OpenPosition { Symbol = "XRP/USDT", Type = "Long", Size = 1000m, EntryPrice = 3.0233m, CurrentPrice = 3.1567m, PnL = 133.40m, ROI = 4.41m },
+            new OpenPosition { Symbol = "SOL/USDT", Type = "Long", Size = 15.0m, EntryPrice = 98.50m, CurrentPrice = 102.30m, PnL = 57.00m, ROI = 3.86m }
+        };
+
+        aiSignals = new List<AISignal>
+        {
+            new AISignal { Symbol = "BTC/USDT", Action = "BUY", Confidence = 87, Reason = "Bullish news sentiment + technical breakout", Time = "2 min ago" },
+            new AISignal { Symbol = "ETH/USDT", Action = "SELL", Confidence = 73, Reason = "Social media FUD + overbought RSI", Time = "15 min ago" },
+            new AISignal { Symbol = "ADA/USDT", Action = "BUY", Confidence = 65, Reason = "Positive dev activity + whale accumulation", Time = "32 min ago" },
+            new AISignal { Symbol = "DOT/USDT", Action = "SELL", Confidence = 81, Reason = "Bearish news + technical breakdown", Time = "1 hour ago" },
+            new AISignal { Symbol = "LINK/USDT", Action = "BUY", Confidence = 69, Reason = "Partnership announcement + volume spike", Time = "2 hours ago" }
+        };
+
+        marketSentiments = new List<MarketSentiment>
+        {
+            new MarketSentiment { Source = "Twitter/X", Summary = "Bullish crypto sentiment rising", Score = 0.72 },
+            new MarketSentiment { Source = "Reddit", Summary = "Mixed opinions on altcoins", Score = 0.58 },
+            new MarketSentiment { Source = "News", Summary = "Positive institutional adoption", Score = 0.81 },
+            new MarketSentiment { Source = "Fear & Greed", Summary = "Market showing greed signals", Score = 0.67 }
+        };
+    }
+
+    public class OpenPosition
+    {
+        public string Symbol { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public decimal Size { get; set; }
+        public decimal EntryPrice { get; set; }
+        public decimal CurrentPrice { get; set; }
+        public decimal PnL { get; set; }
+        public decimal ROI { get; set; }
+    }
+
+    public class AISignal
+    {
+        public string Symbol { get; set; } = string.Empty;
+        public string Action { get; set; } = string.Empty;
+        public int Confidence { get; set; }
+        public string Reason { get; set; } = string.Empty;
+        public string Time { get; set; } = string.Empty;
+    }
+
+    public class MarketSentiment
+    {
+        public string Source { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
+        public double Score { get; set; }
+    }
+}
