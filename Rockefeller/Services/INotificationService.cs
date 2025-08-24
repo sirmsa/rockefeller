@@ -70,7 +70,7 @@ public class Notification
     public bool IsRead { get; set; }
     public string? Category { get; set; } // TRADE, RISK, AI, MARKET, STRATEGY, SYSTEM
     public Dictionary<string, object> Metadata { get; set; } = new();
-    public List<string> Channels { get; set; } = new(); // EMAIL, SMS, PUSH, IN_APP
+    public List<string> Channels { get; set; } = []; // EMAIL, SMS, PUSH, IN_APP
 }
 
 public class NotificationPreferences

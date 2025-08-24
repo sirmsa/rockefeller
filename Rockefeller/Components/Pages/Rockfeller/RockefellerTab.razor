@@ -1,0 +1,1605 @@
+@* Preferences not available in MAUI Blazor WebView - using in-memory storage instead *@
+@implements IDisposable
+
+@inject IRockefellerAIService RockefellerAIService
+@inject ITradingService TradingService
+@inject IMarketDataService MarketDataService
+@inject IAnalyticsService AnalyticsService
+@inject IDataStorageService DataStorageService
+@inject IRiskManagementService RiskManagementService
+@inject INotificationService NotificationService
+
+
+@code {
+
+    // Configuration constants
+    private const decimal DefaultPortfolioValue = 10000.0m;
+    private const string DefaultSymbol = "BTC/USDT";
+    private const int DefaultMaxPositions = 5;
+    private const decimal DefaultMinAIConfidence = 70.0m;
+    private const decimal DefaultPositionSize = 5.0m;
+    private const decimal DefaultStopLoss = 2.0m;
+    private const decimal DefaultTakeProfit = 6.0m;
+    private const decimal DefaultVolatilityThreshold = 5.0m;
+
+    // Risk level configurations
+    private static readonly Dictionary<RiskLevel, RiskProfileConfig?> RiskConfigurations = new()
+    {
+        [RiskLevel.Conservative] = new RiskProfileConfig
+        {
+            PositionSize = 2.0m,
+            StopLoss = 1.5m,
+            TakeProfit = 4.0m,
+            MaxPositions = 2,
+            MinAIConfidence = 80.0m,
+            VolatilityThreshold = 3.0m,
+            MaxTotalPositions = 3,
+            EnableAutoTrading = false
+        },
+        [RiskLevel.Moderate] = new RiskProfileConfig
+        {
+            PositionSize = 5.0m,
+            StopLoss = 2.0m,
+            TakeProfit = 6.0m,
+            MaxPositions = 3,
+            MinAIConfidence = 70.0m,
+            VolatilityThreshold = 5.0m,
+            MaxTotalPositions = 5,
+            EnableAutoTrading = true
+        },
+        [RiskLevel.Aggressive] = new RiskProfileConfig
+        {
+            PositionSize = 8.0m,
+            StopLoss = 3.0m,
+            TakeProfit = 10.0m,
+            MaxPositions = 4,
+            MinAIConfidence = 60.0m,
+            VolatilityThreshold = 8.0m,
+            MaxTotalPositions = 8,
+            EnableAutoTrading = true
+        }
+    };
+
+    // State variables
+    private string? selectedSymbol = DefaultSymbol;
+    private string activeProfileName = string.Empty;
+    private bool isDrawerOpen;
+    private bool isTradingActive;
+    private DateTime? tradingStartTime;
+    private readonly List<RockefellerPosition> activePositions = new();
+    
+    // In-memory storage for preferences (since Preferences is not available in MAUI Blazor WebView)
+    private static readonly Dictionary<string, string> _preferences = new();
+
+    // Dialog states
+    private bool isProfileDialogOpen;
+    private bool isSymbolSettingsDialogOpen;
+    private bool isStopTradingDialogOpen;
+    private bool isApplyProfileDialogOpen;
+
+    // Profile application
+    private TradingProfile? profileToApply;
+    private ProfileApplicationOption profileApplicationOption = ProfileApplicationOption.KeepPositions;
+
+    // Analysis cache
+    private readonly Dictionary<string, SymbolAnalysisCache> symbolAnalysisCache = new();
+    private readonly Dictionary<string, MarketSentimentCache> marketSentimentCache = new();
+    private readonly Dictionary<string, SymbolLoadingState> symbolLoadingStates = new();
+    private bool isInitialAnalysisInProgress;
+
+    // Data
+    private List<string> availableSymbols = [];
+    private List<TradingProfile> tradingProfiles = [];
+    private TradingProfile newProfile = new();
+
+    // Analytics data from services
+    private decimal portfolioChange24h = 0m;
+    private decimal winRate = 0m;
+    private decimal profitFactor = 0m;
+    private decimal maxDrawdown = 0m;
+    private decimal signalAccuracy = 0m;
+    private decimal averageConfidence = 0m;
+    private int signalsToday = 0;
+    private decimal btcPrice = 0m;
+    private decimal ethPrice = 0m;
+    private decimal solPrice = 0m;
+
+    // Trading engine
+    private Timer? tradingTimer;
+
+    // Dialog options
+    private readonly DialogOptions dialogOptions = new()
+    {
+        CloseOnEscapeKey = true,
+        MaxWidth = MaxWidth.Medium,
+        FullWidth = true
+    };
+
+    // Profile application options
+    public enum ProfileApplicationOption
+    {
+        ClosePositions,
+        KeepPositions,
+        Cancel
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            System.Diagnostics.Debug.WriteLine("RockefellerTab: Starting initialization...");
+
+            // Initialize symbols first
+            try
+            {
+                await InitializeSymbolsAsync();
+                System.Diagnostics.Debug.WriteLine("RockefellerTab: Symbols initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"RockefellerTab: Symbol initialization failed: {ex.Message}");
+                // Continue with default symbols
+                availableSymbols = GetDefaultSymbols();
+            }
+
+            // Initialize trading profiles
+            try
+            {
+                InitializeTradingProfiles();
+                System.Diagnostics.Debug.WriteLine("RockefellerTab: Trading profiles initialized successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"RockefellerTab: Trading profiles initialization failed: {ex.Message}");
+                // Create basic profiles as fallback
+                tradingProfiles = CreateTradingProfilesFromConfig();
+                if (tradingProfiles.Any())
+                {
+                    tradingProfiles[0].IsActive = true;
+                    activeProfileName = tradingProfiles[0].Name;
+                }
+            }
+
+            // Load trading profiles
+            try
+            {
+                await LoadTradingProfilesAsync();
+                System.Diagnostics.Debug.WriteLine("RockefellerTab: Trading profiles loaded successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"RockefellerTab: Trading profiles loading failed: {ex.Message}");
+            }
+
+            // Load analytics data
+            try
+            {
+                await LoadAnalyticsDataAsync();
+                System.Diagnostics.Debug.WriteLine("RockefellerTab: Analytics data loaded successfully");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"RockefellerTab: Analytics data loading failed: {ex.Message}");
+            }
+
+            System.Diagnostics.Debug.WriteLine("RockefellerTab: Initialization completed successfully");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"RockefellerTab: Critical initialization error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"RockefellerTab: Stack trace: {ex.StackTrace}");
+            
+            // Don't re-throw - let the component render with default values
+            // This prevents the entire app from crashing
+        }
+    }
+
+    public void Dispose()
+    {
+        tradingTimer?.Dispose();
+    }
+
+    private async Task InitializeSymbolsAsync()
+    {
+        try
+        {
+            // Get available symbols from market data service
+            Dictionary<string, MarketData> marketData = await MarketDataService.GetAllMarketDataAsync();
+            availableSymbols = marketData.Keys.ToList();
+
+            // Initialize loading states and caches for each symbol
+            foreach (string symbol in availableSymbols)
+            {
+                symbolLoadingStates[symbol] = SymbolLoadingState.NoData;
+                symbolAnalysisCache[symbol] = new SymbolAnalysisCache
+                {
+                    Symbol = symbol,
+                    AnalysisTime = DateTime.Now,
+                    MarketTrend = "NEUTRAL",
+                    AIConfidence = 0,
+                    CurrentPrice = 0,
+                    PriceChange24h = 0
+                };
+                marketSentimentCache[symbol] = new MarketSentimentCache
+                {
+                    Symbol = symbol,
+                    MarketMood = "NEUTRAL",
+                    AnalysisTime = DateTime.Now
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error initializing symbols: {ex.Message}");
+            // Fallback to default symbols from configuration
+            availableSymbols = GetDefaultSymbols();
+        }
+    }
+
+    private void InitializeTradingProfiles()
+    {
+        try
+        {
+            // Create default profiles from configuration
+            tradingProfiles = CreateTradingProfilesFromConfig();
+
+            // Set first profile as active
+            if (tradingProfiles.Any())
+            {
+                tradingProfiles[0].IsActive = true;
+                activeProfileName = tradingProfiles[0].Name;
+            }
+
+            // Initialize symbol settings for each profile using default configurations
+            InitializeProfileSymbolSettings();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error initializing trading profiles: {ex.Message}");
+        }
+    }
+
+    private void InitializeProfileSymbolSettings()
+    {
+        try
+        {
+            foreach (TradingProfile profile in tradingProfiles)
+            {
+                foreach (string symbol in availableSymbols)
+                {
+                    try
+                    {
+                        // Use default settings instead of calling AI services during initialization
+                        // This prevents initialization delays and potential failures
+                        SymbolSettings symbolSettings = GetDefaultSymbolSettings(symbol, profile.RiskLevel);
+                        profile.SymbolSettings[symbol] = symbolSettings;
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Error initializing symbol settings for {symbol}: {ex.Message}");
+                        // Use default settings as fallback
+                        profile.SymbolSettings[symbol] = GetDefaultSymbolSettings(symbol, profile.RiskLevel);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error in InitializeProfileSymbolSettings: {ex.Message}");
+            // Ensure all profiles have at least basic symbol settings
+            foreach (TradingProfile profile in tradingProfiles)
+            {
+                foreach (string symbol in availableSymbols)
+                {
+                    if (!profile.SymbolSettings.ContainsKey(symbol))
+                    {
+                        profile.SymbolSettings[symbol] = GetDefaultSymbolSettings(symbol, profile.RiskLevel);
+                    }
+                }
+            }
+        }
+    }
+
+    private SymbolSettings GetDefaultSymbolSettings(string symbol, RiskLevel riskLevel)
+    {
+        RiskProfileConfig config = GetRiskConfig(riskLevel);
+        return new SymbolSettings
+        {
+            Symbol = symbol,
+            IsActive = true,
+            Status = SymbolStatus.Active,
+            PositionSize = config.PositionSize,
+            StopLoss = config.StopLoss,
+            TakeProfit = config.TakeProfit,
+            MaxPositions = config.MaxPositions,
+            MinAIConfidence = config.MinAIConfidence,
+            VolatilityThreshold = config.VolatilityThreshold
+        };
+    }
+
+    private async Task LoadAnalyticsDataAsync()
+    {
+        try
+        {
+            // Load analytics data from services
+            AnalyticsData? analyticsData = await AnalyticsService.GetAnalyticsDataAsync();
+            Portfolio? portfolio = await TradingService.GetPortfolioAsync();
+            List<MarketData> marketData = await MarketDataService.GetMarketDataForSymbolsAsync(GetDefaultMarketSymbols());
+
+            // Update analytics properties
+            portfolioChange24h = portfolio?.DailyChange ?? 0m;
+            winRate = analyticsData?.WinRate ?? 0m;
+            profitFactor = analyticsData?.ProfitFactor ?? 0m;
+            maxDrawdown = analyticsData?.MaxDrawdown ?? 0m;
+            signalAccuracy = analyticsData?.SignalAccuracy ?? 0m;
+            averageConfidence = analyticsData?.AverageConfidence ?? 0m;
+            signalsToday = analyticsData?.SignalsToday ?? 0;
+
+            // Update market prices from configuration
+            UpdateMarketPricesFromData(marketData);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading analytics data: {ex.Message}");
+        }
+    }
+
+    private TradingProfile? GetActiveProfile()
+    {
+        return tradingProfiles.FirstOrDefault(p => p.IsActive);
+    }
+
+    private void ActivateProfile(string profileName)
+    {
+        foreach (TradingProfile profile in tradingProfiles)
+        {
+            profile.IsActive = profile.Name == profileName;
+        }
+
+        activeProfileName = profileName;
+        SaveTradingProfiles();
+    }
+
+    private void OpenProfileDialog()
+    {
+        newProfile = new TradingProfile();
+        isProfileDialogOpen = true;
+    }
+
+    private void SaveProfile(TradingProfile profile)
+    {
+        profile.CreatedAt = DateTime.Now;
+        tradingProfiles.Add(profile);
+        SaveTradingProfiles();
+        StateHasChanged();
+    }
+
+    private void OpenSymbolSettingsDialog()
+    {
+        isSymbolSettingsDialogOpen = true;
+    }
+
+    private void SaveSymbolSettings(TradingProfile profile)
+    {
+        TradingProfile? existingProfile = tradingProfiles.FirstOrDefault(p => p.Name == profile.Name);
+        if (existingProfile != null)
+        {
+            existingProfile.InitialPortfolioValue = profile.InitialPortfolioValue;
+            existingProfile.MaxTotalPositions = profile.MaxTotalPositions;
+            existingProfile.SymbolSettings = profile.SymbolSettings;
+            SaveTradingProfiles();
+        }
+    }
+
+    private void CustomizeSymbolSettings(SymbolSettings settings)
+    {
+        // Handle custom symbol settings
+    }
+
+    private void ApplyProfile()
+    {
+        if (selectedSymbol == null || GetActiveProfile() == null) return;
+
+        // Check if there are active positions for the selected symbol
+        List<RockefellerPosition> symbolPositions = activePositions.Where(p => p.Symbol == selectedSymbol).ToList();
+
+        if (symbolPositions.Any())
+        {
+            // Show confirmation dialog for profile application
+            profileToApply = GetActiveProfile();
+            profileApplicationOption = ProfileApplicationOption.KeepPositions;
+            isApplyProfileDialogOpen = true;
+        }
+        else
+        {
+            // No positions to worry about, apply profile directly
+            ApplyProfileDirectly();
+        }
+    }
+
+    private void CancelApplyProfile()
+    {
+        isApplyProfileDialogOpen = false;
+        profileToApply = null;
+        profileApplicationOption = ProfileApplicationOption.KeepPositions;
+    }
+
+    private void ConfirmApplyProfile()
+    {
+        if (profileToApply == null || string.IsNullOrEmpty(selectedSymbol)) return;
+
+        switch (profileApplicationOption)
+        {
+            case ProfileApplicationOption.ClosePositions:
+                _ = CloseSymbolPositions(selectedSymbol);
+                ApplyProfileDirectly();
+                break;
+
+            case ProfileApplicationOption.KeepPositions:
+                ApplyProfileDirectly();
+                break;
+
+            case ProfileApplicationOption.Cancel:
+                // Do nothing, just close dialog
+                break;
+        }
+
+        // Close dialog and reset state
+        isApplyProfileDialogOpen = false;
+        profileToApply = null;
+        profileApplicationOption = ProfileApplicationOption.KeepPositions;
+    }
+
+    private async Task CloseSymbolPositions(string symbol)
+    {
+        try
+        {
+            List<RockefellerPosition> positionsToClose = activePositions.Where(p => p.Symbol == symbol).ToList();
+
+            foreach (RockefellerPosition position in positionsToClose)
+            {
+                // Use trading service to close position
+                await TradingService.ClosePositionAsync(symbol, position.Side);
+                activePositions.Remove(position);
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error closing positions: {ex.Message}");
+        }
+    }
+
+    private void ApplyProfileDirectly()
+    {
+        if (profileToApply == null || string.IsNullOrEmpty(selectedSymbol)) return;
+
+        // Apply the profile settings to the selected symbol
+        SymbolSettings symbolSettings = profileToApply.SymbolSettings.ContainsKey(selectedSymbol)
+            ? profileToApply.SymbolSettings[selectedSymbol]
+            : new SymbolSettings();
+
+        // Update symbol settings with profile defaults if they don't exist
+        if (!profileToApply.SymbolSettings.ContainsKey(selectedSymbol))
+        {
+            symbolSettings.Symbol = selectedSymbol;
+            symbolSettings.IsActive = true;
+            profileToApply.SymbolSettings[selectedSymbol] = symbolSettings;
+        }
+
+        // Save the updated profile
+        SaveTradingProfiles();
+
+        StateHasChanged();
+    }
+
+    private void HandleTradingButtonClick()
+    {
+        if (isTradingActive)
+        {
+            OpenStopTradingDialog();
+        }
+        else
+        {
+            _ = StartTrading();
+        }
+    }
+
+    private async Task StartTrading()
+    {
+        if (selectedSymbol == null || GetActiveProfile() == null) return;
+
+        if (!HasValidAnalysisCache(selectedSymbol))
+        {
+            await PerformInitialAnalysisAsync(selectedSymbol);
+        }
+
+        isTradingActive = true;
+        tradingStartTime = DateTime.Now;
+
+        // Start trading timer
+        tradingTimer = new Timer(CheckAndExecuteTradesCallback, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+
+        StateHasChanged();
+    }
+
+    private void OpenStopTradingDialog()
+    {
+        isStopTradingDialogOpen = true;
+    }
+
+    private void HandleStopTradingConfirmed(StopTradingOption option)
+    {
+        switch (option)
+        {
+            case StopTradingOption.Cancel:
+                // Do nothing, keep trading
+                break;
+            case StopTradingOption.ClosePositions:
+                _ = CloseAllPositions();
+                StopTrading();
+                break;
+            case StopTradingOption.WaitForCompletion:
+                StopTradingWithPositionsOpen();
+                break;
+        }
+    }
+
+    private async Task CloseAllPositions()
+    {
+        try
+        {
+            foreach (RockefellerPosition position in activePositions.ToList())
+            {
+                await TradingService.ClosePositionAsync(position.Symbol, position.Side);
+            }
+
+            activePositions.Clear();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error closing all positions: {ex.Message}");
+        }
+    }
+
+    private void StopTrading()
+    {
+        isTradingActive = false;
+        tradingTimer?.Dispose();
+        tradingTimer = null;
+        StateHasChanged();
+    }
+
+    private void StopTradingWithPositionsOpen()
+    {
+        isTradingActive = false;
+        tradingTimer?.Dispose();
+        tradingTimer = null;
+
+        // Keep monitoring positions but don't open new ones
+        StateHasChanged();
+    }
+
+    private void ToggleDrawer()
+    {
+        isDrawerOpen = !isDrawerOpen;
+        StateHasChanged();
+    }
+
+    private bool HasValidAnalysisCache(string symbol)
+    {
+        if (!symbolAnalysisCache.ContainsKey(symbol) || !marketSentimentCache.ContainsKey(symbol))
+            return false;
+
+        DateTime today = DateTime.Today;
+        return symbolAnalysisCache[symbol].AnalysisTime.Date == today &&
+               marketSentimentCache[symbol].AnalysisTime.Date == today;
+    }
+
+    private async Task PerformInitialAnalysisAsync(string symbol)
+    {
+        try
+        {
+            symbolLoadingStates[symbol] = SymbolLoadingState.Loading;
+            isInitialAnalysisInProgress = true;
+            StateHasChanged();
+
+            // Use AI service for analysis
+            TechnicalAnalysisResult technicalAnalysis = await RockefellerAIService.PerformTechnicalAnalysisAsync(symbol, ["RSI", "MACD", "BollingerBands"]);
+            MarketSentimentAnalysis marketSentiment = await RockefellerAIService.AnalyzeMarketSentimentAsync(symbol);
+            MarketRegime marketConditions = await RockefellerAIService.DetectMarketRegimeAsync(symbol);
+
+            // Update analysis cache with service data
+            UpdateAnalysisCacheFromServices(symbol, technicalAnalysis, marketSentiment, marketConditions);
+
+            symbolLoadingStates[symbol] = SymbolLoadingState.AnalysisComplete;
+            isInitialAnalysisInProgress = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error performing analysis for {symbol}: {ex.Message}");
+            symbolLoadingStates[symbol] = SymbolLoadingState.AnalysisFailed;
+            isInitialAnalysisInProgress = false;
+            StateHasChanged();
+        }
+    }
+
+    private void UpdateAnalysisCacheFromServices(string symbol, TechnicalAnalysisResult technicalAnalysis, MarketSentimentAnalysis marketSentiment, MarketRegime marketRegime)
+    {
+        // Update technical analysis cache
+        if (symbolAnalysisCache.ContainsKey(symbol))
+        {
+            SymbolAnalysisCache cache = symbolAnalysisCache[symbol];
+            cache.AnalysisTime = DateTime.Now;
+            cache.MarketTrend = technicalAnalysis.OverallTrend;
+            cache.AIConfidence = (int)(technicalAnalysis.TrendStrength * 100);
+            cache.TradingSignal = GetTradingSignalFromAnalysis(technicalAnalysis);
+            cache.SignalStrength = (decimal)technicalAnalysis.TrendStrength;
+            cache.Volatility = GetVolatilityFromRegime(marketRegime);
+        }
+
+        // Update sentiment cache
+        if (marketSentimentCache.ContainsKey(symbol))
+        {
+            MarketSentimentCache cache = marketSentimentCache[symbol];
+            cache.AnalysisTime = DateTime.Now;
+            cache.MarketMood = marketSentiment.Sentiment;
+            cache.FearGreedIndex = (decimal)marketSentiment.OverallScore;
+            cache.MarketPhase = GetMarketPhaseFromRegime(marketRegime);
+        }
+    }
+
+    private AITradingDecision GetTradingSignalFromAnalysis(TechnicalAnalysisResult analysis)
+    {
+        if (analysis.TrendStrength > 0.7)
+        {
+            return analysis.OverallTrend == "BULLISH" ? AITradingDecision.LongSignal : AITradingDecision.ShortSignal;
+        }
+
+        return AITradingDecision.HoldSignal;
+    }
+
+    private decimal GetVolatilityFromRegime(MarketRegime regime)
+    {
+        return (decimal)(regime.Volatility * 100);
+    }
+
+    private string GetMarketPhaseFromRegime(MarketRegime regime)
+    {
+        return regime.RegimeType switch
+        {
+            "TRENDING" => regime.TrendDirection == "UP" ? "Accumulation" : "Distribution",
+            "RANGING" => "Consolidation",
+            "VOLATILE" => "High Volatility",
+            _ => "Stable"
+        };
+    }
+
+    private void RetryAnalysis()
+    {
+        if (selectedSymbol != null)
+        {
+            _ = PerformInitialAnalysisAsync(selectedSymbol);
+        }
+    }
+
+    private async Task OpenLongPosition()
+    {
+        if (selectedSymbol == null || GetActiveProfile() == null) return;
+
+        try
+        {
+            TradingProfile? profile = GetActiveProfile();
+            if (profile == null) return;
+
+            SymbolSettings symbolSettings = profile.SymbolSettings.ContainsKey(selectedSymbol)
+                ? profile.SymbolSettings[selectedSymbol]
+                : GetDefaultSymbolSettings(selectedSymbol, profile.RiskLevel);
+
+            // Use trading service to open position
+            Trade trade = new()
+            {
+                Symbol = selectedSymbol,
+                Side = "LONG",
+                Size = symbolSettings.PositionSize,
+                Price = await GetCurrentPriceAsync(selectedSymbol)
+            };
+
+            await TradingService.ExecuteTradeAsync(trade);
+
+            // Add to local positions for UI
+            RockefellerPosition position = new()
+            {
+                Symbol = selectedSymbol,
+                Side = "LONG",
+                Size = symbolSettings.PositionSize,
+                UnrealizedROI = 0.0m,
+                OpenTime = DateTime.Now,
+                OpenPrice = trade.Price
+            };
+
+            activePositions.Add(position);
+
+            // Notify about successful trade
+            await NotificationService.SendNotificationAsync(
+                "user",
+                "Position Opened",
+                $"LONG position opened for {selectedSymbol} at {trade.Price:C}",
+                "SUCCESS"
+            );
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error opening long position: {ex.Message}");
+            await NotificationService.SendNotificationAsync("user", "Trade Error", $"Failed to open LONG position: {ex.Message}", "ERROR");
+        }
+    }
+
+    private async Task OpenShortPosition()
+    {
+        if (selectedSymbol == null || GetActiveProfile() == null) return;
+
+        try
+        {
+            TradingProfile? profile = GetActiveProfile();
+            if (profile == null) return;
+
+            SymbolSettings symbolSettings = profile.SymbolSettings.ContainsKey(selectedSymbol)
+                ? profile.SymbolSettings[selectedSymbol]
+                : GetDefaultSymbolSettings(selectedSymbol, profile.RiskLevel);
+
+            // Use trading service to open position
+            Trade trade = new()
+            {
+                Symbol = selectedSymbol,
+                Side = "SHORT",
+                Size = symbolSettings.PositionSize,
+                Price = await GetCurrentPriceAsync(selectedSymbol)
+            };
+
+            await TradingService.ExecuteTradeAsync(trade);
+
+            // Add to local positions for UI
+            RockefellerPosition position = new()
+            {
+                Symbol = selectedSymbol,
+                Side = "SHORT",
+                Size = symbolSettings.PositionSize,
+                UnrealizedROI = 0.0m,
+                OpenTime = DateTime.Now,
+                OpenPrice = trade.Price
+            };
+
+            activePositions.Add(position);
+
+            // Notify about successful trade
+            await NotificationService.SendNotificationAsync(
+                "user",
+                "Position Opened",
+                $"SHORT position opened for {selectedSymbol} at {trade.Price:C}",
+                "SUCCESS"
+            );
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error opening short position: {ex.Message}");
+            await NotificationService.SendNotificationAsync("user", "Trade Error", $"Failed to open SHORT position: {ex.Message}", "ERROR");
+        }
+    }
+
+    private async Task<decimal> GetCurrentPriceAsync(string symbol)
+    {
+        try
+        {
+            MarketData? marketData = await MarketDataService.GetMarketDataAsync(symbol);
+            return marketData?.Price ?? 0m;
+        }
+        catch
+        {
+            return 0m;
+        }
+    }
+
+    private void AnalyzeSymbol(string? symbol = null)
+    {
+        string? symbolToAnalyze = symbol ?? selectedSymbol;
+        if (symbolToAnalyze != null)
+        {
+            _ = PerformInitialAnalysisAsync(symbolToAnalyze);
+        }
+    }
+
+    private void AnalyzeSymbolForManagement(string symbol)
+    {
+        if (!string.IsNullOrEmpty(symbol))
+        {
+            _ = PerformInitialAnalysisAsync(symbol);
+        }
+    }
+
+    private void AnalyzeSymbolForTradingControls()
+    {
+        AnalyzeSymbol();
+    }
+
+    private async Task ViewSymbolHistory()
+    {
+        if (selectedSymbol == null) return;
+
+        try
+        {
+            // Get historical trades for the selected symbol
+            List<Trade> symbolTrades = await TradingService.GetTradesAsync();
+            List<Trade> filteredTrades = symbolTrades.Where(t => t.Symbol == selectedSymbol).ToList();
+
+            // Get historical market data for the symbol
+            DateTime startDate = DateTime.Now.AddMonths(-3); // Last 3 months
+            List<MarketData> historicalData = await MarketDataService.GetHistoricalDataAsync(selectedSymbol, startDate, DateTime.Now);
+
+            // Create and show dialog with symbol history
+            await NotificationService.SendNotificationAsync(
+                "user",
+                "Symbol History",
+                $"Found {filteredTrades.Count} trades and {historicalData.Count} data points for {selectedSymbol}.",
+                "INFO"
+            );
+
+            // Note: In a full implementation, this would open a dedicated history dialog/page
+            // showing charts, trade history, performance metrics, etc.
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error viewing symbol history: {ex.Message}");
+            await NotificationService.SendNotificationAsync("user", "Error", "Failed to load symbol history.", "ERROR");
+        }
+    }
+
+    // Timer callback wrapper (must be void for Timer compatibility)
+    private void CheckAndExecuteTradesCallback(object? state)
+    {
+        _ = CheckAndExecuteTrades(state);
+    }
+
+    private async Task CheckAndExecuteTrades(object? state)
+    {
+        if (!isTradingActive || selectedSymbol == null || GetActiveProfile() == null) return;
+
+        try
+        {
+            // Check risk limits first
+            bool riskLimitsOk = await RiskManagementService.CheckDailyLossLimitAsync() && await RiskManagementService.CheckPortfolioRiskAsync();
+            if (!riskLimitsOk)
+            {
+                await NotificationService.SendNotificationAsync("user", "Risk Limit", "Risk limits exceeded. Trading paused.", "WARNING");
+                StopTrading();
+                return;
+            }
+
+            // Monitor existing positions for risk
+            await MonitorPositionRisks();
+
+            // Get AI recommendation for trading
+            AIStrategyAnalysis aiAnalysis = await RockefellerAIService.AnalyzeCurrentMarketConditionsAsync(selectedSymbol);
+
+            if (aiAnalysis.Confidence > 0.7 && ShouldExecuteTrade(aiAnalysis))
+            {
+                // Additional risk check before executing trade
+                RiskAssessment riskAssessment = await RockefellerAIService.AssessTradeRiskAsync(
+                    selectedSymbol,
+                    aiAnalysis.Recommendation,
+                    GetActiveProfile()!.MaxTotalPositions
+                );
+
+                if (riskAssessment.OverallRisk <= 0.5m) // Only execute if risk is acceptable
+                {
+                    await ExecuteTradeFromAI(aiAnalysis);
+                }
+                else
+                {
+                    await NotificationService.SendNotificationAsync(
+                        "user",
+                        "High Risk",
+                        $"Trade skipped due to high risk ({riskAssessment.RiskLevel})",
+                        "WARNING"
+                    );
+                }
+            }
+
+            // Update existing positions
+            await UpdatePositionsAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error in trading timer: {ex.Message}");
+            await NotificationService.SendNotificationAsync("user", "Trading Error", $"Error in trading cycle: {ex.Message}", "ERROR");
+        }
+    }
+
+    private bool ShouldExecuteTrade(AIStrategyAnalysis analysis)
+    {
+        TradingProfile? profile = GetActiveProfile();
+        if (profile == null) return false;
+
+        return analysis.Confidence >= profile.MinAIConfidence / 100.0 &&
+               activePositions.Count < profile.MaxTotalPositions;
+    }
+
+    private async Task ExecuteTradeFromAI(AIStrategyAnalysis analysis)
+    {
+        try
+        {
+            TradingProfile? profile = GetActiveProfile();
+            if (profile == null) return;
+
+            SymbolSettings symbolSettings = profile.SymbolSettings.ContainsKey(selectedSymbol!)
+                ? profile.SymbolSettings[selectedSymbol!]
+                : GetDefaultSymbolSettings(selectedSymbol!, profile.RiskLevel);
+
+            Trade trade = new()
+            {
+                Symbol = selectedSymbol!,
+                Side = analysis.Recommendation,
+                Size = symbolSettings.PositionSize,
+                Price = await GetCurrentPriceAsync(selectedSymbol!)
+            };
+
+            await TradingService.ExecuteTradeAsync(trade);
+
+            // Add to local positions
+            RockefellerPosition position = new()
+            {
+                Symbol = selectedSymbol!,
+                Side = analysis.Recommendation,
+                Size = symbolSettings.PositionSize,
+                UnrealizedROI = 0.0m,
+                OpenTime = DateTime.Now,
+                OpenPrice = trade.Price,
+                OpenedBy = "AI",
+                AIConfidence = (int)(analysis.Confidence * 100),
+                AISignalReason = analysis.Reasoning
+            };
+
+            activePositions.Add(position);
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error executing AI trade: {ex.Message}");
+        }
+    }
+
+    private async Task UpdatePositionsAsync()
+    {
+        try
+        {
+            foreach (RockefellerPosition position in activePositions)
+            {
+                decimal currentPrice = await GetCurrentPriceAsync(position.Symbol);
+                if (currentPrice > 0)
+                {
+                    position.CurrentPrice = currentPrice;
+                    position.UnrealizedROI = CalculateUnrealizedROI(position);
+                }
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error updating positions: {ex.Message}");
+        }
+    }
+
+    private decimal CalculateUnrealizedROI(RockefellerPosition position)
+    {
+        if (position.OpenPrice == 0) return 0m;
+
+        decimal priceChange = position.Side == "LONG"
+            ? (position.CurrentPrice - position.OpenPrice) / position.OpenPrice
+            : (position.OpenPrice - position.CurrentPrice) / position.OpenPrice;
+
+        return priceChange * 100;
+    }
+
+    private async Task LoadTradingProfilesAsync()
+    {
+        try
+        {
+            // Try to load profiles from data storage service first
+            // Note: In a real implementation, we would have a specific method for trading profiles
+            // For now, we'll use in-memory storage as backup
+            _preferences.TryGetValue("TradingProfiles", out string? profilesJson);
+            if (!string.IsNullOrEmpty(profilesJson))
+            {
+                // TODO: Deserialize profiles from JSON
+                // var savedProfiles = JsonSerializer.Deserialize<List<TradingProfile>>(profilesJson);
+                // if (savedProfiles?.Any() == true)
+                // {
+                //     tradingProfiles = savedProfiles;
+                // }
+            }
+
+            // Save current profiles to ensure persistence
+            await SaveTradingProfilesAsync();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading trading profiles: {ex.Message}");
+            await NotificationService.SendNotificationAsync("user", "Load Error", "Failed to load saved trading profiles. Using defaults.", "WARNING");
+        }
+    }
+
+    private async Task SaveTradingProfilesAsync()
+    {
+        try
+        {
+            // TODO: Serialize profiles to JSON and save to data storage
+            // string profilesJson = JsonSerializer.Serialize(tradingProfiles);
+            // _preferences["TradingProfiles"] = profilesJson;
+
+            // For now, just use a placeholder
+            _preferences["TradingProfiles"] = "saved";
+
+            // In a full implementation, we would also save to the data storage service
+            // await DataStorageService.SaveTradingProfilesAsync(tradingProfiles);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error saving trading profiles: {ex.Message}");
+            await NotificationService.SendNotificationAsync("user", "Save Error", "Failed to save trading profiles.", "ERROR");
+        }
+    }
+
+    // Legacy synchronous method for compatibility
+    private void SaveTradingProfiles()
+    {
+        _ = SaveTradingProfilesAsync();
+    }
+
+    // ===== SYMBOL MANAGEMENT METHODS =====
+
+    private void HandleSymbolStatusChanged((string Symbol, SymbolStatus Status) change)
+    {
+        TradingProfile? profile = GetActiveProfile();
+        if (profile?.SymbolSettings.ContainsKey(change.Symbol) == true)
+        {
+            profile.SymbolSettings[change.Symbol].Status = change.Status;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshAllSymbolAnalysis()
+    {
+        TradingProfile? profile = GetActiveProfile();
+        if (profile == null) return;
+
+        foreach (string symbol in profile.SymbolSettings.Keys)
+        {
+            await PerformInitialAnalysisAsync(symbol);
+        }
+    }
+
+    private void PauseAllSymbols()
+    {
+        TradingProfile? profile = GetActiveProfile();
+        if (profile == null) return;
+
+        foreach (SymbolSettings symbolSettings in profile.SymbolSettings.Values)
+        {
+            if (symbolSettings.Status == SymbolStatus.Active)
+            {
+                symbolSettings.Status = SymbolStatus.Paused;
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private void ActivateAllSymbols()
+    {
+        TradingProfile? profile = GetActiveProfile();
+        if (profile == null) return;
+
+        foreach (SymbolSettings symbolSettings in profile.SymbolSettings.Values)
+        {
+            if (symbolSettings.Status == SymbolStatus.Paused || symbolSettings.Status == SymbolStatus.Inactive)
+            {
+                symbolSettings.Status = SymbolStatus.Active;
+            }
+        }
+
+        StateHasChanged();
+    }
+
+    private SymbolManagementSummary GetSymbolManagementSummary()
+    {
+        TradingProfile? profile = GetActiveProfile();
+        if (profile == null)
+        {
+            return new SymbolManagementSummary();
+        }
+
+        SymbolManagementSummary summary = new()
+        {
+            ProfileName = profile.Name,
+            TotalSymbols = profile.SymbolSettings.Count,
+            ActiveSymbols = profile.SymbolSettings.Values.Count(s => s.Status == SymbolStatus.Active),
+            PausedSymbols = profile.SymbolSettings.Values.Count(s => s.Status == SymbolStatus.Paused),
+            RestrictedSymbols = profile.SymbolSettings.Values.Count(s => s.Status == SymbolStatus.Restricted),
+            ErrorSymbols = profile.SymbolSettings.Values.Count(s => s.Status == SymbolStatus.Error),
+            TotalPortfolioValue = profile.InitialPortfolioValue,
+            DailyPnL = CalculateDailyPnL(),
+            TotalPositions = activePositions.Count,
+            WinningPositions = activePositions.Count(p => p.UnrealizedROI > 0),
+            LosingPositions = activePositions.Count(p => p.UnrealizedROI < 0)
+        };
+
+        if (summary.TotalPositions > 0)
+        {
+            summary.WinRate = (decimal)summary.WinningPositions / summary.TotalPositions * 100;
+        }
+
+        // Determine next AI recommendation
+        (AITradingDecision Decision, string Symbol, int Confidence) nextRecommendation = DetermineNextAIRecommendation();
+        summary.NextRecommendedAction = nextRecommendation.Decision;
+        summary.NextRecommendedSymbol = nextRecommendation.Symbol;
+        summary.NextRecommendedConfidence = nextRecommendation.Confidence;
+
+        return summary;
+    }
+
+    private (AITradingDecision Decision, string Symbol, int Confidence) DetermineNextAIRecommendation()
+    {
+        TradingProfile? profile = GetActiveProfile();
+        if (profile == null) return (AITradingDecision.NoSignal, "", 0);
+
+        List<KeyValuePair<string, SymbolSettings>> activeSymbols = profile.SymbolSettings
+            .Where(kvp => kvp.Value.Status == SymbolStatus.Active)
+            .ToList();
+
+        if (!activeSymbols.Any()) return (AITradingDecision.NoSignal, "", 0);
+
+        // Simple AI logic: find symbol with highest confidence and best signal
+        KeyValuePair<string, SymbolSettings> bestSymbol = activeSymbols
+            .OrderByDescending(kvp => kvp.Value.AIConfidence)
+            .ThenByDescending(kvp => kvp.Value.LastSignalStrength)
+            .First();
+
+        SymbolSettings symbolSettings = bestSymbol.Value;
+
+        // Determine action based on AI analysis
+        AITradingDecision decision = symbolSettings.LastAIDecision;
+        if (decision == AITradingDecision.NoSignal)
+        {
+            // Use AI service to get recommendation
+            _ = GetAIRecommendationAsync(bestSymbol.Key);
+        }
+
+        return (decision, bestSymbol.Key, symbolSettings.AIConfidence);
+    }
+
+    private async Task GetAIRecommendationAsync(string symbol)
+    {
+        try
+        {
+            AIStrategyAnalysis analysis = await RockefellerAIService.AnalyzeCurrentMarketConditionsAsync(symbol);
+            TradingProfile? profile = GetActiveProfile();
+
+            if (profile?.SymbolSettings.ContainsKey(symbol) == true)
+            {
+                SymbolSettings symbolSettings = profile.SymbolSettings[symbol];
+                if (symbolSettings != null)
+                {
+                    symbolSettings.LastAIDecision = GetTradingDecisionFromRecommendation(analysis.Recommendation);
+                    symbolSettings.LastAnalysisReason = analysis.Reasoning;
+                    symbolSettings.AIConfidence = (int)(analysis.Confidence * 100);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error getting AI recommendation: {ex.Message}");
+        }
+    }
+
+    private AITradingDecision GetTradingDecisionFromRecommendation(string recommendation) => recommendation switch
+    {
+        "BUY" => AITradingDecision.LongSignal,
+        "SELL" => AITradingDecision.ShortSignal,
+        "HOLD" => AITradingDecision.HoldSignal,
+        _ => AITradingDecision.NoSignal
+    };
+
+    private decimal CalculateDailyPnL()
+    {
+        if (!activePositions.Any()) return 0.0m;
+
+        decimal totalPnL = activePositions.Sum(p => p.UnrealizedROI);
+        TradingProfile? profile = GetActiveProfile();
+        if (profile == null) return totalPnL;
+
+        return (totalPnL / profile.InitialPortfolioValue) * 100;
+    }
+
+    // Risk Management Methods
+    private async Task MonitorPositionRisks()
+    {
+        try
+        {
+            TradingProfile? profile = GetActiveProfile();
+            if (profile == null || !activePositions.Any()) return;
+
+            foreach (RockefellerPosition position in activePositions.ToList())
+            {
+                // Check for stop loss trigger
+                bool shouldClosePosition = false;
+                string reason = string.Empty;
+
+                if (position.Side == "LONG" && position.UnrealizedROI <= -profile.MaxDailyLoss)
+                {
+                    shouldClosePosition = true;
+                    reason = $"Stop loss triggered: {position.UnrealizedROI:F2}%";
+                }
+                else if (position.Side == "SHORT" && position.UnrealizedROI <= -profile.MaxDailyLoss)
+                {
+                    shouldClosePosition = true;
+                    reason = $"Stop loss triggered: {position.UnrealizedROI:F2}%";
+                }
+                else if (position.UnrealizedROI >= profile.MaxDailyGain)
+                {
+                    shouldClosePosition = true;
+                    reason = $"Take profit triggered: {position.UnrealizedROI:F2}%";
+                }
+
+                if (shouldClosePosition)
+                {
+                    await TradingService.ClosePositionAsync(position.Symbol, position.Side);
+                    activePositions.Remove(position);
+
+                    await NotificationService.SendNotificationAsync(
+                        "user",
+                        "Position Closed",
+                        $"{position.Symbol} {position.Side} position closed. {reason}",
+                        "INFO"
+                    );
+
+                    // Save trade record
+                    await DataStorageService.SaveTradeAsync(new Trade
+                    {
+                        Symbol = position.Symbol,
+                        Side = position.Side,
+                        Size = position.Size,
+                        EntryPrice = position.OpenPrice,
+                        Price = position.CurrentPrice,
+                        PnL = position.UnrealizedROI,
+                        EntryTime = position.OpenTime,
+                        ExitTime = DateTime.Now,
+                        Status = "CLOSED"
+                    });
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error monitoring position risks: {ex.Message}");
+        }
+    }
+
+    // Configuration-based helper methods
+    private List<TradingProfile> CreateTradingProfilesFromConfig()
+    {
+        List<TradingProfile> profiles = [];
+
+        foreach (KeyValuePair<RiskLevel, RiskProfileConfig> kvp in RiskConfigurations)
+        {
+            RiskLevel riskLevel = kvp.Key;
+            RiskProfileConfig config = kvp.Value;
+
+            profiles.Add(new TradingProfile
+            {
+                Name = riskLevel.ToString(),
+                RiskLevel = riskLevel,
+                InitialPortfolioValue = DefaultPortfolioValue,
+                MaxTotalPositions = config.MaxTotalPositions,
+                MinAIConfidence = (int)config.MinAIConfidence,
+                EnableAutoTrading = config.EnableAutoTrading,
+                Description = GetRiskDescription(riskLevel)
+            });
+        }
+
+        return profiles;
+    }
+
+    private SymbolSettings CreateSymbolSettingsFromConfig(string symbol, RiskLevel riskLevel)
+    {
+        RiskProfileConfig config = GetRiskConfig(riskLevel);
+        return new SymbolSettings
+        {
+            Symbol = symbol,
+            IsActive = true,
+            Status = SymbolStatus.Active,
+            PositionSize = config.PositionSize,
+            StopLoss = config.StopLoss,
+            TakeProfit = config.TakeProfit,
+            MaxPositions = config.MaxPositions,
+            MinAIConfidence = config.MinAIConfidence,
+            VolatilityThreshold = config.VolatilityThreshold
+        };
+    }
+
+    private static RiskProfileConfig GetRiskConfig(RiskLevel riskLevel)
+    {
+        return RiskConfigurations.TryGetValue(riskLevel, out RiskProfileConfig config) ? config :
+            // Default to moderate if the risk level is not found
+            // We know this will always succeed since the dictionary is statically initialized
+            RiskConfigurations[RiskLevel.Moderate];
+    }
+
+    private string GetRiskDescription(RiskLevel riskLevel) => riskLevel switch
+    {
+        RiskLevel.Conservative => "Low risk, low reward strategy",
+        RiskLevel.Moderate => "Balanced risk and reward",
+        RiskLevel.Aggressive => "High risk, high reward strategy",
+        _ => "Balanced risk and reward"
+    };
+
+    private List<string> GetDefaultSymbols()
+    {
+        return ["BTC/USDT", "ETH/USDT", "XRP/USDT", "SOL/USDT", "ADA/USDT"];
+    }
+
+    private List<string> GetDefaultMarketSymbols()
+    {
+        return ["BTC/USDT", "ETH/USDT", "SOL/USDT"];
+    }
+
+    private void UpdateMarketPricesFromData(List<MarketData> marketData)
+    {
+        if (marketData.Count == 0) return;
+
+        List<string> defaultSymbols = GetDefaultMarketSymbols();
+
+        foreach (string symbol in defaultSymbols)
+        {
+            MarketData? data = marketData.FirstOrDefault(m => m.Symbol == symbol);
+            if (data != null)
+            {
+                switch (symbol)
+                {
+                    case "BTC/USDT":
+                        btcPrice = data.Price;
+                        break;
+                    case "ETH/USDT":
+                        ethPrice = data.Price;
+                        break;
+                    case "SOL/USDT":
+                        solPrice = data.Price;
+                        break;
+                }
+            }
+        }
+    }
+
+}
+
+
+<div class="rockefeller-container">
+    <div class="rockefeller-main-content @(isDrawerOpen ? "drawer-open" : "")">
+        <!-- Header Section -->
+        <div class="rockefeller-header">
+            <h1 class="rockefeller-title">
+                <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Large"
+                         style="margin-right: 16px; color: var(--rockefeller-primary);"/>
+                Rockefeller-AI Trading System
+            </h1>
+            <p class="rockefeller-subtitle-text">Advanced AI-powered cryptocurrency trading with intelligent risk
+                management</p>
+        </div>
+
+        <!-- Main Trading Dashboard -->
+        <div class="rockefeller-dashboard">
+            <!-- Top Row: Symbol Selection & Profile Management -->
+            <div class="rockefeller-dashboard-row">
+                <div class="rockefeller-dashboard-col rockefeller-dashboard-col-wide">
+                    <SymbolSelector
+                        SelectedSymbol="selectedSymbol"
+                        ActiveProfileName="activeProfileName"
+                        ActiveProfile="GetActiveProfile()"
+                        AvailableSymbols="availableSymbols ?? []"
+                        TradingProfiles="tradingProfiles ?? []"
+                        SymbolLoadingStates="symbolLoadingStates ?? []"
+                        OnNewProfileRequested="OpenProfileDialog"
+                        OnProfileActivated="ActivateProfile"
+                        OnApplyProfileRequested="ApplyProfile"/>
+                </div>
+            </div>
+
+            <!-- Second Row: Profile Overview & Trading Status -->
+            <div class="rockefeller-dashboard-row">
+                <div class="rockefeller-dashboard-col">
+                    <ProfileOverview
+                        ActiveProfile="GetActiveProfile()"
+                        OnManageSymbolsRequested="OpenSymbolSettingsDialog"/>
+                </div>
+                <div class="rockefeller-dashboard-col">
+                    <TradingStatus
+                        SelectedSymbol="selectedSymbol"
+                        ActiveProfile="GetActiveProfile()"
+                        IsTradingActive="isTradingActive"
+                        TradingStartTime="tradingStartTime"
+                        ActivePositionsCount="activePositions?.Count ?? 0"/>
+                </div>
+            </div>
+
+            <!-- Third Row: Analysis Status -->
+            <div class="rockefeller-dashboard-row">
+                <div class="rockefeller-dashboard-col rockefeller-dashboard-col-wide">
+                    <AnalysisStatus
+                        SelectedSymbol="selectedSymbol"
+                        IsInitialAnalysisInProgress="isInitialAnalysisInProgress"
+                        SymbolLoadingStates="symbolLoadingStates ?? []"
+                        SymbolAnalysisCache="selectedSymbol != null && symbolAnalysisCache?.ContainsKey(selectedSymbol) == true ? symbolAnalysisCache[selectedSymbol] : null"
+                        MarketSentimentCache="selectedSymbol != null && marketSentimentCache?.ContainsKey(selectedSymbol) == true ? marketSentimentCache[selectedSymbol] : null"
+                        OnRetryAnalysis="RetryAnalysis"/>
+                </div>
+            </div>
+
+            <!-- Fourth Row: Trading Controls -->
+            <div class="rockefeller-dashboard-row">
+                <div class="rockefeller-dashboard-col rockefeller-dashboard-col-wide">
+                    <TradingControls
+                        SelectedSymbol="selectedSymbol"
+                        IsTradingActive="isTradingActive"
+                        ActiveProfile="GetActiveProfile()"
+                        OnTradingButtonClicked="HandleTradingButtonClick"
+                        OnOpenLongPosition="OpenLongPosition"
+                        OnOpenShortPosition="OpenShortPosition"
+                        OnAnalyzeSymbol="AnalyzeSymbolForTradingControls"
+                        OnViewSymbolHistory="ViewSymbolHistory"/>
+                </div>
+            </div>
+
+            <!-- Analytics Drawer Toggle -->
+            <div class="rockefeller-drawer-toggle">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="@ToggleDrawer"
+                           StartIcon="@Icons.Material.Filled.Analytics"
+                           Class="rockefeller-btn-primary rockefeller-drawer-toggle-btn">
+                    <span class="rockefeller-drawer-toggle-text">
+                        @(isDrawerOpen ? "Hide Analytics" : "Show Analytics")
+                    </span>
+                </MudButton>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Drawer -->
+    <AnalyticsDrawer
+        IsOpen="isDrawerOpen"
+        OnClose="@ToggleDrawer"
+        PortfolioValue="GetActiveProfile()?.InitialPortfolioValue ?? DefaultPortfolioValue"
+        PortfolioChange24h="portfolioChange24h"
+        ActivePositionsCount="@(activePositions?.Count ?? 0)"
+        WinRate="winRate"
+        ProfitFactor="profitFactor"
+        MaxDrawdown="maxDrawdown"
+        SignalAccuracy="signalAccuracy"
+        AverageConfidence="averageConfidence"
+        SignalsToday="signalsToday"
+        BtcPrice="btcPrice"
+        EthPrice="ethPrice"
+        SolPrice="solPrice"/>
+</div>
+
+<!-- Profile Creation Dialog -->
+<ProfileCreationDialog
+    IsVisible="isProfileDialogOpen"
+    IsVisibleChanged="@(EventCallback.Factory.Create<bool>(this, (bool value) => isProfileDialogOpen = value))"
+    NewProfile="newProfile"
+    OnSaveRequested="SaveProfile"/>
+
+<!-- Symbol Settings Dialog -->
+<SymbolSettingsDialog
+    IsVisible="isSymbolSettingsDialogOpen"
+    IsVisibleChanged="@(EventCallback.Factory.Create<bool>(this, (bool value) => isSymbolSettingsDialogOpen = value))"
+    ActiveProfile="GetActiveProfile()"
+    OnSaveRequested="SaveSymbolSettings"
+    OnCustomizeSettingsRequested="CustomizeSymbolSettings"/>
+
+<!-- Stop Trading Dialog -->
+<StopTradingDialog
+    IsVisible="isStopTradingDialogOpen"
+    IsVisibleChanged="@(EventCallback.Factory.Create<bool>(this, (bool value) => isStopTradingDialogOpen = value))"
+    ProfileName="GetActiveProfile()?.Name"
+    OpenPositions="activePositions"
+    OnStopTradingConfirmed="HandleStopTradingConfirmed"/>
+
+<!-- Apply Profile Confirmation Dialog -->
+<MudDialog @bind-IsVisible="isApplyProfileDialogOpen" Options="dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6" Class="rockefeller-dialog-title">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small"
+                     style="margin-right: 8px; color: var(--rockefeller-warning);"/>
+            Apply New Profile
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body1" Class="rockefeller-dialog-content">
+            You are about to apply the <strong>@profileToApply?.Name</strong> profile to
+            <strong>@selectedSymbol</strong>.
+        </MudText>
+
+        @if (activePositions?.Any(p => p.Symbol == selectedSymbol) == true)
+        {
+            <MudAlert Severity="Severity.Warning" Class="rockefeller-dialog-alert">
+                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" style="margin-right: 8px;"/>
+                <strong>Warning:</strong> You have @activePositions.Count(p => p.Symbol == selectedSymbol) active
+                position(s) for @selectedSymbol.
+            </MudAlert>
+
+            <MudText Typo="Typo.body2" Class="rockefeller-dialog-question">
+                Do you want to close existing positions before applying the new profile?
+            </MudText>
+
+            <MudRadioGroup @bind-Value="profileApplicationOption" Class="rockefeller-dialog-options">
+                <MudRadio Value="@ProfileApplicationOption.ClosePositions" Color="Color.Warning">
+                    <div class="rockefeller-radio-option">
+                        <div class="rockefeller-radio-label">Close All Positions</div>
+                        <div class="rockefeller-radio-description">
+                            Close all existing positions for @selectedSymbol and apply the new profile settings.
+                            This will realize any current P&L.
+                        </div>
+                    </div>
+                </MudRadio>
+
+                <MudRadio Value="@ProfileApplicationOption.KeepPositions" Color="Color.Info">
+                    <div class="rockefeller-radio-option">
+                        <div class="rockefeller-radio-label">Keep Positions Open</div>
+                        <div class="rockefeller-radio-description">
+                            Keep existing positions open and apply the new profile settings for future trades only.
+                            Current positions will maintain their original settings.
+                        </div>
+                    </div>
+                </MudRadio>
+
+                <MudRadio Value="@ProfileApplicationOption.Cancel" Color="Color.Default">
+                    <div class="rockefeller-radio-option">
+                        <div class="rockefeller-radio-label">Cancel</div>
+                        <div class="rockefeller-radio-description">
+                            Cancel the profile application and keep current settings unchanged.
+                        </div>
+                    </div>
+                </MudRadio>
+            </MudRadioGroup>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info" Class="rockefeller-dialog-alert">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" style="margin-right: 8px;"/>
+                No active positions for @selectedSymbol. The new profile will be applied immediately.
+            </MudAlert>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@CancelApplyProfile" Variant="Variant.Text" Color="Color.Secondary">
+            Cancel
+        </MudButton>
+        @if (profileToApply != null && !string.IsNullOrEmpty(selectedSymbol))
+        {
+            <MudButton OnClick="@ConfirmApplyProfile"
+                       Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="@(profileApplicationOption == ProfileApplicationOption.Cancel)">
+                Apply Profile
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>

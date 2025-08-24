@@ -76,7 +76,7 @@ public class AIStrategyAnalysis
     public string Reasoning { get; set; } = string.Empty;
     public Dictionary<string, object> TechnicalIndicators { get; set; } = new();
     public MarketSentimentAnalysis Sentiment { get; set; } = new();
-    public List<AITradingSignal> Signals { get; set; } = new();
+    public List<AITradingSignal> Signals { get; set; } = [];
     public RiskAssessment Risk { get; set; } = new();
     public PerformancePrediction Prediction { get; set; } = new();
     public MarketRegime MarketRegime { get; set; } = new();
@@ -89,10 +89,10 @@ public class TechnicalAnalysisResult
     public string Symbol { get; set; } = string.Empty;
     public DateTime Timestamp { get; set; }
     public Dictionary<string, object> Indicators { get; set; } = new();
-    public List<ChartPattern> Patterns { get; set; } = new();
+    public List<ChartPattern> Patterns { get; set; } = [];
     public string OverallTrend { get; set; } = string.Empty; // BULLISH, BEARISH, NEUTRAL
     public double TrendStrength { get; set; } // 0.0 to 1.0
-    public List<string> KeyLevels { get; set; } = new();
+    public List<string> KeyLevels { get; set; } = [];
     public Dictionary<string, double> SignalStrength { get; set; } = new();
 }
 
@@ -112,7 +112,7 @@ public class MarketSentimentAnalysis
     public double OverallScore { get; set; } // -1.0 to 1.0
     public string Sentiment { get; set; } = string.Empty; // BULLISH, BEARISH, NEUTRAL
     public Dictionary<string, double> SourceScores { get; set; } = new();
-    public List<string> KeyFactors { get; set; } = new();
+    public List<string> KeyFactors { get; set; } = [];
     public DateTime LastUpdated { get; set; }
 }
 
@@ -130,7 +130,7 @@ public class AITradingSignal
     public string Timeframe { get; set; } = string.Empty;
     public DateTime GeneratedAt { get; set; }
     public DateTime ExpiresAt { get; set; }
-    public List<string> SupportingFactors { get; set; } = new();
+    public List<string> SupportingFactors { get; set; } = [];
 }
 
 public class StrategyOptimizationResult
@@ -142,7 +142,7 @@ public class StrategyOptimizationResult
     public decimal ExpectedRisk { get; set; }
     public double SharpeRatio { get; set; }
     public double OptimizationConfidence { get; set; }
-    public List<Dictionary<string, object>> ParameterHistory { get; set; } = new();
+    public List<Dictionary<string, object>> ParameterHistory { get; set; } = [];
     public DateTime OptimizedAt { get; set; }
 }
 
@@ -155,8 +155,8 @@ public class RiskAssessment
     public decimal MarketRisk { get; set; }
     public decimal LiquidityRisk { get; set; }
     public decimal VolatilityRisk { get; set; }
-    public List<string> RiskFactors { get; set; } = new();
-    public List<string> RiskMitigation { get; set; } = new();
+    public List<string> RiskFactors { get; set; } = [];
+    public List<string> RiskMitigation { get; set; } = [];
     public DateTime AssessedAt { get; set; }
 }
 
@@ -180,7 +180,7 @@ public class MarketRegime
     public string TrendDirection { get; set; } = string.Empty; // UP, DOWN, SIDEWAYS
     public double RegimeStrength { get; set; } // 0.0 to 1.0
     public double Volatility { get; set; }
-    public List<string> Characteristics { get; set; } = new();
+    public List<string> Characteristics { get; set; } = [];
     public DateTime DetectedAt { get; set; }
     public TimeSpan ExpectedDuration { get; set; }
 }
@@ -193,8 +193,8 @@ public class StrategyRecommendation
     public double Suitability { get; set; } // 0.0 to 1.0
     public string Reasoning { get; set; } = string.Empty;
     public Dictionary<string, object> SuggestedParameters { get; set; } = new();
-    public List<string> Advantages { get; set; } = new();
-    public List<string> Disadvantages { get; set; } = new();
+    public List<string> Advantages { get; set; } = [];
+    public List<string> Disadvantages { get; set; } = [];
     public DateTime RecommendedAt { get; set; }
 }
 
@@ -212,7 +212,7 @@ public class RealTimeAnalysis
 {
     public string Symbol { get; set; } = string.Empty;
     public AIStrategyAnalysis CurrentAnalysis { get; set; } = new();
-    public List<AITradingSignal> ActiveSignals { get; set; } = new();
+    public List<AITradingSignal> ActiveSignals { get; set; } = [];
     public MarketConditions CurrentConditions { get; set; } = new();
     public RiskAssessment CurrentRisk { get; set; } = new();
     public DateTime LastUpdate { get; set; }

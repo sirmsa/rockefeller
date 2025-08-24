@@ -1,3 +1,5 @@
+@using Position = global::Rockefeller.Components.Pages.Rockfeller.RockefellerPosition
+
 <MudDialog @bind-IsVisible="IsVisible" Options="DialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">Stop Trading - @(ProfileName ?? "")</MudText>
@@ -5,27 +7,29 @@
     <DialogContent>
         <div class="rockefeller-stop-trading-content">
             <div class="rockefeller-warning-box rockefeller-mb-4">
-                <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Warning" Size="Size.Large" />
+                <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Warning" Size="Size.Large"/>
                 <div>
                     <MudText Typo="Typo.h6" Color="Color.Warning">Trading will be stopped</MudText>
                     <MudText Typo="Typo.body2">Please select how you want to handle open positions:</MudText>
                 </div>
             </div>
-            
+
             @if (OpenPositions.Any())
             {
                 <div class="rockefeller-positions-summary rockefeller-mb-4">
                     <h6>Open Positions (@OpenPositions.Count)</h6>
                     <div class="rockefeller-positions-list">
-                        @foreach (var position in OpenPositions)
+                        @foreach (Position position in OpenPositions)
                         {
                             <div class="rockefeller-position-item">
                                 <span class="rockefeller-symbol">@position.Symbol</span>
-                                <span class="rockefeller-side @(position.Side == "LONG" ? "rockefeller-text-success" : "rockefeller-text-danger")">
+                                <span
+                                    class="rockefeller-side @(position.Side == "LONG" ? "rockefeller-text-success" : "rockefeller-text-danger")">
                                     @position.Side
                                 </span>
                                 <span class="rockefeller-size">@position.Size</span>
-                                <span class="rockefeller-pnl @(position.UnrealizedROI >= 0 ? "rockefeller-text-success" : "rockefeller-text-danger")">
+                                <span
+                                    class="rockefeller-pnl @(position.UnrealizedROI >= 0 ? "rockefeller-text-success" : "rockefeller-text-danger")">
                                     @(position.UnrealizedROI >= 0 ? "+" : "")@position.UnrealizedROI.ToString("N2")%
                                 </span>
                             </div>
@@ -33,13 +37,13 @@
                     </div>
                 </div>
             }
-            
+
             <div class="rockefeller-info-box">
                 <MudText Typo="Typo.body2">
                     Choose one of the following options:
                 </MudText>
             </div>
-            
+
             <MudRadioGroup @bind-Value="SelectedOption" Class="rockefeller-mt-3">
                 <MudRadio Value="@StopTradingOption.Cancel" Class="rockefeller-radio-option">
                     <div class="rockefeller-radio-label">
@@ -49,7 +53,7 @@
                         </MudText>
                     </div>
                 </MudRadio>
-                
+
                 <MudRadio Value="@StopTradingOption.ClosePositions" Class="rockefeller-radio-option">
                     <div class="rockefeller-radio-label">
                         <MudText Typo="Typo.body1"><strong>Close All Positions</strong></MudText>
@@ -58,7 +62,7 @@
                         </MudText>
                     </div>
                 </MudRadio>
-                
+
                 <MudRadio Value="@StopTradingOption.WaitForCompletion" Class="rockefeller-radio-option">
                     <div class="rockefeller-radio-label">
                         <MudText Typo="Typo.body1"><strong>Wait for Positions to Complete</strong></MudText>
@@ -71,9 +75,9 @@
         </div>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="OnCancel">Cancel</MudButton>
-        <MudButton Color="Color.Error" 
-                   OnClick="OnConfirm"
+        <MudButton OnClick="@OnCancel">Cancel</MudButton>
+        <MudButton Color="Color.Error"
+                   OnClick="@OnConfirm"
                    Disabled="@(SelectedOption == StopTradingOption.Cancel)">
             Confirm Stop Trading
         </MudButton>
@@ -84,23 +88,24 @@
     [Parameter] public bool IsVisible { get; set; }
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
     [Parameter] public string? ProfileName { get; set; }
-    [Parameter] public List<Position> OpenPositions { get; set; } = new();
+    [Parameter] public List<Position> OpenPositions { get; set; } = [];
     [Parameter] public EventCallback<StopTradingOption> OnStopTradingConfirmed { get; set; }
-    
+
     private StopTradingOption SelectedOption { get; set; } = StopTradingOption.WaitForCompletion;
-    
+
     private DialogOptions DialogOptions => new() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium };
-    
+
     private async Task OnCancel()
     {
         IsVisible = false;
         await IsVisibleChanged.InvokeAsync(false);
     }
-    
+
     private async Task OnConfirm()
     {
         await OnStopTradingConfirmed.InvokeAsync(SelectedOption);
         IsVisible = false;
         await IsVisibleChanged.InvokeAsync(false);
     }
+
 }

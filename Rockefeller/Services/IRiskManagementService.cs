@@ -84,7 +84,7 @@ public class CircuitBreakerStatus
     public DateTime TriggeredAt { get; set; }
     public DateTime? LastResetAt { get; set; }
     public int TriggerCount { get; set; }
-    public List<string> Conditions { get; set; } = new();
+    public List<string> Conditions { get; set; } = [];
     public bool CanReset { get; set; }
     public TimeSpan CooldownPeriod { get; set; }
 }
@@ -94,8 +94,8 @@ public class RiskScore
     public decimal OverallScore { get; set; } // 0-100, lower is better
     public string RiskLevel { get; set; } = string.Empty; // LOW, MEDIUM, HIGH, CRITICAL
     public Dictionary<string, decimal> ComponentScores { get; set; } = new();
-    public List<string> RiskFactors { get; set; } = new();
-    public List<string> Recommendations { get; set; } = new();
+    public List<string> RiskFactors { get; set; } = [];
+    public List<string> Recommendations { get; set; } = [];
     public DateTime CalculatedAt { get; set; }
 }
 
@@ -133,9 +133,9 @@ public class RiskReport
     public int VolatilityAlerts { get; set; }
     
     // Recommendations
-    public List<string> RiskReductionActions { get; set; } = new();
-    public List<string> ImmediateActions { get; set; } = new();
-    public List<string> LongTermActions { get; set; } = new();
+    public List<string> RiskReductionActions { get; set; } = [];
+    public List<string> ImmediateActions { get; set; } = [];
+    public List<string> LongTermActions { get; set; } = [];
 }
 
 public class RiskEvent

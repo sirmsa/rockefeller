@@ -17,7 +17,7 @@ public class MockMarketDataService : IMarketDataService
     public async Task<MarketData> GetMarketDataAsync(string symbol)
     {
         await Task.Delay(50);
-        if (_mockMarketData.TryGetValue(symbol, out var data))
+        if (_mockMarketData.TryGetValue(symbol, out MarketData? data))
         {
             // Update price with small random variation to simulate real-time data
             data.Price += data.Price * (_random.Next(-50, 51) / 10000.0m);
@@ -35,7 +35,7 @@ public class MockMarketDataService : IMarketDataService
         
         foreach (var symbol in symbols)
         {
-            var data = await GetMarketDataAsync(symbol);
+            MarketData data = await GetMarketDataAsync(symbol);
             result.Add(data);
         }
         
@@ -49,7 +49,7 @@ public class MockMarketDataService : IMarketDataService
         
         foreach (var symbol in _subscribedSymbols)
         {
-            var data = await GetMarketDataAsync(symbol);
+            MarketData data = await GetMarketDataAsync(symbol);
             result[symbol] = data;
         }
         
@@ -60,7 +60,7 @@ public class MockMarketDataService : IMarketDataService
     {
         await Task.Delay(200);
         var data = new List<MarketData>();
-        var currentDate = startDate;
+        DateTime currentDate = startDate;
         var basePrice = _mockMarketData.GetValueOrDefault(symbol, new MarketData()).Price;
         
         while (currentDate <= endDate)
@@ -99,7 +99,7 @@ public class MockMarketDataService : IMarketDataService
     public async Task<List<decimal>> GetPriceHistoryAsync(string symbol, DateTime startDate, DateTime endDate, string interval = "1h")
     {
         await Task.Delay(150);
-        var historicalData = await GetHistoricalDataAsync(symbol, startDate, endDate, interval);
+        List<MarketData> historicalData = await GetHistoricalDataAsync(symbol, startDate, endDate, interval);
         return historicalData.Select(d => d.Price).ToList();
     }
 

@@ -41,7 +41,7 @@ public class MockTradingService : ITradingService
     public async Task<List<Trade>> GetTradesAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
         await Task.Delay(100);
-        var trades = _mockTrades;
+        List<Trade> trades = _mockTrades;
         
         if (startDate.HasValue)
             trades = trades.Where(t => t.EntryTime >= startDate.Value).ToList();
@@ -71,7 +71,7 @@ public class MockTradingService : ITradingService
     public async Task<bool> ClosePositionAsync(string symbol, string side)
     {
         await Task.Delay(150);
-        var position = _mockPositions.FirstOrDefault(p => p.Symbol == symbol && p.Side == side);
+        Position? position = _mockPositions.FirstOrDefault(p => p.Symbol == symbol && p.Side == side);
         if (position != null)
         {
             position.Status = "CLOSED";
@@ -83,7 +83,7 @@ public class MockTradingService : ITradingService
     public async Task<bool> UpdateStopLossAsync(string symbol, string side, decimal stopLoss)
     {
         await Task.Delay(100);
-        var position = _mockPositions.FirstOrDefault(p => p.Symbol == symbol && p.Side == side);
+        Position? position = _mockPositions.FirstOrDefault(p => p.Symbol == symbol && p.Side == side);
         if (position != null)
         {
             // In a real implementation, this would update the order
@@ -95,7 +95,7 @@ public class MockTradingService : ITradingService
     public async Task<bool> UpdateTakeProfitAsync(string symbol, string side, decimal takeProfit)
     {
         await Task.Delay(100);
-        var position = _mockPositions.FirstOrDefault(p => p.Symbol == symbol && p.Side == side);
+        Position? position = _mockPositions.FirstOrDefault(p => p.Symbol == symbol && p.Side == side);
         if (position != null)
         {
             // In a real implementation, this would update the order
@@ -119,7 +119,7 @@ public class MockTradingService : ITradingService
     public async Task<List<object>> GetOpenOrdersAsync()
     {
         await Task.Delay(100);
-        return new List<object>();
+        return [];
     }
 
     public async Task<RiskMetrics> GetRiskMetricsAsync()
@@ -166,7 +166,7 @@ public class MockTradingService : ITradingService
     public async Task<bool> UpdateStrategyAsync(TradingStrategy strategy)
     {
         await Task.Delay(150);
-        var existing = _mockStrategies.FirstOrDefault(s => s.Id == strategy.Id);
+        TradingStrategy? existing = _mockStrategies.FirstOrDefault(s => s.Id == strategy.Id);
         if (existing != null)
         {
             existing.LastModified = DateTime.UtcNow;
@@ -178,7 +178,7 @@ public class MockTradingService : ITradingService
     public async Task<bool> DeleteStrategyAsync(string strategyId)
     {
         await Task.Delay(100);
-        var strategy = _mockStrategies.FirstOrDefault(s => s.Id == strategyId);
+        TradingStrategy? strategy = _mockStrategies.FirstOrDefault(s => s.Id == strategyId);
         if (strategy != null)
         {
             _mockStrategies.Remove(strategy);
@@ -190,7 +190,7 @@ public class MockTradingService : ITradingService
     public async Task<bool> ActivateStrategyAsync(string strategyId)
     {
         await Task.Delay(100);
-        var strategy = _mockStrategies.FirstOrDefault(s => s.Id == strategyId);
+        TradingStrategy? strategy = _mockStrategies.FirstOrDefault(s => s.Id == strategyId);
         if (strategy != null)
         {
             strategy.Status = "ACTIVE";
@@ -202,7 +202,7 @@ public class MockTradingService : ITradingService
     public async Task<bool> PauseStrategyAsync(string strategyId)
     {
         await Task.Delay(100);
-        var strategy = _mockStrategies.FirstOrDefault(s => s.Id == strategyId);
+        TradingStrategy? strategy = _mockStrategies.FirstOrDefault(s => s.Id == strategyId);
         if (strategy != null)
         {
             strategy.Status = "PAUSED";
@@ -213,8 +213,8 @@ public class MockTradingService : ITradingService
 
     private List<Trade> GenerateMockTrades()
     {
-        return new List<Trade>
-        {
+        return
+        [
             new Trade
             {
                 Id = "1",
@@ -235,6 +235,7 @@ public class MockTradingService : ITradingService
                 Commission = 2.16m,
                 OrderId = "ord_001"
             },
+
             new Trade
             {
                 Id = "2",
@@ -255,13 +256,13 @@ public class MockTradingService : ITradingService
                 Commission = 1.05m,
                 OrderId = "ord_002"
             }
-        };
+        ];
     }
 
     private List<Position> GenerateMockPositions()
     {
-        return new List<Position>
-        {
+        return
+        [
             new Position
             {
                 Symbol = "XRP/USDT",
@@ -278,6 +279,7 @@ public class MockTradingService : ITradingService
                 EntryTime = DateTime.UtcNow.AddHours(-6),
                 Status = "OPEN"
             },
+
             new Position
             {
                 Symbol = "SOL/USDT",
@@ -294,53 +296,55 @@ public class MockTradingService : ITradingService
                 EntryTime = DateTime.UtcNow.AddHours(-8),
                 Status = "OPEN"
             }
-        };
+        ];
     }
 
     private List<TradingStrategy> GenerateMockStrategies()
     {
-        return new List<TradingStrategy>
-        {
+        return
+        [
             new TradingStrategy
             {
                 Id = "1",
                 Name = "Momentum Breakout",
                 Description = "Identifies and trades momentum breakouts with volume confirmation",
                 Status = "ACTIVE",
-                Symbols = new List<string> { "BTC/USDT", "ETH/USDT", "SOL/USDT" },
+                Symbols = ["BTC/USDT", "ETH/USDT", "SOL/USDT"],
                 RiskPerTrade = 2.0m,
                 MaxPositionSize = 10.0m,
                 IsAutomated = true,
                 CreatedAt = DateTime.UtcNow.AddDays(-30),
                 LastModified = DateTime.UtcNow.AddDays(-5)
             },
+
             new TradingStrategy
             {
                 Id = "2",
                 Name = "Mean Reversion",
                 Description = "Trades oversold/overbought conditions with RSI confirmation",
                 Status = "ACTIVE",
-                Symbols = new List<string> { "XRP/USDT", "ADA/USDT", "DOT/USDT" },
+                Symbols = ["XRP/USDT", "ADA/USDT", "DOT/USDT"],
                 RiskPerTrade = 1.5m,
                 MaxPositionSize = 8.0m,
                 IsAutomated = true,
                 CreatedAt = DateTime.UtcNow.AddDays(-25),
                 LastModified = DateTime.UtcNow.AddDays(-3)
             },
+
             new TradingStrategy
             {
                 Id = "3",
                 Name = "Trend Following",
                 Description = "Follows established trends with moving average confirmation",
                 Status = "PAUSED",
-                Symbols = new List<string> { "LINK/USDT", "MATIC/USDT" },
+                Symbols = ["LINK/USDT", "MATIC/USDT"],
                 RiskPerTrade = 2.5m,
                 MaxPositionSize = 12.0m,
                 IsAutomated = false,
                 CreatedAt = DateTime.UtcNow.AddDays(-20),
                 LastModified = DateTime.UtcNow.AddDays(-1)
             }
-        };
+        ];
     }
 
     private Portfolio GenerateMockPortfolio()
@@ -354,14 +358,30 @@ public class MockTradingService : ITradingService
             TotalPnL = 1247.65m,
             TotalROI = 24.7m,
             LastUpdated = DateTime.UtcNow,
-            Assets = new List<Asset>
-            {
-                new Asset { Symbol = "USDT", Free = 35998.40m, Locked = 0m, Total = 35998.40m, Value = 35998.40m, UnrealizedPnL = 0m },
-                new Asset { Symbol = "BTC", Free = 0m, Locked = 0.5m, Total = 0.5m, Value = 22260.38m, UnrealizedPnL = 635.13m },
-                new Asset { Symbol = "ETH", Free = 0m, Locked = 2.0m, Total = 2.0m, Value = 5160.50m, UnrealizedPnL = 140.00m },
-                new Asset { Symbol = "XRP", Free = 0m, Locked = 1000m, Total = 1000m, Value = 3156.70m, UnrealizedPnL = 133.40m },
-                new Asset { Symbol = "SOL", Free = 0m, Locked = 15.0m, Total = 15.0m, Value = 1534.50m, UnrealizedPnL = 57.00m }
-            }
+            Assets =
+            [
+                new Asset
+                {
+                    Symbol = "USDT", Free = 35998.40m, Locked = 0m, Total = 35998.40m, Value = 35998.40m,
+                    UnrealizedPnL = 0m
+                },
+                new Asset
+                {
+                    Symbol = "BTC", Free = 0m, Locked = 0.5m, Total = 0.5m, Value = 22260.38m, UnrealizedPnL = 635.13m
+                },
+                new Asset
+                {
+                    Symbol = "ETH", Free = 0m, Locked = 2.0m, Total = 2.0m, Value = 5160.50m, UnrealizedPnL = 140.00m
+                },
+                new Asset
+                {
+                    Symbol = "XRP", Free = 0m, Locked = 1000m, Total = 1000m, Value = 3156.70m, UnrealizedPnL = 133.40m
+                },
+                new Asset
+                {
+                    Symbol = "SOL", Free = 0m, Locked = 15.0m, Total = 15.0m, Value = 1534.50m, UnrealizedPnL = 57.00m
+                }
+            ]
         };
     }
 

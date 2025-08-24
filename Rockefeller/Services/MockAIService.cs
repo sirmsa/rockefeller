@@ -15,7 +15,7 @@ public class MockAIService : IAIService
     public async Task<List<AIInsight>> AnalyzeNewsSentimentAsync(string symbol, DateTime? since = null)
     {
         await Task.Delay(150);
-        var insights = _mockInsights.GetValueOrDefault(symbol, new List<AIInsight>())
+        List<AIInsight> insights = _mockInsights.GetValueOrDefault(symbol, [])
             .Where(i => i.Type == "NEWS")
             .ToList();
 
@@ -28,7 +28,7 @@ public class MockAIService : IAIService
     public async Task<double> GetNewsSentimentScoreAsync(string symbol)
     {
         await Task.Delay(100);
-        var newsInsights = await AnalyzeNewsSentimentAsync(symbol);
+        List<AIInsight> newsInsights = await AnalyzeNewsSentimentAsync(symbol);
         if (!newsInsights.Any()) return 0.0;
         
         return newsInsights.Average(i => i.SentimentScore);
@@ -37,7 +37,7 @@ public class MockAIService : IAIService
     public async Task<List<AIInsight>> AnalyzeSocialMediaAsync(string symbol, string platform, DateTime? since = null)
     {
         await Task.Delay(120);
-        var insights = _mockInsights.GetValueOrDefault(symbol, new List<AIInsight>())
+        List<AIInsight> insights = _mockInsights.GetValueOrDefault(symbol, [])
             .Where(i => i.Type == "SOCIAL" && i.Source == platform)
             .ToList();
 
@@ -50,7 +50,7 @@ public class MockAIService : IAIService
     public async Task<double> GetSocialMediaSentimentAsync(string symbol, string platform)
     {
         await Task.Delay(100);
-        var socialInsights = await AnalyzeSocialMediaAsync(symbol, platform);
+        List<AIInsight> socialInsights = await AnalyzeSocialMediaAsync(symbol, platform);
         if (!socialInsights.Any()) return 0.0;
         
         return socialInsights.Average(i => i.SentimentScore);
@@ -84,7 +84,7 @@ public class MockAIService : IAIService
     public async Task<double> GetTechnicalScoreAsync(string symbol)
     {
         await Task.Delay(100);
-        var indicators = await GetTechnicalIndicatorsAsync(symbol);
+        Dictionary<string, object> indicators = await GetTechnicalIndicatorsAsync(symbol);
         
         // Mock technical score calculation
         var rsi = Convert.ToDouble(indicators["RSI"]);
@@ -146,9 +146,9 @@ public class MockAIService : IAIService
     {
         await Task.Delay(200);
         var marketSentiment = await GetMarketSentimentAsync(symbol);
-        var technicalSignals = await GetTechnicalSignalsAsync(symbol);
-        var newsInsights = await AnalyzeNewsSentimentAsync(symbol);
-        var socialInsights = await AnalyzeSocialMediaAsync(symbol, "Twitter");
+        List<string> technicalSignals = await GetTechnicalSignalsAsync(symbol);
+        List<AIInsight> newsInsights = await AnalyzeNewsSentimentAsync(symbol);
+        List<AIInsight> socialInsights = await AnalyzeSocialMediaAsync(symbol, "Twitter");
         
         var signals = new List<AIInsight>();
         
@@ -204,8 +204,8 @@ public class MockAIService : IAIService
     public async Task<double> GetSignalConfidenceAsync(string symbol, string signalType)
     {
         await Task.Delay(100);
-        var signals = await GenerateTradingSignalsAsync(symbol);
-        var relevantSignal = signals.FirstOrDefault(s => s.Content.Contains(signalType));
+        List<AIInsight> signals = await GenerateTradingSignalsAsync(symbol);
+        AIInsight? relevantSignal = signals.FirstOrDefault(s => s.Content.Contains(signalType));
         
         return relevantSignal?.Confidence ?? 0.0;
     }
@@ -248,7 +248,7 @@ public class MockAIService : IAIService
     public async Task<List<AIInsight>> GetHistoricalInsightsAsync(string symbol, DateTime startDate, DateTime endDate)
     {
         await Task.Delay(150);
-        var insights = _mockInsights.GetValueOrDefault(symbol, new List<AIInsight>())
+        List<AIInsight> insights = _mockInsights.GetValueOrDefault(symbol, [])
             .Where(i => i.Timestamp >= startDate && i.Timestamp <= endDate)
             .ToList();
         
@@ -258,7 +258,7 @@ public class MockAIService : IAIService
     public async Task<double> GetInsightAccuracyAsync(string symbol, DateTime startDate, DateTime endDate)
     {
         await Task.Delay(100);
-        var historicalInsights = await GetHistoricalInsightsAsync(symbol, startDate, endDate);
+        List<AIInsight> historicalInsights = await GetHistoricalInsightsAsync(symbol, startDate, endDate);
         
         if (!historicalInsights.Any()) return 0.0;
         

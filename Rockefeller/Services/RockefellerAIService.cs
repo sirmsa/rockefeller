@@ -18,45 +18,53 @@ public class RockefellerAIService : IRockefellerAIService
         IAIService aiService,
         ITradingService tradingService)
     {
-        _marketDataService = marketDataService;
-        _aiService = aiService;
-        _tradingService = tradingService;
+        try
+        {
+            _marketDataService = marketDataService ?? throw new ArgumentNullException(nameof(marketDataService));
+            _aiService = aiService ?? throw new ArgumentNullException(nameof(aiService));
+            _tradingService = tradingService ?? throw new ArgumentNullException(nameof(tradingService));
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error initializing RockefellerAIService: {ex.Message}");
+            throw;
+        }
     }
 
     #region Core AI Analysis
 
     public async Task<AIStrategyAnalysis> AnalyzeStrategyOnTheFlyAsync(string symbol, string strategyType, Dictionary<string, object> parameters)
     {
-        var startTime = DateTime.UtcNow;
+        DateTime startTime = DateTime.UtcNow;
         
         try
         {
             // Get current market data
-            var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+            MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
             
             // Perform technical analysis
-            var technicalAnalysis = await PerformTechnicalAnalysisAsync(symbol, ["RSI", "MACD", "BollingerBands", "MovingAverages"]);
+            TechnicalAnalysisResult technicalAnalysis = await PerformTechnicalAnalysisAsync(symbol, ["RSI", "MACD", "BollingerBands", "MovingAverages"]);
             
             // Analyze market sentiment
-            var sentiment = await AnalyzeMarketSentimentAsync(symbol);
+            MarketSentimentAnalysis sentiment = await AnalyzeMarketSentimentAsync(symbol);
             
             // Detect market regime
-            var marketRegime = await DetectMarketRegimeAsync(symbol);
+            MarketRegime marketRegime = await DetectMarketRegimeAsync(symbol);
             
             // Generate trading signals
-            var signals = await GenerateTradingSignalsAsync(symbol, "1h");
+            List<AITradingSignal> signals = await GenerateTradingSignalsAsync(symbol, "1h");
             
             // Assess risk
-            var risk = await AssessTradeRiskAsync(symbol, strategyType, 1.0m);
+            RiskAssessment risk = await AssessTradeRiskAsync(symbol, strategyType, 1.0m);
             
             // Generate performance prediction
-            var prediction = await PredictStrategyPerformanceAsync(strategyType, symbol, 7);
+            PerformancePrediction prediction = await PredictStrategyPerformanceAsync(strategyType, symbol, 7);
             
             // Determine recommendation based on analysis
             var (recommendation, confidence, reasoning) = DetermineStrategyRecommendation(
                 technicalAnalysis, sentiment, marketRegime, risk, prediction);
             
-            var analysis = new AIStrategyAnalysis
+            AIStrategyAnalysis analysis = new AIStrategyAnalysis
             {
                 Symbol = symbol,
                 StrategyType = strategyType,
@@ -108,7 +116,7 @@ public class RockefellerAIService : IRockefellerAIService
     public async Task<AIStrategyAnalysis> GenerateOptimalStrategyAsync(string symbol, decimal riskTolerance, decimal investmentAmount)
     {
         // Analyze current market conditions
-        var marketAnalysis = await AnalyzeCurrentMarketConditionsAsync(symbol);
+        AIStrategyAnalysis marketAnalysis = await AnalyzeCurrentMarketConditionsAsync(symbol);
         
         // Determine optimal strategy based on risk tolerance and market conditions
         var optimalStrategy = DetermineOptimalStrategy(marketAnalysis, riskTolerance, investmentAmount);
@@ -130,13 +138,13 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<TechnicalAnalysisResult> PerformTechnicalAnalysisAsync(string symbol, List<string> indicators)
     {
-        var result = new TechnicalAnalysisResult
+        TechnicalAnalysisResult result = new TechnicalAnalysisResult
         {
             Symbol = symbol,
             Timestamp = DateTime.UtcNow,
             Indicators = new Dictionary<string, object>(),
-            Patterns = new List<ChartPattern>(),
-            KeyLevels = new List<string>(),
+            Patterns = [],
+            KeyLevels = [],
             SignalStrength = new Dictionary<string, double>()
         };
 
@@ -192,7 +200,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<Dictionary<string, object>> GetRSIAnalysisAsync(string symbol, int period = 14)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var rsiValue = _random.Next(20, 81); // Mock RSI calculation
         
         var analysis = new Dictionary<string, object>
@@ -235,7 +243,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<Dictionary<string, object>> GetBollingerBandsAnalysisAsync(string symbol, int period = 20)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var currentPrice = marketData.Price;
         var upper = currentPrice * 1.05m;
         var middle = currentPrice;
@@ -258,7 +266,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<Dictionary<string, object>> GetMovingAveragesAnalysisAsync(string symbol, List<int> periods)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var currentPrice = marketData.Price;
         var result = new Dictionary<string, object>();
         
@@ -288,7 +296,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<Dictionary<string, object>> GetVolumeAnalysisAsync(string symbol, int period = 20)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var volume = marketData.Volume24h;
         var avgVolume = volume * (decimal)(0.8 + _random.NextDouble() * 0.4); // ±20% variation
         
@@ -308,7 +316,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<Dictionary<string, object>> GetSupportResistanceAnalysisAsync(string symbol)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var currentPrice = marketData.Price;
         
         var analysis = new Dictionary<string, object>
@@ -326,7 +334,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<Dictionary<string, object>> GetTrendAnalysisAsync(string symbol, int period = 50)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var currentPrice = marketData.Price;
         
         // Mock trend calculation
@@ -386,10 +394,10 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<Dictionary<string, double>> GetPatternConfidenceAsync(string symbol)
     {
-        var patterns = await IdentifyChartPatternsAsync(symbol);
+        List<ChartPattern> patterns = await IdentifyChartPatternsAsync(symbol);
         var confidence = new Dictionary<string, double>();
         
-        foreach (var pattern in patterns)
+        foreach (ChartPattern pattern in patterns)
         {
             confidence[pattern.Name] = pattern.Confidence;
         }
@@ -417,7 +425,7 @@ public class RockefellerAIService : IRockefellerAIService
     public async Task<MarketSentimentAnalysis> AnalyzeMarketSentimentAsync(string symbol)
     {
         var sentiment = await _aiService.GetMarketSentimentAsync(symbol);
-        var sourceScores = await _aiService.GetMarketSentimentBySourceAsync(symbol);
+        Dictionary<string, double> sourceScores = await _aiService.GetMarketSentimentBySourceAsync(symbol);
         
         var sentimentText = sentiment > 0.3 ? "BULLISH" : sentiment < -0.3 ? "BEARISH" : "NEUTRAL";
         
@@ -456,11 +464,11 @@ public class RockefellerAIService : IRockefellerAIService
         var signals = new List<AITradingSignal>();
         
         // Generate entry signal
-        var entrySignal = await GetOptimalEntrySignalAsync(symbol, "General");
+        AITradingSignal? entrySignal = await GetOptimalEntrySignalAsync(symbol, "General");
         if (entrySignal != null) signals.Add(entrySignal);
         
         // Generate exit signal if needed
-        var exitSignal = await GetOptimalExitSignalAsync(symbol, "General");
+        AITradingSignal? exitSignal = await GetOptimalExitSignalAsync(symbol, "General");
         if (exitSignal != null) signals.Add(exitSignal);
         
         return signals;
@@ -468,7 +476,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<AITradingSignal?> GetOptimalEntrySignalAsync(string symbol, string strategy)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var sentiment = await GetOverallSentimentScoreAsync(symbol);
         
         var action = sentiment > 0.3 ? "BUY" : sentiment < -0.3 ? "SELL" : "HOLD";
@@ -494,19 +502,19 @@ public class RockefellerAIService : IRockefellerAIService
             Timeframe = "1h",
             GeneratedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddHours(1),
-            SupportingFactors = new List<string> { "Market Sentiment", "Technical Analysis", "AI Pattern Recognition" }
+            SupportingFactors = ["Market Sentiment", "Technical Analysis", "AI Pattern Recognition"]
         };
     }
 
     public async Task<AITradingSignal?> GetOptimalExitSignalAsync(string symbol, string strategy)
     {
         // Check if there are open positions
-        var positions = await _tradingService.GetOpenPositionsAsync();
-        var position = positions.FirstOrDefault(p => p.Symbol == symbol);
+        List<Position> positions = await _tradingService.GetOpenPositionsAsync();
+        Position? position = positions.FirstOrDefault(p => p.Symbol == symbol);
         
         if (position == null) return null;
         
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var sentiment = await GetOverallSentimentScoreAsync(symbol);
         
         var action = position.Side == "LONG" && sentiment < -0.3 ? "SELL" : 
@@ -530,14 +538,14 @@ public class RockefellerAIService : IRockefellerAIService
             Timeframe = "1h",
             GeneratedAt = DateTime.UtcNow,
             ExpiresAt = DateTime.UtcNow.AddMinutes(30),
-            SupportingFactors = new List<string> { "Position Management", "Sentiment Change", "Risk Control" }
+            SupportingFactors = ["Position Management", "Sentiment Change", "Risk Control"]
         };
     }
 
     public async Task<double> GetSignalConfidenceAsync(string symbol, string signalType)
     {
-        var signals = await GenerateTradingSignalsAsync(symbol);
-        var relevantSignal = signals.FirstOrDefault(s => s.SignalType == signalType);
+        List<AITradingSignal> signals = await GenerateTradingSignalsAsync(symbol);
+        AITradingSignal? relevantSignal = signals.FirstOrDefault(s => s.SignalType == signalType);
         return relevantSignal?.Confidence ?? 0.0;
     }
 
@@ -567,14 +575,14 @@ public class RockefellerAIService : IRockefellerAIService
             ExpectedRisk = 0.08m,
             SharpeRatio = 1.87,
             OptimizationConfidence = 0.82,
-            ParameterHistory = new List<Dictionary<string, object>> { optimalParams },
+            ParameterHistory = [optimalParams],
             OptimizedAt = DateTime.UtcNow
         });
     }
 
     public async Task<Dictionary<string, object>> GetOptimalParametersAsync(string strategyName, string symbol)
     {
-        var result = await OptimizeStrategyParametersAsync(strategyName, symbol, DateTime.UtcNow.AddDays(-30), DateTime.UtcNow);
+        StrategyOptimizationResult result = await OptimizeStrategyParametersAsync(strategyName, symbol, DateTime.UtcNow.AddDays(-30), DateTime.UtcNow);
         return result.OptimalParameters;
     }
 
@@ -602,7 +610,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<RiskAssessment> AssessTradeRiskAsync(string symbol, string strategy, decimal positionSize)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var sentiment = await GetOverallSentimentScoreAsync(symbol);
         
         var positionRisk = positionSize * 0.02m; // 2% risk per trade
@@ -650,7 +658,7 @@ public class RockefellerAIService : IRockefellerAIService
         var totalRisk = 0.0m;
         var riskFactors = new List<string>();
         
-        foreach (var position in positions)
+        foreach (Position position in positions)
         {
             var positionRisk = await CalculatePositionRiskAsync(position.Symbol, position.Size, position.CurrentPrice);
             totalRisk += positionRisk;
@@ -679,7 +687,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<PerformancePrediction> PredictStrategyPerformanceAsync(string strategyName, string symbol, int daysAhead)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var sentiment = await GetOverallSentimentScoreAsync(symbol);
         
         var baseReturn = (decimal)(sentiment * 0.1); // Base return based on sentiment
@@ -703,7 +711,7 @@ public class RockefellerAIService : IRockefellerAIService
     public async Task<decimal> PredictPriceMovementAsync(string symbol, int hoursAhead)
     {
         var sentiment = await GetOverallSentimentScoreAsync(symbol);
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         
         var movement = (decimal)(sentiment * 0.05) * hoursAhead; // 5% movement per hour based on sentiment
         return marketData.Price * (1 + movement);
@@ -728,7 +736,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<MarketRegime> DetectMarketRegimeAsync(string symbol)
     {
-        var marketData = await _marketDataService.GetMarketDataAsync(symbol);
+        MarketData marketData = await _marketDataService.GetMarketDataAsync(symbol);
         var sentiment = await GetOverallSentimentScoreAsync(symbol);
         
         var volatility = _random.NextDouble() * 0.3 + 0.1; // 10-40% volatility
@@ -773,19 +781,19 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<bool> IsTrendingMarketAsync(string symbol)
     {
-        var regime = await DetectMarketRegimeAsync(symbol);
+        MarketRegime regime = await DetectMarketRegimeAsync(symbol);
         return regime.RegimeType == "TRENDING";
     }
 
     public async Task<bool> IsRangingMarketAsync(string symbol)
     {
-        var regime = await DetectMarketRegimeAsync(symbol);
+        MarketRegime regime = await DetectMarketRegimeAsync(symbol);
         return regime.RegimeType == "RANGING";
     }
 
     public async Task<bool> IsVolatileMarketAsync(string symbol)
     {
-        var regime = await DetectMarketRegimeAsync(symbol);
+        MarketRegime regime = await DetectMarketRegimeAsync(symbol);
         return regime.RegimeType == "VOLATILE";
     }
 
@@ -797,7 +805,7 @@ public class RockefellerAIService : IRockefellerAIService
     {
         var recommendations = new List<StrategyRecommendation>();
         
-        var momentumStrategy = new StrategyRecommendation
+        StrategyRecommendation momentumStrategy = new StrategyRecommendation
         {
             StrategyName = "Momentum Breakout",
             Symbol = symbol,
@@ -805,14 +813,14 @@ public class RockefellerAIService : IRockefellerAIService
             Suitability = marketCondition == "TRENDING" ? 0.85 : 0.25,
             Reasoning = marketCondition == "TRENDING" ? "Ideal for trending markets" : "Not suitable for current conditions",
             SuggestedParameters = new Dictionary<string, object> { ["rsi_period"] = 14, ["stop_loss"] = 0.05m },
-            Advantages = new List<string> { "Captures strong trends", "High profit potential" },
-            Disadvantages = new List<string> { "Can miss reversals", "Requires trend confirmation" },
+            Advantages = ["Captures strong trends", "High profit potential"],
+            Disadvantages = ["Can miss reversals", "Requires trend confirmation"],
             RecommendedAt = DateTime.UtcNow
         };
         
         recommendations.Add(momentumStrategy);
         
-        var meanReversionStrategy = new StrategyRecommendation
+        StrategyRecommendation meanReversionStrategy = new StrategyRecommendation
         {
             StrategyName = "Mean Reversion",
             Symbol = symbol,
@@ -820,8 +828,8 @@ public class RockefellerAIService : IRockefellerAIService
             Suitability = marketCondition == "RANGING" ? 0.80 : 0.30,
             Reasoning = marketCondition == "RANGING" ? "Perfect for sideways markets" : "Better suited for trending conditions",
             SuggestedParameters = new Dictionary<string, object> { ["rsi_period"] = 14, ["bollinger_period"] = 20 },
-            Advantages = new List<string> { "Works in sideways markets", "Lower risk" },
-            Disadvantages = new List<string> { "Limited profit potential", "Can fail in trends" },
+            Advantages = ["Works in sideways markets", "Lower risk"],
+            Disadvantages = ["Limited profit potential", "Can fail in trends"],
             RecommendedAt = DateTime.UtcNow
         };
         
@@ -832,14 +840,14 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<StrategyRecommendation> GetBestStrategyForConditionsAsync(string symbol, MarketConditions conditions)
     {
-        var recommendations = await GetStrategyRecommendationsAsync(symbol, conditions.MarketRegime);
+        List<StrategyRecommendation> recommendations = await GetStrategyRecommendationsAsync(symbol, conditions.MarketRegime);
         return recommendations.OrderByDescending(r => r.Suitability).First();
     }
 
     public async Task<bool> ShouldPauseStrategyAsync(string strategyName, string symbol)
     {
-        var risk = await AssessTradeRiskAsync(symbol, strategyName, 1.0m);
-        var regime = await DetectMarketRegimeAsync(symbol);
+        RiskAssessment risk = await AssessTradeRiskAsync(symbol, strategyName, 1.0m);
+        MarketRegime regime = await DetectMarketRegimeAsync(symbol);
         
         // Pause if risk is too high or market is too volatile
         return risk.RiskLevel == "CRITICAL" || regime.RegimeType == "VOLATILE";
@@ -851,14 +859,14 @@ public class RockefellerAIService : IRockefellerAIService
 
     public async Task<RealTimeAnalysis> GetRealTimeAnalysisAsync(string symbol)
     {
-        if (_activeAnalyses.TryGetValue(symbol, out var analysis))
+        if (_activeAnalyses.TryGetValue(symbol, out RealTimeAnalysis? analysis))
         {
             return analysis;
         }
         
         // Create new real-time analysis
-        var marketAnalysis = await AnalyzeCurrentMarketConditionsAsync(symbol);
-        var conditions = new MarketConditions
+        AIStrategyAnalysis marketAnalysis = await AnalyzeCurrentMarketConditionsAsync(symbol);
+        MarketConditions conditions = new MarketConditions
         {
             Trend = marketAnalysis.MarketRegime.TrendDirection,
             Volatility = marketAnalysis.MarketRegime.Volatility > 0.25 ? "HIGH" : "MEDIUM",
@@ -868,7 +876,7 @@ public class RockefellerAIService : IRockefellerAIService
             AssessedAt = DateTime.UtcNow
         };
         
-        var realTimeAnalysis = new RealTimeAnalysis
+        RealTimeAnalysis realTimeAnalysis = new RealTimeAnalysis
         {
             Symbol = symbol,
             CurrentAnalysis = marketAnalysis,
@@ -888,8 +896,8 @@ public class RockefellerAIService : IRockefellerAIService
     {
         try
         {
-            var analysis = await AnalyzeCurrentMarketConditionsAsync(symbol);
-            var realTimeAnalysis = await GetRealTimeAnalysisAsync(symbol);
+            AIStrategyAnalysis analysis = await AnalyzeCurrentMarketConditionsAsync(symbol);
+            RealTimeAnalysis realTimeAnalysis = await GetRealTimeAnalysisAsync(symbol);
             
             realTimeAnalysis.CurrentAnalysis = analysis;
             realTimeAnalysis.ActiveSignals = analysis.Signals;
@@ -1032,7 +1040,7 @@ public class RockefellerAIService : IRockefellerAIService
     {
         var signalStrength = new Dictionary<string, double>();
         
-        foreach (var indicator in indicators)
+        foreach (KeyValuePair<string, object> indicator in indicators)
         {
             if (indicator.Value is Dictionary<string, object> dict)
             {
@@ -1084,7 +1092,7 @@ public class RockefellerAIService : IRockefellerAIService
 
     private Task UpdateRealTimeAnalysisAsync(string symbol, AIStrategyAnalysis analysis)
     {
-        if (_activeAnalyses.TryGetValue(symbol, out var realTimeAnalysis))
+        if (_activeAnalyses.TryGetValue(symbol, out RealTimeAnalysis? realTimeAnalysis))
         {
             realTimeAnalysis.CurrentAnalysis = analysis;
             realTimeAnalysis.LastUpdate = DateTime.UtcNow;

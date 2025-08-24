@@ -25,7 +25,7 @@
         <ApplicationTitle>Rockefeller</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.rockefeller</ApplicationId>
+        <ApplicationId>com.ms-solutions.rockefeller</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
@@ -65,6 +65,19 @@
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0"/>
         <PackageReference Include="MudBlazor" Version="6.17.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Components\Pages\Rockfeller\AnalysisStatus.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\AnalyticsDrawer.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\ProfileCreationDialog.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\ProfileOverview.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\StopTradingDialog.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\SymbolManagement.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\SymbolSelector.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\SymbolSettingsDialog.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\TradingControls.razor" />
+      <AdditionalFiles Include="Components\Pages\Rockfeller\TradingStatus.razor" />
     </ItemGroup>
 
 </Project>

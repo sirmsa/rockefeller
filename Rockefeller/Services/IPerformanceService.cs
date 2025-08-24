@@ -115,6 +115,6 @@ public class PerformanceReport
     // Summary
     public string PerformanceGrade { get; set; } = string.Empty; // A+, A, B+, B, C+, C, D, F
     public string RiskLevel { get; set; } = string.Empty; // LOW, MEDIUM, HIGH, CRITICAL
-    public List<string> Recommendations { get; set; } = new();
+    public List<string> Recommendations { get; set; } = [];
     public DateTime GeneratedAt { get; set; }
 }

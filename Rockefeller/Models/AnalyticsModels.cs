@@ -9,9 +9,15 @@ public class AnalyticsData
     public decimal SharpeRatio { get; set; }
     public decimal MaxDrawdown { get; set; }
     public decimal Volatility { get; set; }
-    public List<Trade> RecentTrades { get; set; } = new();
-    public List<StrategyPerformance> StrategyPerformance { get; set; } = new();
+    public List<Trade> RecentTrades { get; set; } = [];
+    public List<StrategyPerformance> StrategyPerformance { get; set; } = [];
     public PerformanceHistory PerformanceHistory { get; set; } = new();
+    
+    // Additional properties for Rockefeller analytics
+    public decimal ProfitFactor { get; set; }
+    public decimal SignalAccuracy { get; set; }
+    public decimal AverageConfidence { get; set; }
+    public int SignalsToday { get; set; }
 }
 
 public class Trade
@@ -23,12 +29,13 @@ public class Trade
     public decimal Size { get; set; }
     public decimal EntryPrice { get; set; }
     public decimal? ExitPrice { get; set; }
+    public decimal Price { get; set; } // Current or execution price
     public decimal PnL { get; set; }
     public decimal ROI { get; set; }
     public DateTime EntryTime { get; set; }
     public DateTime? ExitTime { get; set; }
     public string Status { get; set; } = string.Empty; // OPEN, CLOSED, CANCELLED
-    public List<AIInsight> AIInsights { get; set; } = new();
+    public List<AIInsight> AIInsights { get; set; } = [];
     public string Strategy { get; set; } = string.Empty;
     public decimal StopLoss { get; set; }
     public decimal TakeProfit { get; set; }
@@ -46,7 +53,7 @@ public class StrategyPerformance
 
 public class PerformanceHistory
 {
-    public List<PerformancePoint> Points { get; set; } = new();
+    public List<PerformancePoint> Points { get; set; } = [];
 }
 
 public class PerformancePoint
@@ -82,8 +89,8 @@ public class TradingSession
     public double WinRate { get; set; }
     public decimal MaxDrawdown { get; set; }
     public decimal SharpeRatio { get; set; }
-    public List<Trade> Trades { get; set; } = new();
-    public List<AIInsight> Insights { get; set; } = new();
+    public List<Trade> Trades { get; set; } = [];
+    public List<AIInsight> Insights { get; set; } = [];
     public Dictionary<string, object> Metrics { get; set; } = new();
 }
 
@@ -95,8 +102,9 @@ public class Portfolio
     public decimal LockedBalance { get; set; }
     public decimal TotalPnL { get; set; }
     public decimal TotalROI { get; set; }
-    public List<Position> Positions { get; set; } = new();
-    public List<Asset> Assets { get; set; } = new();
+    public decimal DailyChange { get; set; } // 24-hour portfolio change
+    public List<Position> Positions { get; set; } = [];
+    public List<Asset> Assets { get; set; } = [];
     public DateTime LastUpdated { get; set; }
 }
 
@@ -133,7 +141,7 @@ public class TradingStrategy
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty; // ACTIVE, PAUSED, DISABLED
-    public List<string> Symbols { get; set; } = new();
+    public List<string> Symbols { get; set; } = [];
     public Dictionary<string, object> Parameters { get; set; } = new();
     public decimal RiskPerTrade { get; set; }
     public decimal MaxPositionSize { get; set; }

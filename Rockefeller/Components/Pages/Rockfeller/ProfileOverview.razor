@@ -1,0 +1,111 @@
+@if (ActiveProfile != null)
+{
+    <div class="rockefeller-profile-overview-container">
+        <div class="rockefeller-profile-overview-header">
+            <h3 class="rockefeller-profile-overview-title">
+                <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small"
+                         class="rockefeller-profile-overview-icon"/>
+                Active Profile: @(ActiveProfile?.Name ?? "Unknown")
+            </h3>
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="OnManageSymbolsRequested"
+                       StartIcon="@Icons.Material.Filled.Tune"
+                       Size="Size.Small"
+                       Class="rockefeller-btn-outline rockefeller-btn-sm">
+                Manage Symbols
+            </MudButton>
+        </div>
+
+        <!-- Profile Metrics Grid -->
+        <div class="rockefeller-profile-overview-grid">
+            <div class="rockefeller-profile-overview-metric">
+                <div class="rockefeller-profile-overview-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.Security" Size="Size.Small"/>
+                </div>
+                <div class="rockefeller-profile-overview-metric-content">
+                    <div class="rockefeller-profile-overview-metric-label">Risk Level</div>
+                    <div
+                        class="rockefeller-profile-overview-metric-value rockefeller-profile-risk-@(ActiveProfile?.RiskLevel.ToString().ToLower() ?? "unknown")">
+                        @(ActiveProfile?.RiskLevel.ToString() ?? "Unknown")
+                    </div>
+                </div>
+            </div>
+
+            <div class="rockefeller-profile-overview-metric">
+                <div class="rockefeller-profile-overview-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Size="Size.Small"/>
+                </div>
+                <div class="rockefeller-profile-overview-metric-content">
+                    <div class="rockefeller-profile-overview-metric-label">Portfolio Value</div>
+                    <div class="rockefeller-profile-overview-metric-value rockefeller-portfolio-value">
+                        $@(ActiveProfile?.InitialPortfolioValue.ToString("N2") ?? "0.00")
+                    </div>
+                </div>
+            </div>
+
+            <div class="rockefeller-profile-overview-metric">
+                <div class="rockefeller-profile-overview-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small"/>
+                </div>
+                <div class="rockefeller-profile-overview-metric-content">
+                    <div class="rockefeller-profile-overview-metric-label">Max Positions</div>
+                    <div class="rockefeller-profile-overview-metric-value">
+                        @(ActiveProfile?.MaxTotalPositions ?? 0)
+                    </div>
+                </div>
+            </div>
+
+            <div class="rockefeller-profile-overview-metric">
+                <div class="rockefeller-profile-overview-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.Psychology" Size="Size.Small"/>
+                </div>
+                <div class="rockefeller-profile-overview-metric-content">
+                    <div class="rockefeller-profile-overview-metric-label">AI Confidence</div>
+                    <div class="rockefeller-profile-overview-metric-value">
+                        @(ActiveProfile?.MinAIConfidence ?? 0)%
+                    </div>
+                </div>
+            </div>
+
+            <div class="rockefeller-profile-overview-metric">
+                <div class="rockefeller-profile-overview-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small"/>
+                </div>
+                <div class="rockefeller-profile-overview-metric-content">
+                    <div class="rockefeller-profile-overview-metric-label">Auto Trading</div>
+                    <div
+                        class="rockefeller-profile-overview-metric-value @(ActiveProfile?.EnableAutoTrading == true ? "rockefeller-text-success" : "rockefeller-text-warning")">
+                        @(ActiveProfile?.EnableAutoTrading == true ? "Enabled" : "Disabled")
+                    </div>
+                </div>
+            </div>
+
+            <div class="rockefeller-profile-overview-metric">
+                <div class="rockefeller-profile-overview-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.CurrencyExchange" Size="Size.Small"/>
+                </div>
+                <div class="rockefeller-profile-overview-metric-content">
+                    <div class="rockefeller-profile-overview-metric-label">Active Symbols</div>
+                    <div class="rockefeller-profile-overview-metric-value">
+                        @(ActiveProfile?.SymbolSettings?.Values?.Count(s => s.IsActive) ?? 0)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Description -->
+        @if (!string.IsNullOrEmpty(ActiveProfile?.Description))
+        {
+            <div class="rockefeller-profile-overview-description">
+                <div class="rockefeller-profile-overview-description-label">Strategy Description</div>
+                <div class="rockefeller-profile-overview-description-text">@ActiveProfile.Description</div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public TradingProfile? ActiveProfile { get; set; }
+    [Parameter] public EventCallback OnManageSymbolsRequested { get; set; }
+}

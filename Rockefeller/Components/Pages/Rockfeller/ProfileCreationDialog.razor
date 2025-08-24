@@ -5,16 +5,16 @@
     <DialogContent>
         <MudGrid>
             <MudItem xs="12" md="6">
-                <MudTextField @bind-Value="NewProfile.Name" 
-                             Label="Profile Name" 
-                             Variant="Variant.Outlined" 
-                             Class="mb-3"
-                             Required="true" />
+                <MudTextField @bind-Value="NewProfile.Name"
+                              Label="Profile Name"
+                              Variant="Variant.Outlined"
+                              Class="mb-3"
+                              Required="true"/>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudSelect @bind-Value="NewProfile.RiskLevel" 
-                           Label="Risk Level" 
-                           Variant="Variant.Outlined" 
+                <MudSelect @bind-Value="NewProfile.RiskLevel"
+                           Label="Risk Level"
+                           Variant="Variant.Outlined"
                            Class="mb-3"
                            Required="true">
                     <MudSelectItem Value="@RiskLevel.Conservative">Conservative</MudSelectItem>
@@ -23,40 +23,40 @@
                 </MudSelect>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudNumericField T="int" @bind-Value="NewProfile.MaxTotalPositions" 
-                                 Label="Max Total Positions" 
-                                 Variant="Variant.Outlined" 
+                <MudNumericField T="int" @bind-Value="NewProfile.MaxTotalPositions"
+                                 Label="Max Total Positions"
+                                 Variant="Variant.Outlined"
                                  Class="mb-3"
                                  Min="1" Max="50" Step="1"
-                                 Required="true" />
+                                 Required="true"/>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudNumericField T="int" @bind-Value="NewProfile.MinAIConfidence" 
-                                 Label="Min AI Confidence (%)" 
-                                 Variant="Variant.Outlined" 
+                <MudNumericField T="int" @bind-Value="NewProfile.MinAIConfidence"
+                                 Label="Min AI Confidence (%)"
+                                 Variant="Variant.Outlined"
                                  Class="mb-3"
                                  Min="50" Max="95" Step="5"
-                                 Required="true" />
+                                 Required="true"/>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudNumericField T="decimal" @bind-Value="NewProfile.InitialPortfolioValue" 
-                                 Label="Initial Portfolio Value ($)" 
-                                 Variant="Variant.Outlined" 
+                <MudNumericField T="decimal" @bind-Value="NewProfile.InitialPortfolioValue"
+                                 Label="Initial Portfolio Value ($)"
+                                 Variant="Variant.Outlined"
                                  Class="mb-3"
                                  Min="1000m" Max="1000000m" Step="1000m"
-                                 Required="true" />
+                                 Required="true"/>
             </MudItem>
             <MudItem xs="12" md="6">
-                <MudCheckBox @bind-Value="NewProfile.EnableAutoTrading" 
-                             Label="Enable Auto Trading" 
-                             Color="Color.Primary" />
+                <MudCheckBox @bind-Value="NewProfile.EnableAutoTrading"
+                             Label="Enable Auto Trading"
+                             Color="Color.Primary"/>
             </MudItem>
             <MudItem xs="12">
-                <MudTextField @bind-Value="NewProfile.Description" 
-                             Label="Description" 
-                             Variant="Variant.Outlined" 
-                             Class="mb-3"
-                             Lines="3" />
+                <MudTextField @bind-Value="NewProfile.Description"
+                              Label="Description"
+                              Variant="Variant.Outlined"
+                              Class="mb-3"
+                              Lines="3"/>
             </MudItem>
         </MudGrid>
     </DialogContent>
@@ -71,19 +71,20 @@
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
     [Parameter] public TradingProfile NewProfile { get; set; } = new();
     [Parameter] public EventCallback<TradingProfile> OnSaveRequested { get; set; }
-    
+
     private DialogOptions DialogOptions => new() { CloseOnEscapeKey = true, MaxWidth = MaxWidth.Medium };
-    
+
     private async Task OnCancel()
     {
         IsVisible = false;
         await IsVisibleChanged.InvokeAsync(false);
     }
-    
+
     private async Task OnSave()
     {
         await OnSaveRequested.InvokeAsync(NewProfile);
         IsVisible = false;
         await IsVisibleChanged.InvokeAsync(false);
     }
+
 }

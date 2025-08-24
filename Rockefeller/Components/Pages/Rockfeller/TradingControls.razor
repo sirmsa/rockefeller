@@ -1,0 +1,154 @@
+<div class="rockefeller-trading-controls-container">
+    <div class="rockefeller-trading-controls-header">
+        <h3 class="rockefeller-trading-controls-title">
+            <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" class="rockefeller-trading-controls-icon" />
+            Trading Controls
+        </h3>
+        <div class="rockefeller-trading-controls-status">
+            @if (IsTradingActive)
+            {
+                <MudChip Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.PlayArrow" Class="rockefeller-trading-status-chip active">
+                    Trading Active
+                </MudChip>
+            }
+            else
+            {
+                <MudChip Size="Size.Small" Color="Color.Secondary" Icon="@Icons.Material.Filled.Pause" Class="rockefeller-trading-status-chip inactive">
+                    Trading Paused
+                </MudChip>
+            }
+        </div>
+    </div>
+    
+    <div class="rockefeller-trading-controls-content">
+        <!-- Primary Trading Controls -->
+        <div class="rockefeller-trading-controls-primary">
+            <div class="rockefeller-trading-controls-main">
+                <MudButton Variant="Variant.Filled" 
+                           Color="@(IsTradingActive ? Color.Error : Color.Success)" 
+                           OnClick="OnTradingButtonClicked"
+                           StartIcon="@(IsTradingActive ? Icons.Material.Filled.Stop : Icons.Material.Filled.PlayArrow)"
+                           Class="@(IsTradingActive ? "rockefeller-btn-danger rockefeller-btn-lg" : "rockefeller-btn-success rockefeller-btn-lg")"
+                           Disabled="@(SelectedSymbol == null || ActiveProfile == null || !ActiveProfile?.EnableAutoTrading == true)">
+                    @(IsTradingActive ? "Stop Trading" : "Start Trading")
+                </MudButton>
+            </div>
+            
+            <div class="rockefeller-trading-controls-info">
+                @if (SelectedSymbol == null)
+                {
+                    <div class="rockefeller-trading-controls-message">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" />
+                        <span>Select a trading symbol to enable controls</span>
+                    </div>
+                }
+                else if (ActiveProfile == null)
+                {
+                    <div class="rockefeller-trading-controls-message">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" />
+                        <span>Select a trading profile to enable controls</span>
+                    </div>
+                }
+                else if (ActiveProfile?.EnableAutoTrading != true)
+                {
+                    <div class="rockefeller-trading-controls-message">
+                        <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" />
+                        <span>Auto trading is disabled for this profile</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="rockefeller-trading-controls-message">
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" />
+                        <span>Ready to trade @SelectedSymbol with @(ActiveProfile?.Name ?? "Unknown") profile</span>
+                    </div>
+                }
+            </div>
+        </div>
+        
+        <!-- Secondary Trading Controls -->
+        <div class="rockefeller-trading-controls-secondary">
+            <div class="rockefeller-trading-controls-grid">
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Primary" 
+                           OnClick="OnOpenLongPosition"
+                           StartIcon="@Icons.Material.Filled.TrendingUp"
+                           Class="rockefeller-btn-outline rockefeller-trading-control-btn"
+                           Disabled="@(SelectedSymbol == null || ActiveProfile == null)">
+                    <div class="rockefeller-trading-control-btn-content">
+                        <div class="rockefeller-trading-control-btn-icon">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" />
+                        </div>
+                        <div class="rockefeller-trading-control-btn-text">
+                            <div class="rockefeller-trading-control-btn-label">Open Long</div>
+                            <div class="rockefeller-trading-control-btn-description">Buy @SelectedSymbol</div>
+                        </div>
+                    </div>
+                </MudButton>
+                
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Secondary" 
+                           OnClick="OnOpenShortPosition"
+                           StartIcon="@Icons.Material.Filled.TrendingDown"
+                           Class="rockefeller-btn-outline rockefeller-trading-control-btn"
+                           Disabled="@(SelectedSymbol == null || ActiveProfile == null)">
+                    <div class="rockefeller-trading-control-btn-content">
+                        <div class="rockefeller-trading-control-btn-icon">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingDown" Size="Size.Small" />
+                        </div>
+                        <div class="rockefeller-trading-control-btn-text">
+                            <div class="rockefeller-trading-control-btn-label">Open Short</div>
+                            <div class="rockefeller-trading-control-btn-description">Sell @SelectedSymbol</div>
+                        </div>
+                    </div>
+                </MudButton>
+                
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Info" 
+                           OnClick="OnAnalyzeSymbol"
+                           StartIcon="@Icons.Material.Filled.Analytics"
+                           Class="rockefeller-btn-outline rockefeller-trading-control-btn"
+                           Disabled="@(SelectedSymbol == null)">
+                    <div class="rockefeller-trading-control-btn-content">
+                        <div class="rockefeller-trading-control-btn-icon">
+                            <MudIcon Icon="@Icons.Material.Filled.Analytics" Size="Size.Small" />
+                        </div>
+                        <div class="rockefeller-trading-control-btn-text">
+                            <div class="rockefeller-trading-control-btn-label">AI Analysis</div>
+                            <div class="rockefeller-trading-control-btn-description">Analyze @SelectedSymbol</div>
+                        </div>
+                    </div>
+                </MudButton>
+                
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Warning" 
+                           OnClick="OnViewSymbolHistory"
+                           StartIcon="@Icons.Material.Filled.History"
+                           Class="rockefeller-btn-outline rockefeller-trading-control-btn"
+                           Disabled="@(SelectedSymbol == null)">
+                    <div class="rockefeller-trading-control-btn-content">
+                        <div class="rockefeller-trading-control-btn-icon">
+                            <MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Small" />
+                        </div>
+                        <div class="rockefeller-trading-control-btn-text">
+                            <div class="rockefeller-trading-control-btn-label">History</div>
+                            <div class="rockefeller-trading-control-btn-description">View @SelectedSymbol history</div>
+                        </div>
+                    </div>
+                </MudButton>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? SelectedSymbol { get; set; }
+    [Parameter] public bool IsTradingActive { get; set; }
+    [Parameter] public TradingProfile? ActiveProfile { get; set; }
+    
+    [Parameter] public EventCallback OnTradingButtonClicked { get; set; }
+    [Parameter] public EventCallback OnOpenLongPosition { get; set; }
+    [Parameter] public EventCallback OnOpenShortPosition { get; set; }
+    [Parameter] public EventCallback OnAnalyzeSymbol { get; set; }
+    [Parameter] public EventCallback OnViewSymbolHistory { get; set; }
+}

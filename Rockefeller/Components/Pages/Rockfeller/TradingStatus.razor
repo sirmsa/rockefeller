@@ -1,0 +1,138 @@
+@if (SelectedSymbol != null && ActiveProfile != null)
+{
+    SymbolSettings? symbolSettings = ActiveProfile?.SymbolSettings?.ContainsKey(SelectedSymbol) == true ? ActiveProfile.SymbolSettings[SelectedSymbol] : null;
+    
+    <div class="rockefeller-trading-status-container">
+        <div class="rockefeller-trading-status-header">
+            <h3 class="rockefeller-trading-status-title">
+                <MudIcon Icon="@Icons.Material.Filled.PowerSettingsNew" Size="Size.Small" class="rockefeller-trading-status-icon" />
+                Trading Status
+            </h3>
+            <div class="rockefeller-trading-status-indicator @(IsTradingActive ? "active" : "inactive")">
+                @if (IsTradingActive)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" />
+                    <span>ACTIVE</span>
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Pause" Size="Size.Small" />
+                    <span>INACTIVE</span>
+                }
+            </div>
+        </div>
+        
+        <!-- Trading Status Grid -->
+        <div class="rockefeller-trading-status-grid">
+            <div class="rockefeller-trading-status-metric">
+                <div class="rockefeller-trading-status-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.CurrencyExchange" Size="Size.Small" />
+                </div>
+                <div class="rockefeller-trading-status-metric-content">
+                    <div class="rockefeller-trading-status-metric-label">Symbol</div>
+                    <div class="rockefeller-trading-status-metric-value rockefeller-symbol">@SelectedSymbol</div>
+                </div>
+            </div>
+            
+            <div class="rockefeller-trading-status-metric">
+                <div class="rockefeller-trading-status-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.Person" Size="Size.Small" />
+                </div>
+                <div class="rockefeller-trading-status-metric-content">
+                    <div class="rockefeller-trading-status-metric-label">Profile</div>
+                    <div class="rockefeller-trading-status-metric-value">@(ActiveProfile?.Name ?? "Unknown")</div>
+                </div>
+            </div>
+            
+            <div class="rockefeller-trading-status-metric">
+                <div class="rockefeller-trading-status-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" />
+                </div>
+                <div class="rockefeller-trading-status-metric-content">
+                    <div class="rockefeller-trading-status-metric-label">Auto Trading</div>
+                    <div class="rockefeller-trading-status-metric-value @(ActiveProfile?.EnableAutoTrading == true ? "rockefeller-text-success" : "rockefeller-text-warning")">
+                        @(ActiveProfile?.EnableAutoTrading == true ? "Enabled" : "Disabled")
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rockefeller-trading-status-metric">
+                <div class="rockefeller-trading-status-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Size="Size.Small" />
+                </div>
+                <div class="rockefeller-trading-status-metric-content">
+                    <div class="rockefeller-trading-status-metric-label">Portfolio Value</div>
+                    <div class="rockefeller-trading-status-metric-value rockefeller-portfolio-value">
+                        $@(ActiveProfile?.InitialPortfolioValue.ToString("N2") ?? "0.00")
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rockefeller-trading-status-metric">
+                <div class="rockefeller-trading-status-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" />
+                </div>
+                <div class="rockefeller-trading-status-metric-content">
+                    <div class="rockefeller-trading-status-metric-label">Max Trade Size</div>
+                    <div class="rockefeller-trading-status-metric-value">
+                        $@(symbolSettings != null && ActiveProfile != null ? (ActiveProfile.InitialPortfolioValue * symbolSettings.PositionSize / 100).ToString("N2") : "N/A")
+                    </div>
+                </div>
+            </div>
+            
+            <div class="rockefeller-trading-status-metric">
+                <div class="rockefeller-trading-status-metric-icon">
+                    <MudIcon Icon="@Icons.Material.Filled.Psychology" Size="Size.Small" />
+                </div>
+                <div class="rockefeller-trading-status-metric-content">
+                    <div class="rockefeller-trading-status-metric-label">AI Confidence</div>
+                    <div class="rockefeller-trading-status-metric-value">
+                        @(ActiveProfile?.MinAIConfidence ?? 0)%
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Trading Activity -->
+        @if (IsTradingActive)
+        {
+            <div class="rockefeller-trading-activity">
+                <div class="rockefeller-trading-activity-header">
+                    <MudIcon Icon="@Icons.Material.Filled.Timer" Size="Size.Small" class="rockefeller-trading-activity-icon" />
+                    <span>Trading Session</span>
+                </div>
+                <div class="rockefeller-trading-activity-content">
+                    <div class="rockefeller-trading-activity-item">
+                        <div class="rockefeller-trading-activity-label">Started</div>
+                        <div class="rockefeller-trading-activity-value">@(TradingStartTime?.ToString("HH:mm:ss") ?? "N/A")</div>
+                    </div>
+                    <div class="rockefeller-trading-activity-item">
+                        <div class="rockefeller-trading-activity-label">Positions</div>
+                        <div class="rockefeller-trading-activity-value rockefeller-position-count">@ActivePositionsCount</div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="rockefeller-trading-status-container rockefeller-trading-status-empty">
+        <div class="rockefeller-trading-status-empty-content">
+            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Large" class="rockefeller-trading-status-empty-icon" />
+            <div class="rockefeller-trading-status-empty-text">
+                <div class="rockefeller-trading-status-empty-title">No Symbol Selected</div>
+                <div class="rockefeller-trading-status-empty-description">Select a trading symbol and profile to view status</div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string? SelectedSymbol { get; set; }
+    [Parameter] public TradingProfile? ActiveProfile { get; set; }
+    [Parameter] public bool IsTradingActive { get; set; }
+    [Parameter] public DateTime? TradingStartTime { get; set; }
+    [Parameter] public int ActivePositionsCount { get; set; }
+}
+
