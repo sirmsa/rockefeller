@@ -29,7 +29,7 @@
                            OnClick="OnTradingButtonClicked"
                            StartIcon="@(IsTradingActive ? Icons.Material.Filled.Stop : Icons.Material.Filled.PlayArrow)"
                            Class="@(IsTradingActive ? "rockefeller-btn-danger rockefeller-btn-lg" : "rockefeller-btn-success rockefeller-btn-lg")"
-                           Disabled="@(SelectedSymbol == null || ActiveProfile == null || !ActiveProfile?.EnableAutoTrading == true)">
+                           Disabled="@(SelectedSymbol == null || ActiveProfile == null)">
                     @(IsTradingActive ? "Stop Trading" : "Start Trading")
                 </MudButton>
             </div>
@@ -47,13 +47,6 @@
                     <div class="rockefeller-trading-controls-message">
                         <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" />
                         <span>Select a trading profile to enable controls</span>
-                    </div>
-                }
-                else if (ActiveProfile?.EnableAutoTrading != true)
-                {
-                    <div class="rockefeller-trading-controls-message">
-                        <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" />
-                        <span>Auto trading is disabled for this profile</span>
                     </div>
                 }
                 else

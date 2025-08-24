@@ -46,24 +46,12 @@
             
             <div class="rockefeller-trading-status-metric">
                 <div class="rockefeller-trading-status-metric-icon">
-                    <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" />
-                </div>
-                <div class="rockefeller-trading-status-metric-content">
-                    <div class="rockefeller-trading-status-metric-label">Auto Trading</div>
-                    <div class="rockefeller-trading-status-metric-value @(ActiveProfile?.EnableAutoTrading == true ? "rockefeller-text-success" : "rockefeller-text-warning")">
-                        @(ActiveProfile?.EnableAutoTrading == true ? "Enabled" : "Disabled")
-                    </div>
-                </div>
-            </div>
-            
-            <div class="rockefeller-trading-status-metric">
-                <div class="rockefeller-trading-status-metric-icon">
                     <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Size="Size.Small" />
                 </div>
                 <div class="rockefeller-trading-status-metric-content">
-                    <div class="rockefeller-trading-status-metric-label">Portfolio Value</div>
+                    <div class="rockefeller-trading-status-metric-label">Max Budget</div>
                     <div class="rockefeller-trading-status-metric-value rockefeller-portfolio-value">
-                        $@(ActiveProfile?.InitialPortfolioValue.ToString("N2") ?? "0.00")
+                        $@(ActiveProfile?.MaxBudget.ToString("N2") ?? "0.00")
                     </div>
                 </div>
             </div>
@@ -73,21 +61,21 @@
                     <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Size="Size.Small" />
                 </div>
                 <div class="rockefeller-trading-status-metric-content">
-                    <div class="rockefeller-trading-status-metric-label">Max Trade Size</div>
+                    <div class="rockefeller-trading-status-metric-label">Budget Allocation</div>
                     <div class="rockefeller-trading-status-metric-value">
-                        $@(symbolSettings != null && ActiveProfile != null ? (ActiveProfile.InitialPortfolioValue * symbolSettings.PositionSize / 100).ToString("N2") : "N/A")
+                        @(symbolSettings != null ? (symbolSettings.BudgetAllocation * 100).ToString("N1") : "N/A")%
                     </div>
                 </div>
             </div>
             
             <div class="rockefeller-trading-status-metric">
                 <div class="rockefeller-trading-status-metric-icon">
-                    <MudIcon Icon="@Icons.Material.Filled.Psychology" Size="Size.Small" />
+                    <MudIcon Icon="@Icons.Material.Filled.ShowChart" Size="Size.Small" />
                 </div>
                 <div class="rockefeller-trading-status-metric-content">
-                    <div class="rockefeller-trading-status-metric-label">AI Confidence</div>
+                    <div class="rockefeller-trading-status-metric-label">Allocated Amount</div>
                     <div class="rockefeller-trading-status-metric-value">
-                        @(ActiveProfile?.MinAIConfidence ?? 0)%
+                        $@(symbolSettings != null && ActiveProfile != null ? (ActiveProfile.MaxBudget * symbolSettings.BudgetAllocation).ToString("N2") : "N/A")
                     </div>
                 </div>
             </div>

@@ -28,14 +28,17 @@ public static class MauiProgram
             builder.Services.AddMudServices();
             
             // Add Rockefeller services with error handling
+            // Register base services first (dependencies)
             builder.Services.AddScoped<IAnalyticsService, MockAnalyticsService>();
             builder.Services.AddScoped<ITradingService, MockTradingService>();
             builder.Services.AddScoped<IAIService, MockAIService>();
             builder.Services.AddScoped<IMarketDataService, MockMarketDataService>();
-            builder.Services.AddScoped<IRockefellerAIService, RockefellerAIService>();
             builder.Services.AddScoped<IDataStorageService, MockDataStorageService>();
             builder.Services.AddScoped<INotificationService, MockNotificationService>();
             builder.Services.AddScoped<IRiskManagementService, MockRiskManagementService>();
+            
+            // Register RockefellerAIService last (depends on other services)
+            builder.Services.AddScoped<IRockefellerAIService, RockefellerAIService>();
 #if DEBUG
             // Add specific logging for Blazor components
             builder.Logging.AddFilter("Microsoft.AspNetCore.Components", LogLevel.Debug);

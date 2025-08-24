@@ -371,7 +371,7 @@
 
 @code {
     private AnalyticsData analyticsData = new();
-    private List<ChartSeries> chartSeries = [];
+    private List<MudBlazor.ChartSeries> chartSeries = [];
     private string[] xAxisLabels = [];
     
     // Table pagination and filtering
@@ -417,18 +417,18 @@
             
             if (analyticsData?.PerformanceHistory?.Points != null && analyticsData.PerformanceHistory.Points.Any())
             {
-                chartSeries.Add(new ChartSeries
-                {
-                    Name = "Portfolio Value",
-                    Data = analyticsData.PerformanceHistory.Points.Select(p => (double)p.Value).ToArray()
-                });
+                            chartSeries.Add(new MudBlazor.ChartSeries
+            {
+                Name = "Portfolio Value",
+                Data = analyticsData.PerformanceHistory.Points.Select(p => (double)p.Value).ToArray()
+            });
 
                 xAxisLabels = analyticsData.PerformanceHistory.Points.Select(p => p.Date.ToString("MMM dd")).ToArray();
             }
             else
             {
                 // Provide fallback chart data
-                chartSeries.Add(new ChartSeries
+                chartSeries.Add(new MudBlazor.ChartSeries
                 {
                     Name = "Portfolio Value",
                     Data = [100, 105, 103, 108, 110, 112, 115]
@@ -444,7 +444,7 @@
             // Provide minimal fallback data
             chartSeries =
             [
-                new ChartSeries
+                new MudBlazor.ChartSeries
                 {
                     Name = "Portfolio Value",
                     Data = [100]

@@ -4,35 +4,41 @@ namespace Rockefeller.Services;
 
 public interface ITradingService
 {
-    // Portfolio Management
-    Task<Portfolio> GetPortfolioAsync();
-    Task<List<Position>> GetOpenPositionsAsync();
-    Task<List<Asset>> GetAssetsAsync();
+    // Position Management
+    Task<bool> OpenPositionAsync(string symbol, string side, decimal size, decimal price, string strategy);
+    Task<bool> ClosePositionAsync(string positionId, decimal price, string reason);
+    Task<bool> UpdatePositionAsync(string positionId, decimal stopLoss, decimal takeProfit);
+    Task<bool> ModifyPositionAsync(string positionId, decimal newSize, decimal newPrice);
     
-    // Trade Management
-    Task<List<Trade>> GetTradesAsync(DateTime? startDate = null, DateTime? endDate = null);
-    Task<Trade> GetTradeByIdAsync(string tradeId);
-    Task<Trade> ExecuteTradeAsync(Trade trade);
-    Task<bool> ClosePositionAsync(string symbol, string side);
-    Task<bool> UpdateStopLossAsync(string symbol, string side, decimal stopLoss);
-    Task<bool> UpdateTakeProfitAsync(string symbol, string side, decimal takeProfit);
-    
-    // Order Management
-    Task<string> PlaceOrderAsync(string symbol, string side, decimal size, decimal price, string orderType);
-    Task<bool> CancelOrderAsync(string orderId);
-    Task<List<object>> GetOpenOrdersAsync();
+    // Position Queries
+    Task<List<RockefellerPosition>> GetActivePositionsAsync();
+    Task<RockefellerPosition?> GetPositionAsync(string positionId);
+    Task<List<RockefellerPosition>> GetPositionsBySymbolAsync(string symbol);
+    Task<List<RockefellerPosition>> GetPositionsByStrategyAsync(string strategy);
     
     // Risk Management
-    Task<RiskMetrics> GetRiskMetricsAsync();
-    Task<bool> CheckRiskLimitsAsync();
-    Task<bool> TriggerCircuitBreakerAsync();
+    Task<bool> ValidatePositionAsync(string symbol, decimal size, decimal price);
+    Task<RiskAssessment> AssessPositionRiskAsync(string positionId);
+    Task<bool> CheckRiskLimitsAsync(string symbol, decimal size);
     
-    // Strategy Management
-    Task<List<TradingStrategy>> GetStrategiesAsync();
-    Task<TradingStrategy> GetStrategyByIdAsync(string strategyId);
-    Task<TradingStrategy> CreateStrategyAsync(TradingStrategy strategy);
-    Task<bool> UpdateStrategyAsync(TradingStrategy strategy);
-    Task<bool> DeleteStrategyAsync(string strategyId);
-    Task<bool> ActivateStrategyAsync(string strategyId);
-    Task<bool> PauseStrategyAsync(string strategyId);
+    // Trading Control
+    Task<bool> StartTradingAsync();
+    Task<bool> StopTradingAsync();
+    Task<bool> PauseTradingAsync();
+    Task<TradingStatus> GetTradingStatusAsync();
+    
+    // Portfolio Management
+    Task<PortfolioSummary> GetPortfolioSummaryAsync();
+    Task<decimal> GetTotalPortfolioValueAsync();
+    Task<decimal> GetUnrealizedPnLAsync();
+    Task<decimal> GetRealizedPnLAsync();
+}
+
+public class TradingStatus
+{
+    public bool IsActive { get; set; }
+    public bool IsPaused { get; set; }
+    public DateTime LastUpdate { get; set; }
+    public string Status { get; set; } = string.Empty; // ACTIVE, PAUSED, STOPPED, ERROR
+    public string Message { get; set; } = string.Empty;
 }

@@ -20,6 +20,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <EnableDefaultCssItems>false</EnableDefaultCssItems>
         <Nullable>enable</Nullable>
+        
+        <!-- MAUI Version -->
+        <MauiVersion>9.0.82</MauiVersion>
+        
+
 
         <!-- Display name -->
         <ApplicationTitle>Rockefeller</ApplicationTitle>

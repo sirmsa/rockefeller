@@ -10,6 +10,9 @@ public interface INotificationService
     Task<bool> SendRiskAlertAsync(string userId, string alertType, string message, string severity);
     Task<bool> SendPerformanceUpdateAsync(string userId, string metricName, decimal value, string? symbol = null);
     
+    // UI Notification Method
+    Task ShowNotification(string message, string type = "INFO");
+    
     // System Alerts
     Task<bool> SendSystemAlertAsync(string alertType, string message, string severity);
     Task<bool> SendCircuitBreakerAlertAsync(string reason, string severity);

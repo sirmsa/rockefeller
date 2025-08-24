@@ -103,10 +103,12 @@
 /* Ensure complete background coverage */
 html {
     background-color: var(--rockefeller-bg-primary) !important;
+    min-height: 100vh;
 }
 
 body {
     background-color: var(--rockefeller-bg-primary) !important;
+    min-height: 100vh;
 }
 
 /* Additional background coverage for potential white areas */
@@ -116,6 +118,135 @@ body {
 .mud-tab-panel,
 .mud-tabs-container {
     background-color: var(--rockefeller-bg-primary) !important;
+}
+
+/* Fix background overflow issues */
+.rockefeller-container {
+    min-height: 100vh;
+    background: var(--rockefeller-bg-primary);
+    background-attachment: fixed;
+}
+
+.rockefeller-main-content {
+    min-height: 100vh;
+    background: var(--rockefeller-bg-primary);
+}
+
+.rockefeller-dashboard {
+    min-height: 100vh;
+    background: var(--rockefeller-bg-primary);
+    background-attachment: local;
+}
+
+/* Enhanced MudGrid Layout Styling */
+.mud-container {
+    background: var(--rockefeller-bg-primary) !important;
+}
+
+.mud-paper {
+    background: var(--rockefeller-gradient-surface) !important;
+    border: 1px solid var(--rockefeller-border-subtle) !important;
+    transition: all 0.3s ease-in-out !important;
+}
+
+.mud-paper:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--rockefeller-shadow-lg) !important;
+    border-color: var(--rockefeller-border-accent) !important;
+}
+
+/* Enhanced Header Styling */
+.mud-paper .mud-text-h4 {
+    color: var(--rockefeller-text-primary) !important;
+    font-weight: 700 !important;
+}
+
+.mud-paper .mud-text-body1 {
+    color: var(--rockefeller-text-secondary) !important;
+}
+
+/* Enhanced Trading Status Button */
+.mud-button.mud-button-filled.mud-button-filled-primary {
+    background: var(--rockefeller-gradient-primary) !important;
+    border: none !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    transition: all 0.3s ease-in-out !important;
+}
+
+.mud-button.mud-button-filled.mud-button-filled-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--rockefeller-shadow-lg) !important;
+}
+
+/* Enhanced Portfolio Summary List */
+.mud-list .mud-list-item {
+    padding: var(--rockefeller-space-2) 0 !important;
+    border-bottom: 1px solid var(--rockefeller-border-subtle) !important;
+}
+
+.mud-list .mud-list-item:last-child {
+    border-bottom: none !important;
+}
+
+.mud-list .mud-list-item .mud-text-body2 {
+    color: var(--rockefeller-text-primary) !important;
+    font-weight: 500 !important;
+}
+
+/* Enhanced Performance Metrics */
+.mud-paper[style*="background: rgba"] {
+    border-radius: var(--rockefeller-radius-md) !important;
+    transition: all 0.3s ease-in-out !important;
+}
+
+.mud-paper[style*="background: rgba"]:hover {
+    transform: scale(1.02) !important;
+    box-shadow: var(--rockefeller-shadow-md) !important;
+}
+
+/* Enhanced Table Styling */
+.mud-table {
+    background: transparent !important;
+}
+
+.mud-table .mud-table-head {
+    background: var(--rockefeller-bg-secondary) !important;
+}
+
+.mud-table .mud-table-head .mud-th {
+    color: var(--rockefeller-text-secondary) !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+.mud-table .mud-table-body .mud-tr:hover {
+    background: rgba(220, 38, 38, 0.05) !important;
+}
+
+/* Enhanced Chip Styling */
+.mud-chip {
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* Enhanced Select Styling */
+.mud-select {
+    background: var(--rockefeller-bg-secondary) !important;
+    border: 2px solid var(--rockefeller-border-primary) !important;
+    border-radius: var(--rockefeller-radius-md) !important;
+}
+
+.mud-select:hover {
+    border-color: var(--rockefeller-border-accent) !important;
+}
+
+.mud-select.mud-focused {
+    border-color: var(--rockefeller-primary) !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
 }
 
 html, body {
@@ -137,6 +268,25 @@ html, body {
     flex-direction: column;
     overflow: auto;
     background-color: var(--rockefeller-bg-primary);
+    background-attachment: fixed;
+}
+
+/* Ensure proper scrolling behavior */
+.rockefeller-dashboard {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+}
+
+/* Fix any potential white gaps */
+* {
+    background-color: inherit;
+}
+
+.rockefeller-dashboard-col,
+.rockefeller-dashboard-row {
+    background-color: transparent;
 }
 
 .status-bar-safe-area {

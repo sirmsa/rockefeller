@@ -1,5 +1,6 @@
 using Rockefeller.Models;
 
+
 namespace Rockefeller.Services;
 
 public class MockMarketDataService : IMarketDataService
@@ -20,12 +21,278 @@ public class MockMarketDataService : IMarketDataService
         if (_mockMarketData.TryGetValue(symbol, out MarketData? data))
         {
             // Update price with small random variation to simulate real-time data
-            data.Price += data.Price * (_random.Next(-50, 51) / 10000.0m);
+            data.Last += data.Last * (_random.Next(-50, 51) / 10000.0m);
             data.Timestamp = DateTime.UtcNow;
             return data;
         }
         
-        return new MarketData { Symbol = symbol, Price = 0, Timestamp = DateTime.UtcNow };
+        return new MarketData { Symbol = symbol, Last = 0, Timestamp = DateTime.UtcNow };
+    }
+
+    public async Task<OrderBook> GetOrderBookAsync(string symbol, int depth = 20)
+    {
+        await Task.Delay(100);
+        var orderBook = new OrderBook
+        {
+            Symbol = symbol,
+            Timestamp = DateTime.UtcNow,
+            LastUpdateId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
+        };
+
+        // Generate mock bids and asks
+        var basePrice = _mockMarketData.GetValueOrDefault(symbol, new MarketData()).Last;
+        for (int i = 0; i < depth; i++)
+        {
+            var bidPrice = basePrice * (1 - (i + 1) * 0.001m);
+            var askPrice = basePrice * (1 + (i + 1) * 0.001m);
+            var quantity = _random.Next(1, 100);
+
+            orderBook.Bids.Add(new OrderBookEntry
+            {
+                Price = bidPrice,
+                Quantity = quantity,
+                TotalValue = bidPrice * quantity,
+                CumulativeVolume = orderBook.Bids.Sum(b => b.Quantity) + quantity
+            });
+
+            orderBook.Asks.Add(new OrderBookEntry
+            {
+                Price = askPrice,
+                Quantity = quantity,
+                TotalValue = askPrice * quantity,
+                CumulativeVolume = orderBook.Asks.Sum(a => a.Quantity) + quantity
+            });
+        }
+
+        orderBook.Spread = orderBook.Asks.First().Price - orderBook.Bids.First().Price;
+        orderBook.MidPrice = (orderBook.Bids.First().Price + orderBook.Asks.First().Price) / 2;
+        orderBook.BidVolume = orderBook.Bids.Sum(b => b.Quantity);
+        orderBook.AskVolume = orderBook.Asks.Sum(a => a.Quantity);
+        orderBook.TotalVolume = orderBook.BidVolume + orderBook.AskVolume;
+
+        return orderBook;
+    }
+
+    public async Task<List<PriceHistory>> GetPriceHistoryAsync(string symbol, string timeframe, int count = 100)
+    {
+        await Task.Delay(150);
+        var data = new List<PriceHistory>();
+        var basePrice = _mockMarketData.GetValueOrDefault(symbol, new MarketData()).Last;
+        var currentTime = DateTime.UtcNow;
+
+        for (int i = 0; i < count; i++)
+        {
+            var variation = (decimal)(_random.NextDouble() - 0.5) * 0.1m; // ±5% variation
+            var price = basePrice * (1 + variation);
+            var timestamp = timeframe switch
+            {
+                "1m" => currentTime.AddMinutes(-i),
+                "5m" => currentTime.AddMinutes(-i * 5),
+                "15m" => currentTime.AddMinutes(-i * 15),
+                "1h" => currentTime.AddHours(-i),
+                "4h" => currentTime.AddHours(-i * 4),
+                "1d" => currentTime.AddDays(-i),
+                _ => currentTime.AddHours(-i)
+            };
+
+            data.Add(new PriceHistory
+            {
+                Symbol = symbol,
+                Timestamp = timestamp,
+                Open = price,
+                High = price * (1 + (decimal)(_random.NextDouble() * 0.02)),
+                Low = price * (1 - (decimal)(_random.NextDouble() * 0.02)),
+                Close = price,
+                Volume = _random.Next(1000000, 10000000)
+            });
+        }
+
+        return data.OrderBy(p => p.Timestamp).ToList();
+    }
+
+    public async Task<MarketDepth> GetMarketDepthAsync(string symbol)
+    {
+        await Task.Delay(100);
+        var orderBook = await GetOrderBookAsync(symbol, 10);
+        
+        return new MarketDepth
+        {
+            Symbol = symbol,
+            Timestamp = DateTime.UtcNow,
+            Bids = orderBook.Bids.Select(b => new DepthLevel
+            {
+                Price = b.Price,
+                Quantity = b.Quantity,
+                CumulativeVolume = b.CumulativeVolume
+            }).ToList(),
+            Asks = orderBook.Asks.Select(a => new DepthLevel
+            {
+                Price = a.Price,
+                Quantity = a.Quantity,
+                CumulativeVolume = a.CumulativeVolume
+            }).ToList(),
+            TotalBidVolume = orderBook.BidVolume,
+            TotalAskVolume = orderBook.AskVolume
+        };
+    }
+
+    public async Task<VolumeAnalysis> GetVolumeAnalysisAsync(string symbol)
+    {
+        await Task.Delay(100);
+        var baseVolume = _random.Next(1000000, 10000000);
+        var volumeChange = (decimal)(_random.NextDouble() - 0.5) * 0.3m; // ±15% change
+
+        return new VolumeAnalysis
+        {
+            Symbol = symbol,
+            Timestamp = DateTime.UtcNow,
+            Volume24h = baseVolume,
+            VolumeChange24h = volumeChange * baseVolume,
+            AverageVolume = baseVolume * 0.9m,
+            VolumeRatio = 1 + volumeChange
+        };
+    }
+
+    public async Task<LiquidityAnalysis> GetLiquidityAnalysisAsync(string symbol)
+    {
+        await Task.Delay(100);
+        var orderBook = await GetOrderBookAsync(symbol, 5);
+        var spread = orderBook.Spread;
+        var bidLiquidity = orderBook.Bids.Take(5).Sum(b => b.Quantity * b.Price);
+        var askLiquidity = orderBook.Asks.Take(5).Sum(a => a.Quantity * a.Price);
+
+        return new LiquidityAnalysis
+        {
+            Symbol = symbol,
+            Timestamp = DateTime.UtcNow,
+            BidLiquidity = bidLiquidity,
+            AskLiquidity = askLiquidity,
+            Spread = spread,
+            LiquidityScore = Math.Min(1.0m, (bidLiquidity + askLiquidity) / 1000000m) // Normalize to 0-1
+        };
+    }
+
+    public async Task<decimal> GetCurrentPriceAsync(string symbol)
+    {
+        var marketData = await GetMarketDataAsync(symbol);
+        return marketData.Last;
+    }
+
+    public async Task<decimal> GetBidPriceAsync(string symbol)
+    {
+        var orderBook = await GetOrderBookAsync(symbol, 1);
+        return orderBook.Bids.FirstOrDefault()?.Price ?? 0;
+    }
+
+    public async Task<decimal> GetAskPriceAsync(string symbol)
+    {
+        var orderBook = await GetOrderBookAsync(symbol, 1);
+        return orderBook.Asks.FirstOrDefault()?.Price ?? 0;
+    }
+
+    public async Task<decimal> GetLastPriceAsync(string symbol)
+    {
+        var marketData = await GetMarketDataAsync(symbol);
+        return marketData.Last;
+    }
+
+    public async Task<MarketStatistics> GetMarketStatisticsAsync(string symbol)
+    {
+        await Task.Delay(100);
+        var marketData = await GetMarketDataAsync(symbol);
+        
+        return new MarketStatistics
+        {
+            Symbol = symbol,
+            Timestamp = DateTime.UtcNow,
+            TotalVolume = marketData.Volume,
+            TotalTrades = (int)marketData.NumberOfTrades,
+            AverageTradeSize = marketData.Volume / Math.Max(1, marketData.NumberOfTrades),
+            PriceChange = marketData.PriceChange,
+            PriceChangePercent = marketData.PriceChangePercent
+        };
+    }
+
+    public async Task<VolatilityMetrics> GetVolatilityMetricsAsync(string symbol)
+    {
+        await Task.Delay(100);
+        var priceHistory = await GetPriceHistoryAsync(symbol, "1h", 24);
+        var prices = priceHistory.Select(p => p.Close).ToList();
+        var returns = new List<decimal>();
+        
+        for (int i = 1; i < prices.Count; i++)
+        {
+            if (prices[i - 1] > 0)
+            {
+                returns.Add((prices[i] - prices[i - 1]) / prices[i - 1]);
+            }
+        }
+
+        var volatility = returns.Count > 0 ? (decimal)Math.Sqrt((double)returns.Average(r => r * r)) : 0;
+        var highLow = priceHistory.Max(p => p.High) - priceHistory.Min(p => p.Low);
+        var averagePrice = priceHistory.Average(p => p.Close);
+        var highLowVolatility = averagePrice > 0 ? highLow / averagePrice : 0;
+
+        return new VolatilityMetrics
+        {
+            Symbol = symbol,
+            Timestamp = DateTime.UtcNow,
+            HistoricalVolatility = volatility,
+            HighLowVolatility = highLowVolatility,
+            AverageTrueRange = highLowVolatility * averagePrice,
+            VolatilityIndex = volatility * 100
+        };
+    }
+
+    public async Task<CorrelationMatrix> GetCorrelationMatrixAsync(List<string> symbols)
+    {
+        await Task.Delay(200);
+        var matrix = new CorrelationMatrix
+        {
+            Symbols = symbols,
+            Timestamp = DateTime.UtcNow,
+            Matrix = new Dictionary<string, Dictionary<string, decimal>>()
+        };
+
+        foreach (var symbol1 in symbols)
+        {
+            matrix.Matrix[symbol1] = new Dictionary<string, decimal>();
+            foreach (var symbol2 in symbols)
+            {
+                if (symbol1 == symbol2)
+                {
+                    matrix.Matrix[symbol1][symbol2] = 1.0m;
+                }
+                else
+                {
+                    // Generate mock correlation between -0.8 and 0.8
+                    matrix.Matrix[symbol1][symbol2] = (decimal)(_random.NextDouble() * 1.6 - 0.8);
+                }
+            }
+        }
+
+        return matrix;
+    }
+
+    public Task<IObservable<MarketDataUpdate>> SubscribeToMarketDataAsync(string symbol)
+    {
+        // Mock observable - in real implementation this would use System.Reactive
+        var mockObservable = new MockObservable<MarketDataUpdate>();
+        return Task.FromResult<IObservable<MarketDataUpdate>>(mockObservable);
+    }
+
+    public Task<IObservable<PriceUpdate>> SubscribeToPriceUpdatesAsync(string symbol)
+    {
+        // Mock observable - in real implementation this would use System.Reactive
+        var mockObservable = new MockObservable<PriceUpdate>();
+        return Task.FromResult<IObservable<PriceUpdate>>(mockObservable);
+    }
+
+    public Task<IObservable<VolumeUpdate>> SubscribeToVolumeUpdatesAsync(string symbol)
+    {
+        // Mock observable - in real implementation this would use System.Reactive
+        var mockObservable = new MockObservable<VolumeUpdate>();
+        return Task.FromResult<IObservable<VolumeUpdate>>(mockObservable);
     }
 
     public async Task<List<MarketData>> GetMarketDataForSymbolsAsync(List<string> symbols)
@@ -61,7 +328,7 @@ public class MockMarketDataService : IMarketDataService
         await Task.Delay(200);
         var data = new List<MarketData>();
         DateTime currentDate = startDate;
-        var basePrice = _mockMarketData.GetValueOrDefault(symbol, new MarketData()).Price;
+        var basePrice = _mockMarketData.GetValueOrDefault(symbol, new MarketData()).Last;
         
         while (currentDate <= endDate)
         {
@@ -96,132 +363,11 @@ public class MockMarketDataService : IMarketDataService
         return data;
     }
 
-    public async Task<List<decimal>> GetPriceHistoryAsync(string symbol, DateTime startDate, DateTime endDate, string interval = "1h")
-    {
-        await Task.Delay(150);
-        List<MarketData> historicalData = await GetHistoricalDataAsync(symbol, startDate, endDate, interval);
-        return historicalData.Select(d => d.Price).ToList();
-    }
-
-    public async Task<Dictionary<string, object>> GetRSIAsync(string symbol, int period = 14)
-    {
-        await Task.Delay(50);
-        var rsiValue = _random.Next(20, 81);
-        return new Dictionary<string, object>
-        {
-            ["value"] = rsiValue,
-            ["period"] = period,
-            ["overbought"] = 70,
-            ["oversold"] = 30,
-            ["status"] = rsiValue > 70 ? "OVERBOUGHT" : rsiValue < 30 ? "OVERSOLD" : "NEUTRAL"
-        };
-    }
-
-    public async Task<Dictionary<string, object>> GetMACDAsync(string symbol)
-    {
-        await Task.Delay(50);
-        var macd = _random.Next(-50, 51);
-        var signal = _random.Next(-30, 31);
-        var histogram = macd - signal;
-        
-        return new Dictionary<string, object>
-        {
-            ["macd"] = macd,
-            ["signal"] = signal,
-            ["histogram"] = histogram,
-            ["crossover"] = histogram > 0 ? "BULLISH" : "BEARISH"
-        };
-    }
-
-    public async Task<Dictionary<string, object>> GetBollingerBandsAsync(string symbol, int period = 20)
-    {
-        await Task.Delay(50);
-        var currentPrice = (await GetMarketDataAsync(symbol)).Price;
-        var upper = currentPrice * 1.05m;
-        var middle = currentPrice;
-        var lower = currentPrice * 0.95m;
-        
-        return new Dictionary<string, object>
-        {
-            ["upper"] = upper,
-            ["middle"] = middle,
-            ["lower"] = lower,
-            ["width"] = (upper - lower) / middle,
-            ["position"] = currentPrice > upper ? "ABOVE" : currentPrice < lower ? "BELOW" : "INSIDE"
-        };
-    }
-
-    public async Task<Dictionary<string, object>> GetMovingAveragesAsync(string symbol, List<int> periods)
-    {
-        await Task.Delay(50);
-        var currentPrice = (await GetMarketDataAsync(symbol)).Price;
-        var result = new Dictionary<string, object>();
-        
-        foreach (var period in periods)
-        {
-            var variation = (decimal)(_random.NextDouble() - 0.5) * 0.02m; // ±1% variation
-            result[$"SMA{period}"] = currentPrice * (1 + variation);
-        }
-        
-        return result;
-    }
-
-    public async Task<decimal> Get24hVolumeAsync(string symbol)
-    {
-        await Task.Delay(50);
-        return _mockMarketData.GetValueOrDefault(symbol, new MarketData()).Volume24h;
-    }
-
-    public async Task<decimal> Get24hChangeAsync(string symbol)
-    {
-        await Task.Delay(50);
-        return _mockMarketData.GetValueOrDefault(symbol, new MarketData()).Change24h;
-    }
-
-    public async Task<decimal> Get24hHighAsync(string symbol)
-    {
-        await Task.Delay(50);
-        return _mockMarketData.GetValueOrDefault(symbol, new MarketData()).High24h;
-    }
-
-    public async Task<decimal> Get24hLowAsync(string symbol)
-    {
-        await Task.Delay(50);
-        return _mockMarketData.GetValueOrDefault(symbol, new MarketData()).Low24h;
-    }
-
-    public async Task<Dictionary<string, object>> GetOrderBookAsync(string symbol, int depth = 20)
-    {
-        await Task.Delay(100);
-        var currentPrice = (await GetMarketDataAsync(symbol)).Price;
-        var bids = new List<object>();
-        var asks = new List<object>();
-        
-        // Generate mock order book
-        for (int i = 0; i < depth; i++)
-        {
-            var bidPrice = currentPrice * (1 - (i + 1) * 0.001m);
-            var askPrice = currentPrice * (1 + (i + 1) * 0.001m);
-            
-            bids.Add(new { price = bidPrice, quantity = _random.Next(100, 10000) / 1000.0m });
-            asks.Add(new { price = askPrice, quantity = _random.Next(100, 10000) / 1000.0m });
-        }
-        
-        return new Dictionary<string, object>
-        {
-            ["symbol"] = symbol,
-            ["timestamp"] = DateTime.UtcNow,
-            ["bids"] = bids,
-            ["asks"] = asks,
-            ["spread"] = 0.001m // Mock spread value
-        };
-    }
-
     public async Task<List<object>> GetRecentTradesAsync(string symbol, int limit = 100)
     {
         await Task.Delay(100);
         var trades = new List<object>();
-        var currentPrice = (await GetMarketDataAsync(symbol)).Price;
+        var currentPrice = (await GetMarketDataAsync(symbol)).Last;
         
         for (int i = 0; i < limit; i++)
         {

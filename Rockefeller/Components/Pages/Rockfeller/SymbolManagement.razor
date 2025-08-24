@@ -78,11 +78,8 @@
             <HeaderContent>
                 <MudTh>Symbol</MudTh>
                 <MudTh>Status</MudTh>
-                <MudTh>AI Signal</MudTh>
-                <MudTh>Confidence</MudTh>
-                <MudTh>Position Size</MudTh>
-                <MudTh>Risk Limits</MudTh>
-                <MudTh>Last Analysis</MudTh>
+                <MudTh>Budget Allocation</MudTh>
+                <MudTh>Allocated Amount</MudTh>
                 <MudTh>Actions</MudTh>
             </HeaderContent>
             <RowTemplate>
@@ -95,99 +92,46 @@
                 </MudTd>
                 <MudTd>
                     <MudChip Size="Size.Small"
-                             Color="@GetStatusColor(context.Value.Status)"
-                             Icon="@GetStatusIcon(context.Value.Status)"
-                             Class="@($"rockefeller-status-chip {GetStatusClass(context.Value.Status)}")">
-                        @context.Value.Status
+                             Color="@(context.Value.IsActive ? Color.Success : Color.Warning)"
+                             Icon="@(context.Value.IsActive ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.Pause)"
+                             Class="rockefeller-status-chip">
+                        @(context.Value.IsActive ? "Active" : "Inactive")
                     </MudChip>
                 </MudTd>
                 <MudTd>
-                    <div class="rockefeller-ai-signal">
-                        <MudChip Size="Size.Small"
-                                 Color="@GetSignalColor(context.Value.LastAIDecision)"
-                                 Icon="@GetSignalIcon(context.Value.LastAIDecision)"
-                                 Class="rockefeller-signal-chip">
-                            @context.Value.LastAIDecision
-                        </MudChip>
-                        @if (!string.IsNullOrEmpty(context.Value.LastAnalysisReason))
-                        {
-                            <MudTooltip Text="@context.Value.LastAnalysisReason">
-                                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small"
-                                         class="rockefeller-info-icon"/>
-                            </MudTooltip>
-                        }
-                    </div>
-                </MudTd>
-                <MudTd>
-                    <div class="rockefeller-confidence">
-                        <MudProgressLinear Value="@context.Value.AIConfidence"
-                                           Color="@GetConfidenceColor(context.Value.AIConfidence)"
-                                           Class="rockefeller-confidence-bar"/>
-                        <span class="rockefeller-confidence-value">@context.Value.AIConfidence%</span>
-                    </div>
-                </MudTd>
-                <MudTd>
-                    <div class="rockefeller-position-size">
-                        <span class="rockefeller-position-size-value">@context.Value.PositionSize%</span>
-                        <MudTooltip Text="Position size as percentage of portfolio">
+                    <div class="rockefeller-budget-allocation">
+                        <span class="rockefeller-allocation-value">@(context.Value.BudgetAllocation * 100)%</span>
+                        <MudTooltip Text="Budget allocation as percentage of total portfolio">
                             <MudIcon Icon="@Icons.Material.Filled.Help" Size="Size.Small"
                                      class="rockefeller-help-icon"/>
                         </MudTooltip>
                     </div>
                 </MudTd>
                 <MudTd>
-                    <div class="rockefeller-risk-limits">
-                        <div class="rockefeller-risk-limit">
-                            <span class="rockefeller-risk-label">SL:</span>
-                            <span class="rockefeller-risk-value">@context.Value.StopLoss%</span>
-                        </div>
-                        <div class="rockefeller-risk-limit">
-                            <span class="rockefeller-risk-label">TP:</span>
-                            <span class="rockefeller-risk-value">@context.Value.TakeProfit%</span>
-                        </div>
-                    </div>
-                </MudTd>
-                <MudTd>
-                    <div class="rockefeller-last-analysis">
-                        @if (context.Value.LastAnalysisTime != DateTime.MinValue)
-                        {
-                            <span
-                                class="rockefeller-analysis-time">@context.Value.LastAnalysisTime.ToString("HH:mm")</span>
-                            <MudTooltip Text="@context.Value.LastAnalysisTime.ToString("MMM dd, yyyy HH:mm")">
-                                <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small"
-                                         class="rockefeller-time-icon"/>
-                            </MudTooltip>
-                        }
-                        else
-                        {
-                            <span class="rockefeller-analysis-time">Never</span>
-                        }
+                    <div class="rockefeller-allocated-amount">
+                        <span class="rockefeller-amount-value">$@(context.Value.BudgetAllocation * 10000m)</span>
+                        <MudTooltip Text="Calculated allocated amount">
+                            <MudIcon Icon="@Icons.Material.Filled.Help" Size="Size.Small"
+                                     class="rockefeller-help-icon"/>
+                        </MudTooltip>
                     </div>
                 </MudTd>
                 <MudTd>
                     <div class="rockefeller-symbol-actions">
-                        @if (context.Value.Status == SymbolStatus.Active)
+                        @if (context.Value.IsActive)
                         {
                             <MudIconButton Icon="@Icons.Material.Filled.Pause"
                                            Size="Size.Small"
                                            Color="Color.Warning"
-                                           OnClick="@(() => OnSymbolStatusChanged.InvokeAsync((context.Key, SymbolStatus.Paused)))"
+                                           OnClick="@(() => OnSymbolStatusChanged.InvokeAsync((context.Key, "INACTIVE")))"
                                            Class="rockefeller-action-btn pause"/>
                         }
-                        else if (context.Value.Status == SymbolStatus.Paused)
+                        else
                         {
                             <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
                                            Size="Size.Small"
                                            Color="Color.Success"
-                                           OnClick="@(() => OnSymbolStatusChanged.InvokeAsync((context.Key, SymbolStatus.Active)))"
-                                           Class="rockefeller-action-btn activate"/>
-                        }
-                        else if (context.Value.Status == SymbolStatus.Inactive)
-                        {
-                            <MudIconButton Icon="@Icons.Material.Filled.PlayArrow"
-                                           Size="Size.Small"
-                                           Color="Color.Success"
-                                           OnClick="@(() => OnSymbolStatusChanged.InvokeAsync((context.Key, SymbolStatus.Active)))"
+                                           OnClick="@(() => OnSymbolStatusChanged.InvokeAsync((context.Key, "ACTIVE")))"
                                            Class="rockefeller-action-btn activate"/>
                         }
 
@@ -249,74 +193,15 @@
     [Parameter] public bool IsAITradingEnabled { get; set; } = true;
 
     [Parameter] public EventCallback<string> OnAnalyzeSymbol { get; set; }
-    [Parameter] public EventCallback<(string Symbol, SymbolStatus Status)> OnSymbolStatusChanged { get; set; }
+    [Parameter] public EventCallback<(string Symbol, string Status)> OnSymbolStatusChanged { get; set; }
     [Parameter] public EventCallback<SymbolSettings> OnSymbolSettingsRequested { get; set; }
     [Parameter] public EventCallback OnRefreshAnalysis { get; set; }
     [Parameter] public EventCallback OnPauseAllSymbols { get; set; }
     [Parameter] public EventCallback OnActivateAllSymbols { get; set; }
 
-    private Color GetStatusColor(SymbolStatus status) => status switch
-    {
-        SymbolStatus.Active => Color.Success,
-        SymbolStatus.Paused => Color.Warning,
-        SymbolStatus.Restricted => Color.Error,
-        SymbolStatus.Error => Color.Error,
-        _ => Color.Default
-    };
-
-    private string GetStatusIcon(SymbolStatus status) => status switch
-    {
-        SymbolStatus.Active => Icons.Material.Filled.CheckCircle,
-        SymbolStatus.Paused => Icons.Material.Filled.Pause,
-        SymbolStatus.Restricted => Icons.Material.Filled.Warning,
-        SymbolStatus.Error => Icons.Material.Filled.Error,
-        _ => Icons.Material.Filled.Cancel
-    };
-
-    private static string GetStatusClass(SymbolStatus status) => status switch
-    {
-        SymbolStatus.Active => "active",
-        SymbolStatus.Paused => "paused",
-        SymbolStatus.Restricted => "restricted",
-        SymbolStatus.Error => "error",
-        _ => "inactive"
-    };
-
-    private static Color GetSignalColor(AITradingDecision decision) => decision switch
-    {
-        AITradingDecision.LongSignal => Color.Success,
-        AITradingDecision.ShortSignal => Color.Error,
-        AITradingDecision.CloseSignal => Color.Warning,
-        AITradingDecision.HoldSignal => Color.Info,
-        _ => Color.Default
-    };
-
-    private static string GetSignalIcon(AITradingDecision decision) => decision switch
-    {
-        AITradingDecision.LongSignal => Icons.Material.Filled.TrendingUp,
-        AITradingDecision.ShortSignal => Icons.Material.Filled.TrendingDown,
-        AITradingDecision.CloseSignal => Icons.Material.Filled.Close,
-        AITradingDecision.HoldSignal => Icons.Material.Filled.Pause,
-        _ => Icons.Material.Filled.Remove
-    };
-
-    private static Color GetConfidenceColor(int confidence) => confidence switch
-    {
-        >= 80 => Color.Success,
-        >= 60 => Color.Warning,
-        _ => Color.Error
-    };
-
     private string GetNextRecommendedSymbol() => Summary?.NextRecommendedSymbol ?? "None";
 
-    private string GetNextRecommendedAction() => Summary?.NextRecommendedAction switch
-    {
-        AITradingDecision.LongSignal => "Long Signal",
-        AITradingDecision.ShortSignal => "Short Signal",
-        AITradingDecision.CloseSignal => "Close Position",
-        AITradingDecision.HoldSignal => "Hold Position",
-        _ => "No Signal"
-    };
+    private string GetNextRecommendedAction() => Summary?.NextRecommendedAction ?? "No Action";
 
     private static string GetNextAnalysisTime()
     {

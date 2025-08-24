@@ -26,6 +26,13 @@ public class MockNotificationService : INotificationService
         return Task.FromResult(true);
     }
 
+    public Task ShowNotification(string message, string type = "INFO")
+    {
+        // Mock implementation - in a real app this would show a UI notification
+        System.Diagnostics.Debug.WriteLine($"Mock Notification [{type}]: {message}");
+        return Task.CompletedTask;
+    }
+
     public Task<bool> SendTradeNotificationAsync(string userId, Trade trade, string notificationType)
     {
         var message = $"Trade {notificationType}: {trade.Symbol} {trade.Side} at {trade.Price:C}";

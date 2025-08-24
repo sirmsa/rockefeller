@@ -10,20 +10,18 @@
                 <h5 class="rockefeller-heading">Portfolio Settings</h5>
                 <MudGrid>
                     <MudItem xs="12" md="6">
-                        <MudNumericField T="decimal" @bind-Value="ActiveProfile.InitialPortfolioValue" 
-                                         Label="Initial Portfolio Value ($)" 
+                        <MudNumericField T="decimal" @bind-Value="ActiveProfile.MaxBudget" 
+                                         Label="Max Budget ($)" 
                                          Variant="Variant.Outlined" 
                                          Class="mb-3"
                                          Min="1000m" Max="1000000m" Step="1000m"
                                          Required="true" />
                     </MudItem>
                     <MudItem xs="12" md="6">
-                        <MudNumericField T="int" @bind-Value="ActiveProfile.MaxTotalPositions" 
-                                         Label="Max Total Positions" 
-                                         Variant="Variant.Outlined" 
-                                         Class="mb-3"
-                                         Min="1" Max="50" Step="1"
-                                         Required="true" />
+                        <MudText Typo="Typo.body1" Class="mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.ShowChart" Class="mr-2" />
+                            Active Symbols: <span class="font-weight-bold">@ActiveProfile.SymbolSettings.Values.Count(s => s.IsActive)</span>
+                        </MudText>
                     </MudItem>
                 </MudGrid>
             </div>
@@ -38,10 +36,8 @@
                     <HeaderContent>
                         <MudTh>Symbol</MudTh>
                         <MudTh>Active</MudTh>
-                        <MudTh>Position Size (%)</MudTh>
-                        <MudTh>Stop Loss (%)</MudTh>
-                        <MudTh>Take Profit (%)</MudTh>
-                        <MudTh>Max Positions</MudTh>
+                        <MudTh>Budget Allocation (%)</MudTh>
+                        <MudTh>Allocated Amount ($)</MudTh>
                         <MudTh>Actions</MudTh>
                     </HeaderContent>
                     <RowTemplate>
@@ -54,28 +50,15 @@
                             </MudChip>
                         </MudTd>
                         <MudTd>
-                            <MudNumericField T="decimal" @bind-Value="context.PositionSize" 
+                            <MudNumericField T="decimal" @bind-Value="context.BudgetAllocation" 
                                              Variant="Variant.Outlined" 
                                              Min="0.1m" Max="100m" Step="0.1m"
                                              Class="rockefeller-custom-setting" />
                         </MudTd>
                         <MudTd>
-                            <MudNumericField T="decimal" @bind-Value="context.StopLoss" 
-                                             Variant="Variant.Outlined" 
-                                             Min="0.1m" Max="50m" Step="0.1m"
-                                             Class="rockefeller-custom-setting" />
-                        </MudTd>
-                        <MudTd>
-                            <MudNumericField T="decimal" @bind-Value="context.TakeProfit" 
-                                             Variant="Variant.Outlined" 
-                                             Min="0.1m" Max="100m" Step="0.1m"
-                                             Class="rockefeller-custom-setting" />
-                        </MudTd>
-                        <MudTd>
-                            <MudNumericField T="int" @bind-Value="context.MaxPositionsOverride" 
-                                             Variant="Variant.Outlined" 
-                                             Min="1" Max="10" Step="1"
-                                             Class="rockefeller-custom-setting" />
+                            <MudText Typo="Typo.body2">
+                                $@((ActiveProfile.MaxBudget * context.BudgetAllocation).ToString("N2"))
+                            </MudText>
                         </MudTd>
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Filled.Tune" 

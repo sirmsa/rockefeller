@@ -1,4 +1,4 @@
-@using Position = global::Rockefeller.Components.Pages.Rockfeller.RockefellerPosition
+@using Rockefeller.Models
 
 <MudDialog @bind-IsVisible="IsVisible" Options="DialogOptions">
     <TitleContent>
@@ -19,7 +19,7 @@
                 <div class="rockefeller-positions-summary rockefeller-mb-4">
                     <h6>Open Positions (@OpenPositions.Count)</h6>
                     <div class="rockefeller-positions-list">
-                        @foreach (Position position in OpenPositions)
+                        @foreach (RockefellerPosition position in OpenPositions)
                         {
                             <div class="rockefeller-position-item">
                                 <span class="rockefeller-symbol">@position.Symbol</span>
@@ -88,7 +88,7 @@
     [Parameter] public bool IsVisible { get; set; }
     [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
     [Parameter] public string? ProfileName { get; set; }
-    [Parameter] public List<Position> OpenPositions { get; set; } = [];
+    [Parameter] public List<RockefellerPosition> OpenPositions { get; set; } = [];
     [Parameter] public EventCallback<StopTradingOption> OnStopTradingConfirmed { get; set; }
 
     private StopTradingOption SelectedOption { get; set; } = StopTradingOption.WaitForCompletion;

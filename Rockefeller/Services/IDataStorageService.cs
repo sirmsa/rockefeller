@@ -68,11 +68,4 @@ public class AuditLogEntry
     public Dictionary<string, object> Metadata { get; set; } = new();
 }
 
-public class PerformanceMetric
-{
-    public string Id { get; set; } = string.Empty;
-    public string MetricName { get; set; } = string.Empty;
-    public decimal Value { get; set; }
-    public DateTime Timestamp { get; set; }
-    public string? Symbol { get; set; }
-}
+
