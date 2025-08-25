@@ -1,292 +1,453 @@
-# Rockefeller AI Trading System - System Architecture
+# Rockefeller Day-Trader AI System - System Architecture
 
 ## Architecture Overview
 
-The Rockefeller AI Trading System follows a layered, service-oriented architecture designed for high performance, reliability, and scalability. The system is built around the principle of AI-driven decision making with minimal user intervention.
+The Rockefeller Day-Trader AI System follows a **modern web architecture** designed for **fully automated trading** with **portfolio management** and **AI-driven decision making**. The system is built around the principle of **autonomous trading** with **portfolio-based management**, **real-time sentiment analysis**, and **comprehensive analytics** for automated cryptocurrency trading operations.
 
 ## System Layers
 
-### 1. Presentation Layer (UI)
+### 1. Presentation Layer (Frontend)
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    MAUI Blazor WebView                      │
+│                    Next.js React Application                │
 ├─────────────────────────────────────────────────────────────┤
-│  RockefellerTab  │  AnalyticsTab  │  SettingsTab          │
-│  - AI Analysis   │  - Performance │  - Basic Config       │
-│  - Positions     │  - Metrics     │  - Budget Limits      │
-│  - Trading       │  - History     │  - Symbol Selection   │
+│  Rockefeller Trader │  Analytics        │  Settings        │
+│  - Portfolio Mgmt   │  - Performance    │  - Portfolio     │
+│  - Live Trading     │  - Risk Metrics   │  - Risk Config   │
+│  - Position View    │  - Trading History│  - System Prefs  │
+├─────────────────────────────────────────────────────────────┤
+│  Portfolio Panel    │  Symbol Panel     │  Trading Panel   │
+│  - Portfolio List   │  - Symbol Select  │  - Live Trades   │
+│  - Budget Mgmt      │  - Market Data    │  - Position Mgmt │
+│  - Performance      │  - Sentiment      │  - AI Decisions  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 2. Business Logic Layer (Services)
+### 2. API Layer (Backend)
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Service Layer                            │
+│                    Next.js API Routes                       │
 ├─────────────────────────────────────────────────────────────┤
-│  RockefellerAIService  │  TradingService  │  MarketDataService │
-│  - AI Decision Engine  │  - Order Exec    │  - Real-time Data  │
-│  - Technical Analysis  │  - Position Mgmt │  - Market Streams  │
-│  - Risk Assessment     │  - Risk Control  │  - Price Feeds     │
+│  /api/portfolios    │  /api/trading     │  /api/market-data │
+│  - Portfolio CRUD   │  - Auto Trading   │  - Real-Time Data │
+│  - Budget Mgmt      │  - Position Mgmt  │  - Market Streams │
+│  - Symbol Mgmt      │  - Risk Control   │  - Price Feeds    │
 ├─────────────────────────────────────────────────────────────┤
-│  AnalyticsService      │  DataStorageService               │
-│  - Performance Metrics │  - AI Analysis Storage            │
-│  - Historical Data     │  - Position History               │
-│  - Success Analysis    │  - Market Context                 │
+│  /api/analytics     │  /api/sentiment   │  /api/websocket  │
+│  - Performance Data │  - AI Sentiment   │  - Real-Time     │
+│  - Risk Analytics   │  - Sentiment Poll │  - Updates       │
+│  - Trading History  │  - Integration    │  - Live Feeds    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### 3. Data Layer
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    Data Persistence                        │
+│                    High-Speed Data Persistence              │
 ├─────────────────────────────────────────────────────────────┤
-│  In-Memory Storage     │  Persistent Storage              │
-│  - Active Positions    │  - AI Analysis Records           │
-│  - Market Data Cache   │  - Trade History                 │
-│  - User Preferences    │  - Performance Metrics            │
+│  Portfolio Storage     │  Trading Storage                 │
+│  - Portfolio Config    │  - Position History              │
+│  - Symbol Lists        │  - Trading Decisions             │
+│  - Budget Allocations  │  - Performance Data              │
+│  - Risk Parameters     │  - Sentiment History             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ## Core Services Architecture
 
-### RockefellerAIService (Central Decision Engine)
-```csharp
-public class RockefellerAIService : IRockefellerAIService
-{
-    // Core Analysis Methods
-    public async Task<AIStrategyAnalysis> AnalyzeStrategyOnTheFlyAsync(string symbol, string strategyType, Dictionary<string, object> parameters)
-    public async Task<MarketRegime> DetectMarketRegimeAsync(string symbol)
-    public async Task<RiskAssessment> AssessTradeRiskAsync(string symbol, string strategyType, decimal positionSize)
-    
-    // Technical Analysis
-    public async Task<TechnicalAnalysisResult> PerformTechnicalAnalysisAsync(string symbol, List<string> indicators)
-    public async Task<MarketSentimentAnalysis> AnalyzeMarketSentimentAsync(string symbol)
-    
-    // Position Management
-    public async Task<TradingSignal> GenerateTradingSignalAsync(string symbol, string signalType)
-    public async Task<PositionRecommendation> GetPositionRecommendationAsync(string symbol)
+### Portfolio Management Engine (Multi-Portfolio Automation)
+```typescript
+interface PortfolioManagementEngine {
+  // Portfolio Management
+  createPortfolio(name: string, budget: number, symbols: string[]): Promise<Portfolio>
+  updatePortfolio(portfolioId: string, updates: PortfolioUpdates): Promise<Portfolio>
+  deletePortfolio(portfolioId: string): Promise<boolean>
+  getPortfolio(portfolioId: string): Promise<Portfolio>
+  getAllPortfolios(): Promise<Portfolio[]>
+  
+  // Symbol Management
+  addSymbolToPortfolio(portfolioId: string, symbol: string): Promise<boolean>
+  removeSymbolFromPortfolio(portfolioId: string, symbol: string): Promise<boolean>
+  updateSymbolAllocation(portfolioId: string, symbol: string, allocation: number): Promise<boolean>
+  
+  // Budget Management
+  updatePortfolioBudget(portfolioId: string, budget: number): Promise<boolean>
+  getPortfolioPerformance(portfolioId: string): Promise<PortfolioPerformance>
+  getPortfolioRiskMetrics(portfolioId: string): Promise<RiskMetrics>
 }
 ```
 
-### Trading Service (Execution Engine)
-```csharp
-public class TradingService : ITradingService
-{
-    // Position Management
-    public async Task<bool> OpenPositionAsync(string symbol, string side, decimal size, decimal price)
-    public async Task<bool> ClosePositionAsync(string positionId, decimal price)
-    public async Task<bool> UpdatePositionAsync(string positionId, decimal stopLoss, decimal takeProfit)
-    
-    // Risk Management
-    public async Task<bool> ValidatePositionAsync(string symbol, decimal size, decimal price)
-    public async Task<RiskAssessment> AssessPositionRiskAsync(string positionId)
+### AI Trading Engine (Automated Decision Making)
+```typescript
+interface AITradingEngine {
+  // Automated Trading Decisions
+  analyzePortfolioSymbols(portfolioId: string): Promise<TradingDecision[]>
+  executeTradingDecision(decision: TradingDecision): Promise<boolean>
+  monitorPortfolioPositions(portfolioId: string): Promise<PositionUpdate[]>
+  
+  // Multi-Factor Analysis
+  performTechnicalAnalysis(symbol: string): Promise<TechnicalAnalysis>
+  performMathematicalPrediction(symbol: string): Promise<PricePrediction>
+  integrateSentimentAnalysis(symbol: string): Promise<SentimentAnalysis>
+  
+  // Automated Position Management
+  openPosition(portfolioId: string, symbol: string, side: string, size: number): Promise<Position>
+  closePosition(positionId: string, reason: string): Promise<boolean>
+  updatePositionRisk(positionId: string, stopLoss: number, takeProfit: number): Promise<boolean>
 }
 ```
 
-### Market Data Service (Data Provider)
-```csharp
-public class MarketDataService : IMarketDataService
-{
-    // Real-time Data
-    public async Task<MarketData> GetMarketDataAsync(string symbol)
-    public async Task<OrderBook> GetOrderBookAsync(string symbol)
-    public async Task<List<PriceHistory>> GetPriceHistoryAsync(string symbol, string timeframe)
-    
-    // Market Analysis
-    public async Task<MarketDepth> GetMarketDepthAsync(string symbol)
-    public async Task<VolumeAnalysis> GetVolumeAnalysisAsync(string symbol)
+### Sentiment Analysis Service (AI Sentiment Integration)
+```typescript
+interface SentimentAnalysisService {
+  // External Sentiment Sources
+  pollInternetSentiment(symbol: string): Promise<SentimentData>
+  pollCoinAnalysisSentiment(symbol: string): Promise<SentimentData>
+  aggregateSentimentData(symbol: string): Promise<AggregatedSentiment>
+  
+  // Sentiment Integration
+  updateSymbolSentiment(symbol: string): Promise<boolean>
+  getSentimentHistory(symbol: string, timeframe: string): Promise<SentimentHistory[]>
+  analyzeSentimentImpact(symbol: string): Promise<SentimentImpact>
+  
+  // Sentiment Polling Management
+  startSentimentPolling(symbols: string[]): Promise<boolean>
+  stopSentimentPolling(symbol: string): Promise<boolean>
+  getPollingStatus(): Promise<PollingStatus>
 }
 ```
 
-## Data Flow Architecture
+## Three-Panel Interface Architecture
 
-### 1. Symbol Selection Flow
-```
-User Selection → Initial AI Analysis → Technical Assessment → Risk Evaluation → Ready for Trading
-     ↓                ↓                    ↓                    ↓              ↓
-Symbol List    Market Regime        Technical Indicators   Risk Profile   Trading Enabled
-```
-
-### 2. Trading Decision Flow
-```
-Market Data → Technical Analysis → AI Trend Analysis → Risk Assessment → Decision Engine → Action
-     ↓              ↓                    ↓                    ↓              ↓           ↓
-Real-time    Mathematical        Pattern Recognition    Risk Scoring    Signal Gen    Execute
-```
-
-### 3. Position Management Flow
-```
-Position Open → Continuous Monitoring → Market Changes → AI Re-evaluation → Position Update
-      ↓               ↓                    ↓                ↓                ↓
-Entry Signal    Real-time Analysis    New Data         Decision Engine    Modify/Close
-```
-
-## AI Decision Making Architecture
-
-### Technical Analysis Engine (Primary)
+### 1. Rockefeller Trader Panel (Main Trading Interface)
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                Technical Analysis Engine                    │
+│                    Rockefeller Trader Panel                 │
 ├─────────────────────────────────────────────────────────────┤
-│  Mathematical Indicators  │  Pattern Recognition           │
-│  - RSI (14, 30, 70)      │  - Support/Resistance         │
-│  - MACD (12, 26, 9)      │  - Breakout Patterns          │
-│  - Bollinger Bands (20,2) │  - Trend Lines                │
-│  - Moving Averages        │  - Volume Patterns             │
+│  Portfolio Overview │  Symbol Monitoring │  Live Trading    │
+│  - Portfolio List   │  - Symbol Grid     │  - Active Trades │
+│  - Budget Status    │  - Market Data     │  - Position Mgmt │
+│  - Performance      │  - Sentiment       │  - AI Decisions  │
 ├─────────────────────────────────────────────────────────────┤
-│  Risk Calculations        │  Position Sizing               │
-│  - Volatility (ATR)       │  - Kelly Criterion            │
-│  - Sharpe Ratio           │  - Risk-Adjusted Size          │
-│  - Maximum Drawdown       │  - Portfolio Balance           │
+│  Trading Controls   │  Risk Management   │  Real-Time Data  │
+│  - Start/Stop       │  - Risk Limits     │  - Price Charts  │
+│  - Portfolio Config │  - Position Sizing │  - Volume Data   │
+│  - Symbol Selection │  - Stop Losses     │  - Sentiment     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### AI Trend Analysis Engine (Secondary)
+### 2. Analytics Panel (Comprehensive Analysis)
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                AI Trend Analysis Engine                    │
+│                    Analytics Panel                          │
 ├─────────────────────────────────────────────────────────────┤
-│  Market Sentiment         │  Pattern Recognition           │
-│  - News Analysis          │  - Historical Patterns         │
-│  - Social Media Trends    │  - Market Regime Detection     │
-│  - Market Psychology      │  - Correlation Analysis        │
+│  Performance Metrics│  Risk Analytics   │  Trading History │
+│  - Portfolio P&L    │  - Risk Metrics   │  - Trade Log     │
+│  - Win Rate         │  - Drawdown       │  - Decision Log  │
+│  - Profit Factor    │  - Volatility     │  - Sentiment Log │
 ├─────────────────────────────────────────────────────────────┤
-│  Risk Assessment          │  Portfolio Optimization        │
-│  - Market Conditions      │  - Multi-symbol Correlation    │
-│  - Volatility Regimes     │  - Risk Distribution           │
-│  - Black Swan Events      │  - Dynamic Rebalancing         │
+│  AI Performance     │  Sentiment Impact │  Strategy Analysis│
+│  - Decision Accuracy│  - Sentiment Corr │  - Strategy Perf │
+│  - Signal Quality   │  - Impact Metrics │  - Optimization  │
+│  - Model Performance│  - Trend Analysis │  - Backtesting   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Data Persistence Architecture
+### 3. Settings Panel (Configuration Management)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Settings Panel                           │
+├─────────────────────────────────────────────────────────────┤
+│  Portfolio Settings │  Risk Settings    │  Trading Settings│
+│  - Portfolio Config │  - Risk Limits    │  - Trading Rules │
+│  - Symbol Mgmt      │  - Position Sizing│  - Execution     │
+│  - Budget Mgmt      │  - Stop Losses    │  - Automation    │
+├─────────────────────────────────────────────────────────────┤
+│  System Settings    │  Sentiment Config │  Analytics Config│
+│  - System Prefs     │  - Sentiment Poll │  - Analytics     │
+│  - Notifications    │  - Source Config  │  - Reporting     │
+│  - Security         │  - Integration    │  - Export        │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### AI Analysis Records
-```csharp
-public class AIAnalysisRecord
-{
-    public string Id { get; set; }
-    public string Symbol { get; set; }
-    public DateTime Timestamp { get; set; }
-    
-    // Technical Analysis Results
-    public TechnicalAnalysisResult TechnicalAnalysis { get; set; }
-    public Dictionary<string, decimal> Indicators { get; set; }
-    
-    // AI Reasoning
-    public string Decision { get; set; }
-    public decimal Confidence { get; set; }
-    public string Reasoning { get; set; }
-    
-    // Market Context
-    public MarketContext MarketContext { get; set; }
-    public RiskAssessment RiskAssessment { get; set; }
-    
-    // Performance Tracking
-    public bool WasSuccessful { get; set; }
-    public decimal ActualReturn { get; set; }
-    public string PostTradeAnalysis { get; set; }
+## Automated Trading Flow
+
+### 1. Portfolio Management Flow
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Portfolio Management Flow                │
+├─────────────────────────────────────────────────────────────┤
+│  Portfolio Creation │  Symbol Selection │  Budget Allocation│
+│  - User Input       │  - Symbol List    │  - Budget Config  │
+│  - Validation       │  - Market Data    │  - Risk Limits    │
+│  - Creation         │  - Selection      │  - Allocation     │
+├─────────────────────────────────────────────────────────────┤
+│  Portfolio Monitoring│  Performance Tracking│  Risk Management│
+│  - Real-Time Data   │  - P&L Tracking   │  - Risk Monitoring│
+│  - Position Mgmt    │  - Performance    │  - Risk Alerts    │
+│  - Budget Tracking  │  - Analytics      │  - Risk Controls  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 2. AI Trading Decision Flow
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    AI Trading Decision Flow                 │
+├─────────────────────────────────────────────────────────────┤
+│  Data Collection    │  Multi-Factor Analysis│  Decision Making│
+│  - Market Data      │  - Technical Analysis│  - Signal Gen    │
+│  - Sentiment Data   │  - Math Prediction   │  - Confidence    │
+│  - Portfolio Data   │  - Sentiment Int     │  - Risk Assess   │
+├─────────────────────────────────────────────────────────────┤
+│  Position Execution │  Position Monitoring│  Position Closure│
+│  - Order Execution  │  - Real-Time Mon    │  - Exit Signals  │
+│  - Risk Validation  │  - Risk Updates     │  - Profit/Loss   │
+│  - Position Open    │  - Performance      │  - Position Close│
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 3. Sentiment Integration Flow
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Sentiment Integration Flow               │
+├─────────────────────────────────────────────────────────────┤
+│  Sentiment Polling  │  Data Aggregation │  Sentiment Analysis│
+│  - Internet Sources │  - Data Collection│  - Sentiment Score │
+│  - Coin Analysis    │  - Data Cleaning  │  - Trend Analysis  │
+│  - Periodic Updates │  - Data Storage   │  - Impact Assess   │
+├─────────────────────────────────────────────────────────────┤
+│  Sentiment Integration│  Trading Impact  │  Performance Track│
+│  - Signal Integration│  - Decision Mod   │  - Impact Metrics │
+│  - Weight Assignment │  - Risk Adjust    │  - Performance    │
+│  - Real-Time Update │  - Position Mod   │  - Optimization   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Data Models
+
+### Portfolio Management Models
+```typescript
+interface Portfolio {
+  id: string;
+  name: string;
+  userId: string;
+  budget: number;
+  allocatedBudget: number;
+  symbols: PortfolioSymbol[];
+  riskSettings: RiskSettings;
+  performance: PortfolioPerformance;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PortfolioSymbol {
+  symbol: string;
+  allocation: number;
+  currentValue: number;
+  performance: number;
+  sentiment: SentimentData;
+  isActive: boolean;
+}
+
+interface PortfolioPerformance {
+  totalValue: number;
+  totalPnL: number;
+  totalROI: number;
+  winRate: number;
+  profitFactor: number;
+  maxDrawdown: number;
+  sharpeRatio: number;
 }
 ```
 
-### Position History
-```csharp
-public class PositionHistory
-{
-    public string Id { get; set; }
-    public string Symbol { get; set; }
-    public string Side { get; set; }
-    
-    // Entry Details
-    public DateTime EntryTime { get; set; }
-    public decimal EntryPrice { get; set; }
-    public decimal Size { get; set; }
-    public AIAnalysisRecord EntryAnalysis { get; set; }
-    
-    // Exit Details
-    public DateTime? ExitTime { get; set; }
-    public decimal? ExitPrice { get; set; }
-    public decimal? PnL { get; set; }
-    public AIAnalysisRecord ExitAnalysis { get; set; }
-    
-    // Performance Metrics
-    public decimal MaxDrawdown { get; set; }
-    public decimal PeakValue { get; set; }
-    public TimeSpan Duration { get; set; }
+### Trading Decision Models
+```typescript
+interface TradingDecision {
+  id: string;
+  portfolioId: string;
+  symbol: string;
+  decision: 'BUY' | 'SELL' | 'HOLD' | 'CLOSE';
+  confidence: number;
+  reasoning: string;
+  technicalAnalysis: TechnicalAnalysis;
+  mathematicalPrediction: PricePrediction;
+  sentimentAnalysis: SentimentAnalysis;
+  riskAssessment: RiskAssessment;
+  timestamp: string;
+}
+
+interface Position {
+  id: string;
+  portfolioId: string;
+  symbol: string;
+  side: 'LONG' | 'SHORT';
+  size: number;
+  entryPrice: number;
+  currentPrice: number;
+  stopLoss: number;
+  takeProfit: number;
+  unrealizedPnL: number;
+  status: 'OPEN' | 'CLOSED';
+  entryDecision: TradingDecision;
+  exitDecision?: TradingDecision;
+  createdAt: string;
+  closedAt?: string;
 }
 ```
 
-## Performance Requirements
+### Sentiment Analysis Models
+```typescript
+interface SentimentData {
+  symbol: string;
+  source: 'INTERNET' | 'COIN_ANALYSIS' | 'AGGREGATED';
+  sentiment: number; // -1 to 1
+  confidence: number;
+  volume: number;
+  timestamp: string;
+  metadata: Record<string, any>;
+}
 
-### Response Times
-- **Technical Analysis**: < 100ms per symbol
-- **AI Decision Making**: < 500ms per decision
-- **Position Updates**: < 50ms for execution
-- **Data Persistence**: < 100ms for storage
+interface AggregatedSentiment {
+  symbol: string;
+  overallSentiment: number;
+  internetSentiment: number;
+  coinAnalysisSentiment: number;
+  confidence: number;
+  trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+  impact: SentimentImpact;
+  timestamp: string;
+}
 
-### Throughput
-- **Symbol Analysis**: 100+ symbols simultaneously
-- **Position Management**: 50+ concurrent positions
-- **Data Processing**: 1000+ market data points/second
-- **AI Decisions**: 100+ decisions/minute
+interface SentimentImpact {
+  symbol: string;
+  impactScore: number;
+  tradingSignal: 'BUY' | 'SELL' | 'HOLD';
+  confidence: number;
+  reasoning: string;
+  timestamp: string;
+}
+```
 
-### Reliability
-- **Uptime**: 99.9% availability
-- **Data Integrity**: 100% accuracy for critical data
-- **Fault Tolerance**: Graceful degradation on failures
-- **Recovery Time**: < 30 seconds for service failures
+## Performance Architecture
 
-## Security & Risk Management
+### 1. Real-Time Data Processing
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Real-Time Data Processing               │
+├─────────────────────────────────────────────────────────────┤
+│  Market Data Stream │  Sentiment Polling │  Portfolio Updates│
+│  - Price Updates    │  - Internet Poll   │  - Position Mgmt  │
+│  - Volume Updates   │  - Coin Analysis   │  - Performance    │
+│  - Order Book       │  - Aggregation     │  - Risk Updates   │
+├─────────────────────────────────────────────────────────────┤
+│  AI Analysis        │  Decision Engine   │  Execution Engine │
+│  - Technical Analysis│  - Signal Gen     │  - Order Exec     │
+│  - Math Prediction  │  - Risk Assess     │  - Position Mgmt  │
+│  - Sentiment Int    │  - Confidence      │  - Risk Control   │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### Data Security
-- **Encryption**: All sensitive data encrypted at rest and in transit
-- **Access Control**: Role-based access to system components
-- **Audit Logging**: Complete audit trail of all system actions
-- **Data Validation**: Input validation and sanitization
+### 2. Scalability Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Scalability Design                      │
+├─────────────────────────────────────────────────────────────┤
+│  Portfolio Scaling  │  Symbol Scaling   │  System Scaling   │
+│  - Multi-Portfolio  │  - Multi-Symbol   │  - Load Balancing │
+│  - Budget Mgmt      │  - Data Processing│  - Distribution   │
+│  - Performance      │  - Analysis       │  - Optimization   │
+├─────────────────────────────────────────────────────────────┤
+│  Max Portfolios: 1000+ │  Max Symbols: 500+ │  Max Trades: 10000+/hr │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### Risk Controls
-- **Position Limits**: Maximum position size per symbol
-- **Daily Loss Limits**: Maximum daily portfolio loss
-- **Circuit Breakers**: Automatic trading suspension on losses
-- **Portfolio Balance**: Maximum allocation per asset class
+## Risk Management Architecture
 
-## Scalability Considerations
+### 1. Multi-Level Risk Control
+```
+┌─────────────────────────────────────────────────────────────┤
+│                    Risk Management Layers                   │
+├─────────────────────────────────────────────────────────────┤
+│  Portfolio Level    │  Symbol Level     │  Position Level  │
+│  - Budget Limits    │  - Symbol Limits  │  - Position Size │
+│  - Risk Allocation  │  - Risk Per Symbol│  - Stop Losses   │
+│  - Correlation      │  - Volatility     │  - Take Profits  │
+├─────────────────────────────────────────────────────────────┤
+│  Max Portfolio: 100% │  Max Symbol: 20% │  Max Position: 5% │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### Horizontal Scaling
-- **Service Instances**: Multiple instances of each service
-- **Load Balancing**: Distributed load across instances
-- **Data Partitioning**: Symbol-based data distribution
-- **Cache Distribution**: Distributed caching for performance
+### 2. Real-Time Risk Monitoring
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Risk Monitoring System                   │
+├─────────────────────────────────────────────────────────────┤
+│  Continuous Monitoring│  Alert System     │  Auto Response  │
+│  - Portfolio Risk    │  - Risk Alerts    │  - Position Clos │
+│  - Symbol Risk       │  - Budget Alerts  │  - Trading Stop  │
+│  - Position Risk     │  - Performance    │  - Risk Adjust   │
+├─────────────────────────────────────────────────────────────┤
+│  Update Freq: 1s │  Alert Latency: <5s │  Response: <10s │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### Vertical Scaling
-- **Resource Allocation**: Dynamic resource allocation
-- **Performance Tuning**: Continuous optimization
-- **Memory Management**: Efficient memory usage
-- **CPU Optimization**: Multi-threaded processing
+## Technology Stack
 
-## Monitoring & Observability
+### 1. Core Technologies
+- **Framework**: Next.js 14+ with App Router for modern React development
+- **Language**: TypeScript for type safety and developer experience
+- **Styling**: Tailwind CSS for utility-first styling
+- **State Management**: React Context API and custom hooks
 
-### System Metrics
-- **Performance**: Response times and throughput
-- **Resource Usage**: CPU, memory, and network
-- **Error Rates**: Failure rates and error types
-- **Business Metrics**: Trading performance and AI accuracy
+### 2. Performance Technologies
+- **Server-Side Rendering**: Next.js SSR for optimal performance
+- **Static Generation**: Pre-rendered pages for fast loading
+- **Edge Runtime**: Edge functions for global performance
+- **Caching**: Next.js built-in caching and Redis for data caching
 
-### Alerting
-- **Performance Alerts**: Response time thresholds
-- **Error Alerts**: Error rate thresholds
-- **Business Alerts**: Trading performance thresholds
-- **System Alerts**: Resource usage thresholds
+### 3. Security Technologies
+- **Authentication**: NextAuth.js for secure authentication
+- **API Security**: Secure API routes with rate limiting
+- **Data Encryption**: AES-256 for sensitive data
+- **Audit Logging**: Complete transaction audit trail
 
-## Future Enhancements
+## Deployment Architecture
 
-### Advanced AI Features
-- **Machine Learning**: Training on historical data
-- **Deep Learning**: Neural networks for pattern recognition
-- **Reinforcement Learning**: Adaptive strategy optimization
-- **Natural Language Processing**: Advanced sentiment analysis
+### 1. Vercel Production Environment
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Vercel Deployment                       │
+├─────────────────────────────────────────────────────────────┤
+│  Edge Network     │  Auto Scaling      │  Global CDN       │
+│  - Global Edge    │  - Load Balancing  │  - Fast Delivery  │
+│  - Low Latency    │  - Performance     │  - Reliability    │
+│  - High Availability│  - Monitoring    │  - Security       │
+├─────────────────────────────────────────────────────────────┤
+│  Uptime: 99.9% │  Failover: <30s │  Recovery: <5min │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### Platform Expansion
-- **Multi-Exchange**: Support for additional exchanges
-- **Advanced Analytics**: Enhanced performance metrics
-- **Mobile Applications**: Native mobile apps
-- **API Access**: Third-party integration capabilities
+### 2. Monitoring and Alerting
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Monitoring System                        │
+├─────────────────────────────────────────────────────────────┤
+│  Vercel Analytics │  Health Checks     │  Alert System     │
+│  - Performance    │  - System Status   │  - Notifications  │
+│  - Latency       │  - Service Health  │  - Escalation     │
+│  - Throughput    │  - Resource Usage  │  - Response       │
+├─────────────────────────────────────────────────────────────┤
+│  Monitoring: 24/7 │  Alerts: <5s │  Response: <10s │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Conclusion
+
+The Rockefeller Day-Trader AI System architecture is designed for **maximum automation** and **portfolio management** in cryptocurrency trading operations using modern web technologies. The system prioritizes:
+
+1. **Portfolio Management**: Multi-portfolio automation with budget controls
+2. **AI Automation**: Fully autonomous trading decisions
+3. **Sentiment Integration**: Real-time sentiment analysis integration
+4. **Comprehensive Analytics**: Complete trading analytics and optimization
+
+This Next.js architecture provides the foundation for a **high-performance, fully automated trading system** that can compete with institutional trading platforms while maintaining the flexibility and intelligence of AI-driven decision making.

@@ -1,560 +1,768 @@
-# Rockefeller AI Trading System - API Specification
+# Rockefeller Day-Trader AI System - API Specification
 
-## Service Interfaces
+## System Overview
 
-### IRockefellerAIService (Core AI Decision Engine)
+The Rockefeller Day-Trader AI System is a **fully automated cryptocurrency trading platform** that enables users to create and manage portfolios with selected symbols. The system makes **autonomous trading decisions** based on **technical analysis**, **mathematical predictions**, and **real-time sentiment analysis** from internet/coin analysis sources. The platform operates on **minute-to-minute timeframes** with **sub-second execution** and **comprehensive analytics**.
 
-The central service responsible for all AI-driven trading decisions, technical analysis, and market assessment.
+## API Routes Structure
 
-#### Core Analysis Methods
+### Portfolio Management API Routes (`/api/portfolios`)
 
-```csharp
-public interface IRockefellerAIService
-{
-    // Primary Analysis Methods
-    Task<AIStrategyAnalysis> AnalyzeStrategyOnTheFlyAsync(string symbol, string strategyType, Dictionary<string, object> parameters);
-    Task<AIStrategyAnalysis> AnalyzeCurrentMarketConditionsAsync(string symbol);
-    
-    // Market Regime Detection
-    Task<MarketRegime> DetectMarketRegimeAsync(string symbol);
-    Task<MarketRegime> GetCurrentMarketRegimeAsync(string symbol);
-    
-    // Risk Assessment
-    Task<RiskAssessment> AssessTradeRiskAsync(string symbol, string strategyType, decimal positionSize);
-    Task<RiskAssessment> GetCurrentRiskProfileAsync(string symbol);
-    
-    // Technical Analysis
-    Task<TechnicalAnalysisResult> PerformTechnicalAnalysisAsync(string symbol, List<string> indicators);
-    Task<TechnicalAnalysisResult> GetLatestTechnicalAnalysisAsync(string symbol);
-    
-    // Market Sentiment
-    Task<MarketSentimentAnalysis> AnalyzeMarketSentimentAsync(string symbol);
-    Task<MarketSentimentAnalysis> GetCurrentSentimentAsync(string symbol);
-    
-    // Trading Signals
-    Task<List<AITradingSignal>> GenerateTradingSignalsAsync(string symbol, string timeframe);
-    Task<TradingSignal> GetLatestTradingSignalAsync(string symbol);
-    
-    // Performance Prediction
-    Task<PerformancePrediction> PredictStrategyPerformanceAsync(string strategyType, string symbol, int days);
-    Task<PerformancePrediction> GetPerformancePredictionAsync(string symbol);
-    
-    // Real-time Analysis
-    Task<RealTimeAnalysis> GetRealTimeAnalysisAsync(string symbol);
-    Task<bool> UpdateRealTimeAnalysisAsync(string symbol, RealTimeAnalysis analysis);
+The central API routes responsible for **portfolio management**, **symbol selection**, and **budget allocation**. Designed for **multi-portfolio support** and **automated trading operations**.
+
+#### Core Portfolio Endpoints
+
+```typescript
+// POST /api/portfolios
+interface CreatePortfolioRequest {
+  name: string;
+  budget: number;
+  symbols: string[];
+  riskSettings?: RiskSettings;
+}
+
+interface CreatePortfolioResponse {
+  success: boolean;
+  data: Portfolio;
+  message?: string;
+}
+
+// GET /api/portfolios
+interface GetPortfoliosResponse {
+  success: boolean;
+  data: Portfolio[];
+  message?: string;
+}
+
+// GET /api/portfolios/:id
+interface GetPortfolioRequest {
+  portfolioId: string;
+}
+
+interface GetPortfolioResponse {
+  success: boolean;
+  data: Portfolio;
+  message?: string;
+}
+
+// PUT /api/portfolios/:id
+interface UpdatePortfolioRequest {
+  portfolioId: string;
+  updates: PortfolioUpdates;
+}
+
+interface UpdatePortfolioResponse {
+  success: boolean;
+  data: Portfolio;
+  message?: string;
+}
+
+// DELETE /api/portfolios/:id
+interface DeletePortfolioRequest {
+  portfolioId: string;
+}
+
+interface DeletePortfolioResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// POST /api/portfolios/:id/symbols
+interface AddSymbolRequest {
+  portfolioId: string;
+  symbol: string;
+  allocation?: number;
+}
+
+interface AddSymbolResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// DELETE /api/portfolios/:id/symbols/:symbol
+interface RemoveSymbolRequest {
+  portfolioId: string;
+  symbol: string;
+}
+
+interface RemoveSymbolResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// PUT /api/portfolios/:id/budget
+interface UpdateBudgetRequest {
+  portfolioId: string;
+  budget: number;
+}
+
+interface UpdateBudgetResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// GET /api/portfolios/:id/performance
+interface GetPerformanceRequest {
+  portfolioId: string;
+  timeframe?: string; // 1d, 7d, 30d, 90d, 1y
+}
+
+interface GetPerformanceResponse {
+  success: boolean;
+  data: PortfolioPerformance;
+  message?: string;
 }
 ```
 
-#### Data Models
+#### Data Models (Portfolio Management)
 
-```csharp
-public class AIStrategyAnalysis
-{
-    public string Id { get; set; } = string.Empty;
-    public string Symbol { get; set; } = string.Empty;
-    public string StrategyType { get; set; } = string.Empty;
-    
-    // Analysis Results
-    public string Recommendation { get; set; } = string.Empty; // BUY, SELL, HOLD, WAIT
-    public decimal Confidence { get; set; } // 0.0 to 1.0
-    public string Reasoning { get; set; } = string.Empty;
-    
-    // Technical Analysis
-    public TechnicalAnalysisResult TechnicalIndicators { get; set; } = new();
-    public MarketSentimentAnalysis Sentiment { get; set; } = new();
-    public List<AITradingSignal> Signals { get; set; } = [];
-    
-    // Risk Assessment
-    public RiskAssessment Risk { get; set; } = new();
-    public PerformancePrediction Prediction { get; set; } = new();
-    public MarketRegime MarketRegime { get; set; } = new();
-    
-    // Metadata
-    public DateTime AnalysisTime { get; set; }
-    public TimeSpan AnalysisDuration { get; set; }
-    public Dictionary<string, object> Parameters { get; set; } = new();
+```typescript
+interface Portfolio {
+  id: string;
+  name: string;
+  userId: string;
+  budget: number;
+  allocatedBudget: number;
+  symbols: PortfolioSymbol[];
+  riskSettings: RiskSettings;
+  performance: PortfolioPerformance;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
-public class TechnicalAnalysisResult
-{
-    public string Symbol { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; }
-    
-    // Technical Indicators
-    public Dictionary<string, decimal> Indicators { get; set; } = new();
-    public Dictionary<string, string> Signals { get; set; } = new(); // BUY, SELL, NEUTRAL
-    
-    // Support/Resistance
-    public List<decimal> SupportLevels { get; set; } = [];
-    public List<decimal> ResistanceLevels { get; set; } = [];
-    
-    // Trend Analysis
-    public string TrendDirection { get; set; } = string.Empty; // UP, DOWN, SIDEWAYS
-    public decimal TrendStrength { get; set; } // 0.0 to 1.0
-    public string TrendDuration { get; set; } = string.Empty; // SHORT, MEDIUM, LONG
-    
-    // Volatility
-    public decimal Volatility { get; set; }
-    public decimal AverageTrueRange { get; set; }
-    public decimal BollingerBandWidth { get; set; }
+interface PortfolioSymbol {
+  symbol: string;
+  allocation: number; // Percentage of portfolio budget
+  currentValue: number;
+  performance: number; // ROI percentage
+  sentiment: SentimentData;
+  isActive: boolean;
+  lastUpdated: string;
 }
 
-public class MarketSentimentAnalysis
-{
-    public string Symbol { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; }
-    
-    // Sentiment Scores
-    public decimal OverallSentiment { get; set; } // -1.0 to 1.0
-    public decimal NewsSentiment { get; set; } // -1.0 to 1.0
-    public decimal SocialMediaSentiment { get; set; } // -1.0 to 1.0
-    public decimal MarketPsychologySentiment { get; set; } // -1.0 to 1.0
-    
-    // Market Psychology
-    public string MarketMood { get; set; } = string.Empty; // FEAR, GREED, NEUTRAL
-    public decimal FearGreedIndex { get; set; } // 0 to 100
-    public string MarketRegime { get; set; } = string.Empty; // BULL, BEAR, SIDEWAYS
-    
-    // News Analysis
-    public List<NewsItem> RecentNews { get; set; } = [];
-    public decimal NewsImpactScore { get; set; } // 0.0 to 1.0
-    public string NewsSentimentTrend { get; set; } = string.Empty; // IMPROVING, DETERIORATING, STABLE
+interface RiskSettings {
+  maxPositionSize: number; // Maximum percentage per position
+  maxDailyLoss: number; // Maximum daily loss percentage
+  maxDrawdown: number; // Maximum drawdown percentage
+  stopLossPercentage: number; // Default stop loss percentage
+  takeProfitPercentage: number; // Default take profit percentage
+  correlationLimit: number; // Maximum correlation between positions
 }
 
-public class RiskAssessment
-{
-    public string Symbol { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; }
-    
-    // Risk Metrics
-    public decimal RiskScore { get; set; } // 0.0 to 1.0
-    public decimal VolatilityRisk { get; set; }
-    public decimal LiquidityRisk { get; set; }
-    public decimal MarketRisk { get; set; }
-    
-    // Position Sizing
-    public decimal RecommendedPositionSize { get; set; }
-    public decimal MaximumPositionSize { get; set; }
-    public decimal RiskAdjustedSize { get; set; }
-    
-    // Risk Controls
-    public decimal RecommendedStopLoss { get; set; }
-    public decimal RecommendedTakeProfit { get; set; }
-    public decimal MaximumDrawdown { get; set; }
-    
-    // Market Conditions
-    public string RiskLevel { get; set; } = string.Empty; // LOW, MEDIUM, HIGH, EXTREME
-    public string RiskTrend { get; set; } = string.Empty; // IMPROVING, DETERIORATING, STABLE
+interface PortfolioPerformance {
+  totalValue: number;
+  totalPnL: number;
+  totalROI: number;
+  winRate: number;
+  profitFactor: number;
+  maxDrawdown: number;
+  sharpeRatio: number;
+  totalTrades: number;
+  profitableTrades: number;
+  losingTrades: number;
+  averageWin: number;
+  averageLoss: number;
+  bestTrade: number;
+  worstTrade: number;
+  lastUpdated: string;
+}
+
+interface PortfolioUpdates {
+  name?: string;
+  budget?: number;
+  riskSettings?: Partial<RiskSettings>;
+  isActive?: boolean;
 }
 ```
 
-### ITradingService (Position Management & Execution)
+### AI Trading API Routes (`/api/trading`)
 
-Service responsible for managing trading positions, order execution, and risk management.
+API routes responsible for **automated trading decisions**, **position management**, and **AI-driven execution**.
 
-#### Core Methods
+#### Core Trading Endpoints
 
-```csharp
-public interface ITradingService
-{
-    // Position Management
-    Task<bool> OpenPositionAsync(string symbol, string side, decimal size, decimal price, string strategy);
-    Task<bool> ClosePositionAsync(string positionId, decimal price, string reason);
-    Task<bool> UpdatePositionAsync(string positionId, decimal stopLoss, decimal takeProfit);
-    Task<bool> ModifyPositionAsync(string positionId, decimal newSize, decimal newPrice);
-    
-    // Position Queries
-    Task<List<RockefellerPosition>> GetActivePositionsAsync();
-    Task<RockefellerPosition?> GetPositionAsync(string positionId);
-    Task<List<RockefellerPosition>> GetPositionsBySymbolAsync(string symbol);
-    Task<List<RockefellerPosition>> GetPositionsByStrategyAsync(string strategy);
-    
-    // Risk Management
-    Task<bool> ValidatePositionAsync(string symbol, decimal size, decimal price);
-    Task<RiskAssessment> AssessPositionRiskAsync(string positionId);
-    Task<bool> CheckRiskLimitsAsync(string symbol, decimal size);
-    
-    // Trading Control
-    Task<bool> StartTradingAsync();
-    Task<bool> StopTradingAsync();
-    Task<bool> PauseTradingAsync();
-    Task<TradingStatus> GetTradingStatusAsync();
-    
-    // Portfolio Management
-    Task<PortfolioSummary> GetPortfolioSummaryAsync();
-    Task<decimal> GetTotalPortfolioValueAsync();
-    Task<decimal> GetUnrealizedPnLAsync();
-    Task<decimal> GetRealizedPnLAsync();
+```typescript
+// POST /api/trading/analyze-portfolio
+interface AnalyzePortfolioRequest {
+  portfolioId: string;
+}
+
+interface AnalyzePortfolioResponse {
+  success: boolean;
+  data: TradingDecision[];
+  message?: string;
+}
+
+// POST /api/trading/execute-decision
+interface ExecuteDecisionRequest {
+  decision: TradingDecision;
+}
+
+interface ExecuteDecisionResponse {
+  success: boolean;
+  data: Position;
+  message?: string;
+}
+
+// GET /api/trading/positions/:portfolioId
+interface GetPositionsRequest {
+  portfolioId: string;
+  status?: 'OPEN' | 'CLOSED' | 'ALL';
+}
+
+interface GetPositionsResponse {
+  success: boolean;
+  data: Position[];
+  message?: string;
+}
+
+// POST /api/trading/close-position
+interface ClosePositionRequest {
+  positionId: string;
+  reason: string;
+}
+
+interface ClosePositionResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// PUT /api/trading/update-position-risk
+interface UpdatePositionRiskRequest {
+  positionId: string;
+  stopLoss?: number;
+  takeProfit?: number;
+}
+
+interface UpdatePositionRiskResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// POST /api/trading/start-automation
+interface StartAutomationRequest {
+  portfolioId: string;
+}
+
+interface StartAutomationResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// POST /api/trading/stop-automation
+interface StopAutomationRequest {
+  portfolioId: string;
+}
+
+interface StopAutomationResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// GET /api/trading/automation-status/:portfolioId
+interface GetAutomationStatusRequest {
+  portfolioId: string;
+}
+
+interface GetAutomationStatusResponse {
+  success: boolean;
+  data: AutomationStatus;
+  message?: string;
 }
 ```
 
-#### Data Models
+#### Data Models (Trading)
 
-```csharp
-public class RockefellerPosition
-{
-    public string Id { get; set; } = string.Empty;
-    public string Symbol { get; set; } = string.Empty;
-    public string Side { get; set; } = string.Empty; // LONG, SHORT
-    public decimal Size { get; set; }
-    public decimal EntryPrice { get; set; }
-    public DateTime EntryTime { get; set; }
-    
-    // Current State
-    public decimal CurrentPrice { get; set; }
-    public decimal UnrealizedPnL { get; set; }
-    public decimal UnrealizedROI { get; set; }
-    public string Status { get; set; } = string.Empty; // OPEN, CLOSED, PENDING
-    
-    // Risk Management
-    public decimal StopLoss { get; set; }
-    public decimal TakeProfit { get; set; }
-    public decimal MaxDrawdown { get; set; }
-    
-    // AI Context
-    public string Strategy { get; set; } = string.Empty;
-    public string EntryReason { get; set; } = string.Empty;
-    public decimal EntryConfidence { get; set; }
-    public AIAnalysisRecord EntryAnalysis { get; set; } = new();
-    
-    // Performance Tracking
-    public decimal PeakValue { get; set; }
-    public decimal TroughValue { get; set; }
-    public TimeSpan Duration { get; set; }
+```typescript
+interface TradingDecision {
+  id: string;
+  portfolioId: string;
+  symbol: string;
+  decision: 'BUY' | 'SELL' | 'HOLD' | 'CLOSE';
+  confidence: number; // 0.0 to 1.0
+  reasoning: string;
+  technicalAnalysis: TechnicalAnalysis;
+  mathematicalPrediction: PricePrediction;
+  sentimentAnalysis: SentimentAnalysis;
+  riskAssessment: RiskAssessment;
+  suggestedSize: number;
+  suggestedStopLoss: number;
+  suggestedTakeProfit: number;
+  timestamp: string;
 }
 
-public class PortfolioSummary
-{
-    public decimal TotalValue { get; set; }
-    public decimal CashBalance { get; set; }
-    public decimal InvestedAmount { get; set; }
-    public decimal UnrealizedPnL { get; set; }
-    public decimal RealizedPnL { get; set; }
-    public decimal TotalPnL { get; set; }
-    
-    // Risk Metrics
-    public decimal TotalRisk { get; set; }
-    public decimal MaxDrawdown { get; set; }
-    public decimal SharpeRatio { get; set; }
-    public decimal Volatility { get; set; }
-    
-    // Position Summary
-    public int TotalPositions { get; set; }
-    public int LongPositions { get; set; }
-    public int ShortPositions { get; set; }
-    public int ProfitablePositions { get; set; }
-    public int LosingPositions { get; set; }
-    
-    // Performance
-    public decimal WinRate { get; set; }
-    public decimal AverageWin { get; set; }
-    public decimal AverageLoss { get; set; }
-    public decimal ProfitFactor { get; set; }
+interface Position {
+  id: string;
+  portfolioId: string;
+  symbol: string;
+  side: 'LONG' | 'SHORT';
+  size: number;
+  entryPrice: number;
+  currentPrice: number;
+  stopLoss: number;
+  takeProfit: number;
+  unrealizedPnL: number;
+  unrealizedROI: number;
+  status: 'OPEN' | 'CLOSED';
+  entryDecision: TradingDecision;
+  exitDecision?: TradingDecision;
+  entryTime: string;
+  exitTime?: string;
+  duration?: string;
 }
-```
 
-### IMarketDataService (Real-time Market Data)
+interface AutomationStatus {
+  portfolioId: string;
+  isAutomated: boolean;
+  lastDecision: string;
+  activePositions: number;
+  totalPnL: number;
+  lastUpdated: string;
+}
 
-Service providing real-time market data, price feeds, and market analysis.
+interface TechnicalAnalysis {
+  symbol: string;
+  rsi: number;
+  macd: {
+    macd: number;
+    signal: number;
+    histogram: number;
+  };
+  bollingerBands: {
+    upper: number;
+    middle: number;
+    lower: number;
+    width: number;
+  };
+  movingAverages: {
+    sma20: number;
+    sma50: number;
+    ema12: number;
+    ema26: number;
+  };
+  support: number[];
+  resistance: number[];
+  trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+  strength: number; // 0.0 to 1.0
+  timestamp: string;
+}
 
-#### Core Methods
+interface PricePrediction {
+  symbol: string;
+  predictedPrice: number;
+  confidence: number;
+  timeframe: string; // 5m, 15m, 1h, 4h
+  direction: 'UP' | 'DOWN' | 'SIDEWAYS';
+  probability: number; // 0.0 to 1.0
+  factors: string[];
+  timestamp: string;
+}
 
-```csharp
-public interface IMarketDataService
-{
-    // Real-time Data
-    Task<MarketData> GetMarketDataAsync(string symbol);
-    Task<OrderBook> GetOrderBookAsync(string symbol, int depth = 20);
-    Task<List<PriceHistory>> GetPriceHistoryAsync(string symbol, string timeframe, int count = 100);
-    
-    // Market Analysis
-    Task<MarketDepth> GetMarketDepthAsync(string symbol);
-    Task<VolumeAnalysis> GetVolumeAnalysisAsync(string symbol);
-    Task<LiquidityAnalysis> GetLiquidityAnalysisAsync(string symbol);
-    
-    // Price Feeds
-    Task<decimal> GetCurrentPriceAsync(string symbol);
-    Task<decimal> GetBidPriceAsync(string symbol);
-    Task<decimal> GetAskPriceAsync(string symbol);
-    Task<decimal> GetLastPriceAsync(string symbol);
-    
-    // Market Statistics
-    Task<MarketStatistics> GetMarketStatisticsAsync(string symbol);
-    Task<VolatilityMetrics> GetVolatilityMetricsAsync(string symbol);
-    Task<CorrelationMatrix> GetCorrelationMatrixAsync(List<string> symbols);
-    
-    // Real-time Updates
-    Task<IObservable<MarketDataUpdate>> SubscribeToMarketDataAsync(string symbol);
-    Task<IObservable<PriceUpdate>> SubscribeToPriceUpdatesAsync(string symbol);
-    Task<IObservable<VolumeUpdate>> SubscribeToVolumeUpdatesAsync(string symbol);
+interface RiskAssessment {
+  symbol: string;
+  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  volatility: number;
+  correlation: number;
+  maxPositionSize: number;
+  suggestedStopLoss: number;
+  suggestedTakeProfit: number;
+  riskRewardRatio: number;
+  timestamp: string;
 }
 ```
 
-#### Data Models
+### Sentiment Analysis API Routes (`/api/sentiment`)
 
-```csharp
-public class MarketData
-{
-    public string Symbol { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; }
-    
-    // Price Data
-    public decimal Open { get; set; }
-    public decimal High { get; set; }
-    public decimal Low { get; set; }
-    public decimal Close { get; set; }
-    public decimal Last { get; set; }
-    public decimal Bid { get; set; }
-    public decimal Ask { get; set; }
-    
-    // Volume Data
-    public decimal Volume { get; set; }
-    public decimal QuoteVolume { get; set; }
-    public decimal VolumeWeightedAveragePrice { get; set; }
-    
-    // Market Metrics
-    public decimal PriceChange { get; set; }
-    public decimal PriceChangePercent { get; set; }
-    public decimal High24h { get; set; }
-    public decimal Low24h { get; set; }
-    public decimal Volume24h { get; set; }
-    
-    // Additional Data
-    public decimal NumberOfTrades { get; set; }
-    public decimal TakerBuyBaseVolume { get; set; }
-    public decimal TakerBuyQuoteVolume { get; set; }
+API routes providing **AI sentiment analysis** from internet/coin analysis sources and **sentiment integration** into trading decisions.
+
+#### Core Sentiment Endpoints
+
+```typescript
+// GET /api/sentiment/:symbol
+interface GetSentimentRequest {
+  symbol: string;
 }
 
-public class OrderBook
-{
-    public string Symbol { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; }
-    public long LastUpdateId { get; set; }
-    
-    // Order Book Data
-    public List<OrderBookEntry> Bids { get; set; } = [];
-    public List<OrderBookEntry> Asks { get; set; } = [];
-    
-    // Calculated Metrics
-    public decimal Spread { get; set; }
-    public decimal MidPrice { get; set; }
-    public decimal BidVolume { get; set; }
-    public decimal AskVolume { get; set; }
-    public decimal TotalVolume { get; set; }
+interface GetSentimentResponse {
+  success: boolean;
+  data: AggregatedSentiment;
+  message?: string;
 }
 
-public class OrderBookEntry
-{
-    public decimal Price { get; set; }
-    public decimal Quantity { get; set; }
-    public decimal TotalValue { get; set; }
-    public decimal CumulativeVolume { get; set; }
-}
-```
-
-### IAnalyticsService (Performance & Historical Analysis)
-
-Service providing trading performance analytics, historical data analysis, and success metrics.
-
-#### Core Methods
-
-```csharp
-public interface IAnalyticsService
-{
-    // Performance Metrics
-    Task<AnalyticsData> GetAnalyticsDataAsync();
-    Task<PerformanceMetrics> GetPerformanceMetricsAsync(DateTime startDate, DateTime endDate);
-    Task<List<PerformanceMetric>> GetPerformanceMetricsAsync(string metricName, DateTime startDate, DateTime endDate, string? symbol = null);
-    
-    // Trade Analysis
-    Task<List<Trade>> GetRecentTradesAsync(int count = 100);
-    Task<List<Trade>> GetTradesBySymbolAsync(string symbol, DateTime startDate, DateTime endDate);
-    Task<List<Trade>> GetTradesByStrategyAsync(string strategy, DateTime startDate, DateTime endDate);
-    
-    // Portfolio Analysis
-    Task<PortfolioAnalytics> GetPortfolioAnalyticsAsync(DateTime startDate, DateTime endDate);
-    Task<RiskAnalytics> GetRiskAnalyticsAsync(DateTime startDate, DateTime endDate);
-    Task<CorrelationAnalytics> GetCorrelationAnalyticsAsync(List<string> symbols, DateTime startDate, DateTime endDate);
-    
-    // AI Performance
-    Task<AIPerformanceMetrics> GetAIPerformanceMetricsAsync(DateTime startDate, DateTime endDate);
-    Task<List<AIDecisionAnalysis>> GetAIDecisionAnalysisAsync(string symbol, DateTime startDate, DateTime endDate);
-    Task<AISuccessRate> GetAISuccessRateAsync(DateTime startDate, DateTime endDate);
-}
-```
-
-#### Data Models
-
-```csharp
-public class AnalyticsData
-{
-    // Performance Metrics
-    public decimal TotalReturn { get; set; }
-    public decimal WinRate { get; set; }
-    public int TotalTrades { get; set; }
-    public string AverageHoldTime { get; set; } = string.Empty;
-    
-    // Risk Metrics
-    public decimal SharpeRatio { get; set; }
-    public decimal MaxDrawdown { get; set; }
-    public decimal Volatility { get; set; }
-    
-    // Trading Data
-    public List<Trade> RecentTrades { get; set; } = [];
-    public List<StrategyPerformance> StrategyPerformance { get; set; } = [];
-    public PerformanceHistory PerformanceHistory { get; set; } = new();
+// POST /api/sentiment/poll-internet
+interface PollInternetSentimentRequest {
+  symbol: string;
 }
 
-public class Trade
-{
-    public string Id { get; set; } = string.Empty;
-    public string Symbol { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty; // LONG, SHORT
-    public decimal EntryPrice { get; set; }
-    public decimal? ExitPrice { get; set; }
-    public decimal Size { get; set; }
-    public decimal PnL { get; set; }
-    public string Duration { get; set; } = string.Empty;
-    
-    // AI Context
-    public string Strategy { get; set; } = string.Empty;
-    public decimal EntryConfidence { get; set; }
-    public string EntryReason { get; set; } = string.Empty;
-    public string ExitReason { get; set; } = string.Empty;
-    
-    // Timestamps
-    public DateTime EntryTime { get; set; }
-    public DateTime? ExitTime { get; set; }
+interface PollInternetSentimentResponse {
+  success: boolean;
+  data: SentimentData;
+  message?: string;
 }
 
-public class StrategyPerformance
-{
-    public string Name { get; set; } = string.Empty;
-    public int TradeCount { get; set; }
-    public decimal Return { get; set; }
-    public decimal WinRate { get; set; }
-    public decimal AverageReturn { get; set; }
-    public decimal MaxDrawdown { get; set; }
-    public decimal SharpeRatio { get; set; }
+// POST /api/sentiment/poll-coin-analysis
+interface PollCoinAnalysisSentimentRequest {
+  symbol: string;
+}
+
+interface PollCoinAnalysisSentimentResponse {
+  success: boolean;
+  data: SentimentData;
+  message?: string;
+}
+
+// POST /api/sentiment/aggregate
+interface AggregateSentimentRequest {
+  symbol: string;
+}
+
+interface AggregateSentimentResponse {
+  success: boolean;
+  data: AggregatedSentiment;
+  message?: string;
+}
+
+// GET /api/sentiment/history/:symbol
+interface GetSentimentHistoryRequest {
+  symbol: string;
+  timeframe?: string; // 1h, 4h, 1d, 7d
+  limit?: number;
+}
+
+interface GetSentimentHistoryResponse {
+  success: boolean;
+  data: SentimentHistory[];
+  message?: string;
+}
+
+// POST /api/sentiment/start-polling
+interface StartPollingRequest {
+  symbols: string[];
+  interval?: number; // Minutes
+}
+
+interface StartPollingResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// POST /api/sentiment/stop-polling
+interface StopPollingRequest {
+  symbols: string[];
+}
+
+interface StopPollingResponse {
+  success: boolean;
+  data: boolean;
+  message?: string;
+}
+
+// GET /api/sentiment/polling-status
+interface GetPollingStatusResponse {
+  success: boolean;
+  data: PollingStatus;
+  message?: string;
 }
 ```
 
-## Data Persistence Models
+#### Data Models (Sentiment Analysis)
 
-### AI Analysis Records
-
-```csharp
-public class AIAnalysisRecord
-{
-    public string Id { get; set; } = string.Empty;
-    public string Symbol { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; }
-    
-    // Analysis Type
-    public string AnalysisType { get; set; } = string.Empty; // ENTRY, EXIT, MONITORING
-    public string Strategy { get; set; } = string.Empty;
-    public Dictionary<string, object> Parameters { get; set; } = new();
-    
-    // Technical Analysis Results
-    public TechnicalAnalysisResult TechnicalAnalysis { get; set; } = new();
-    public Dictionary<string, decimal> Indicators { get; set; } = new();
-    public Dictionary<string, string> IndicatorSignals { get; set; } = new();
-    
-    // AI Reasoning
-    public string Decision { get; set; } = string.Empty; // BUY, SELL, HOLD, WAIT
-    public decimal Confidence { get; set; } // 0.0 to 1.0
-    public string Reasoning { get; set; } = string.Empty;
-    public List<string> SupportingFactors { get; set; } = [];
-    public List<string> RiskFactors { get; set; } = [];
-    
-    // Market Context
-    public MarketContext MarketContext { get; set; } = new();
-    public RiskAssessment RiskAssessment { get; set; } = new();
-    public MarketSentimentAnalysis Sentiment { get; set; } = new();
-    
-    // Performance Tracking
-    public bool WasSuccessful { get; set; }
-    public decimal? ActualReturn { get; set; }
-    public string? PostTradeAnalysis { get; set; }
-    public DateTime? PostTradeAnalysisDate { get; set; }
-    
-    // Metadata
-    public string Version { get; set; } = string.Empty;
-    public Dictionary<string, object> Metadata { get; set; } = new();
+```typescript
+interface SentimentData {
+  symbol: string;
+  source: 'INTERNET' | 'COIN_ANALYSIS' | 'AGGREGATED';
+  sentiment: number; // -1.0 to 1.0
+  confidence: number; // 0.0 to 1.0
+  volume: number;
+  positiveMentions: number;
+  negativeMentions: number;
+  neutralMentions: number;
+  totalMentions: number;
+  keywords: string[];
+  metadata: Record<string, any>;
+  timestamp: string;
 }
 
-public class MarketContext
-{
-    public DateTime Timestamp { get; set; }
-    public string MarketRegime { get; set; } = string.Empty;
-    public decimal MarketVolatility { get; set; }
-    public string MarketTrend { get; set; } = string.Empty;
-    public decimal MarketStrength { get; set; }
-    
-    // Economic Indicators
-    public decimal FearGreedIndex { get; set; }
-    public string MarketMood { get; set; } = string.Empty;
-    public decimal MarketCorrelation { get; set; }
-    
-    // External Factors
-    public List<string> MarketEvents { get; set; } = [];
-    public List<string> NewsHeadlines { get; set; } = [];
-    public string OverallMarketSentiment { get; set; } = string.Empty;
+interface AggregatedSentiment {
+  symbol: string;
+  overallSentiment: number; // -1.0 to 1.0
+  internetSentiment: number;
+  coinAnalysisSentiment: number;
+  confidence: number;
+  trend: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+  trendStrength: number; // 0.0 to 1.0
+  impact: SentimentImpact;
+  lastUpdated: string;
+}
+
+interface SentimentImpact {
+  symbol: string;
+  impactScore: number; // -1.0 to 1.0
+  tradingSignal: 'BUY' | 'SELL' | 'HOLD';
+  confidence: number;
+  reasoning: string;
+  expectedPriceMovement: number; // Percentage
+  timeframe: string;
+  timestamp: string;
+}
+
+interface SentimentHistory {
+  symbol: string;
+  sentiment: number;
+  source: string;
+  timestamp: string;
+}
+
+interface PollingStatus {
+  activeSymbols: string[];
+  lastPollTime: string;
+  nextPollTime: string;
+  pollingInterval: number; // Minutes
+  isActive: boolean;
 }
 ```
 
-### Position History
+### Analytics API Routes (`/api/analytics`)
 
-```csharp
-public class PositionHistory
-{
-    public string Id { get; set; } = string.Empty;
-    public string Symbol { get; set; } = string.Empty;
-    public string Side { get; set; } = string.Empty; // LONG, SHORT
-    public string Strategy { get; set; } = string.Empty;
-    
-    // Entry Details
-    public DateTime EntryTime { get; set; }
-    public decimal EntryPrice { get; set; }
-    public decimal Size { get; set; }
-    public decimal EntryValue { get; set; }
-    public AIAnalysisRecord EntryAnalysis { get; set; } = new();
-    
-    // Exit Details
-    public DateTime? ExitTime { get; set; }
-    public decimal? ExitPrice { get; set; }
-    public decimal? ExitValue { get; set; }
-    public string? ExitReason { get; set; }
-    public AIAnalysisRecord? ExitAnalysis { get; set; }
-    
-    // Performance Metrics
-    public decimal? PnL { get; set; }
-    public decimal? ROI { get; set; }
-    public decimal MaxDrawdown { get; set; }
-    public decimal PeakValue { get; set; }
-    public decimal TroughValue { get; set; }
-    public TimeSpan Duration { get; set; }
-    
-    // Risk Management
-    public decimal InitialStopLoss { get; set; }
-    public decimal InitialTakeProfit { get; set; }
-    public List<RiskAdjustment> RiskAdjustments { get; set; } = [];
-    
-    // AI Performance
-    public decimal EntryConfidence { get; set; }
-    public decimal ExitConfidence { get; set; }
-    public bool WasSuccessful { get; set; }
-    public string SuccessReason { get; set; } = string.Empty;
+API routes providing **comprehensive analytics** for portfolio performance, trading decisions, and sentiment impact.
+
+#### Core Analytics Endpoints
+
+```typescript
+// GET /api/analytics/portfolio/:portfolioId
+interface GetPortfolioAnalyticsRequest {
+  portfolioId: string;
+  timeframe?: string; // 1d, 7d, 30d, 90d, 1y
 }
 
-public class RiskAdjustment
-{
-    public DateTime Timestamp { get; set; }
-    public string Type { get; set; } = string.Empty; // STOP_LOSS, TAKE_PROFIT, POSITION_SIZE
-    public decimal OldValue { get; set; }
-    public decimal NewValue { get; set; }
-    public string Reason { get; set; } = string.Empty;
-    public AIAnalysisRecord Analysis { get; set; } = new();
+interface GetPortfolioAnalyticsResponse {
+  success: boolean;
+  data: PortfolioAnalytics;
+  message?: string;
+}
+
+// GET /api/analytics/trading-decisions/:portfolioId
+interface GetTradingDecisionsRequest {
+  portfolioId: string;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+}
+
+interface GetTradingDecisionsResponse {
+  success: boolean;
+  data: TradingDecision[];
+  message?: string;
+}
+
+// GET /api/analytics/ai-performance/:portfolioId
+interface GetAIPerformanceRequest {
+  portfolioId: string;
+  timeframe?: string;
+}
+
+interface GetAIPerformanceResponse {
+  success: boolean;
+  data: AIPerformanceMetrics;
+  message?: string;
+}
+
+// GET /api/analytics/sentiment-impact/:symbol
+interface GetSentimentImpactRequest {
+  symbol: string;
+  timeframe?: string;
+}
+
+interface GetSentimentImpactResponse {
+  success: boolean;
+  data: SentimentImpactAnalysis;
+  message?: string;
+}
+
+// GET /api/analytics/risk-metrics/:portfolioId
+interface GetRiskMetricsRequest {
+  portfolioId: string;
+  timeframe?: string;
+}
+
+interface GetRiskMetricsResponse {
+  success: boolean;
+  data: RiskMetrics;
+  message?: string;
+}
+
+// GET /api/analytics/strategy-performance/:portfolioId
+interface GetStrategyPerformanceRequest {
+  portfolioId: string;
+  timeframe?: string;
+}
+
+interface GetStrategyPerformanceResponse {
+  success: boolean;
+  data: StrategyPerformance;
+  message?: string;
+}
+```
+
+#### Data Models (Analytics)
+
+```typescript
+interface PortfolioAnalytics {
+  portfolioId: string;
+  performance: PortfolioPerformance;
+  riskMetrics: RiskMetrics;
+  tradingMetrics: TradingMetrics;
+  sentimentMetrics: SentimentMetrics;
+  timeframe: string;
+  lastUpdated: string;
+}
+
+interface TradingMetrics {
+  totalTrades: number;
+  profitableTrades: number;
+  losingTrades: number;
+  winRate: number;
+  profitFactor: number;
+  averageWin: number;
+  averageLoss: number;
+  bestTrade: number;
+  worstTrade: number;
+  averageHoldTime: string;
+  totalVolume: number;
+  averageVolume: number;
+}
+
+interface SentimentMetrics {
+  averageSentiment: number;
+  sentimentCorrelation: number;
+  sentimentAccuracy: number;
+  bullishSentimentCount: number;
+  bearishSentimentCount: number;
+  neutralSentimentCount: number;
+  sentimentImpact: number;
+}
+
+interface AIPerformanceMetrics {
+  decisionAccuracy: number;
+  signalQuality: number;
+  modelPerformance: number;
+  technicalAccuracy: number;
+  mathematicalAccuracy: number;
+  sentimentAccuracy: number;
+  falsePositives: number;
+  falseNegatives: number;
+  precision: number;
+  recall: number;
+  f1Score: number;
+}
+
+interface SentimentImpactAnalysis {
+  symbol: string;
+  sentimentCorrelation: number;
+  priceImpact: number;
+  tradingSignalAccuracy: number;
+  sentimentTrendAccuracy: number;
+  impactMetrics: {
+    positiveImpact: number;
+    negativeImpact: number;
+    neutralImpact: number;
+  };
+  timeframe: string;
+}
+
+interface RiskMetrics {
+  maxDrawdown: number;
+  sharpeRatio: number;
+  sortinoRatio: number;
+  volatility: number;
+  var95: number; // Value at Risk 95%
+  cvar95: number; // Conditional Value at Risk 95%
+  beta: number;
+  correlation: number;
+  downsideDeviation: number;
+}
+
+interface StrategyPerformance {
+  strategyName: string;
+  totalTrades: number;
+  winRate: number;
+  profitFactor: number;
+  sharpeRatio: number;
+  maxDrawdown: number;
+  totalReturn: number;
+  averageReturn: number;
+  bestPeriod: string;
+  worstPeriod: string;
+}
+```
+
+## WebSocket API (`/api/websocket`)
+
+Real-time data streaming for live market updates, trading signals, and portfolio updates.
+
+```typescript
+// WebSocket Connection
+interface WebSocketMessage {
+  type: string;
+  data: any;
+  timestamp: string;
+}
+
+// Portfolio Updates
+interface PortfolioUpdate extends WebSocketMessage {
+  type: 'PORTFOLIO_UPDATE';
+  data: {
+    portfolioId: string;
+    totalValue: number;
+    totalPnL: number;
+    activePositions: number;
+    lastUpdate: string;
+  };
+}
+
+// Trading Decision Updates
+interface TradingDecisionUpdate extends WebSocketMessage {
+  type: 'TRADING_DECISION';
+  data: TradingDecision;
+}
+
+// Position Updates
+interface PositionUpdate extends WebSocketMessage {
+  type: 'POSITION_UPDATE';
+  data: Position;
+}
+
+// Sentiment Updates
+interface SentimentUpdate extends WebSocketMessage {
+  type: 'SENTIMENT_UPDATE';
+  data: {
+    symbol: string;
+    sentiment: number;
+    source: string;
+    impact: SentimentImpact;
+  };
+}
+
+// Market Data Updates
+interface MarketDataUpdate extends WebSocketMessage {
+  type: 'MARKET_DATA_UPDATE';
+  data: MarketData;
+}
+
+// Automation Status Updates
+interface AutomationStatusUpdate extends WebSocketMessage {
+  type: 'AUTOMATION_STATUS';
+  data: AutomationStatus;
 }
 ```
 
@@ -562,87 +770,109 @@ public class RiskAdjustment
 
 ### Standard Response Format
 
-```csharp
-public class ApiResponse<T>
-{
-    public bool Success { get; set; }
-    public T? Data { get; set; }
-    public string? Message { get; set; }
-    public List<string> Errors { get; set; } = [];
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  errors?: string[];
+  timestamp: string;
 }
 
-public class ErrorResponse
-{
-    public string ErrorCode { get; set; } = string.Empty;
-    public string Message { get; set; } = string.Empty;
-    public string? Details { get; set; }
-    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-    public string? RequestId { get; set; }
+interface ErrorResponse {
+  errorCode: string;
+  message: string;
+  details?: string;
+  timestamp: string;
+  requestId?: string;
 }
 ```
 
 ### Common Error Codes
 
-```csharp
-public static class ErrorCodes
-{
-    // Validation Errors
-    public const string InvalidSymbol = "INVALID_SYMBOL";
-    public const string InvalidAmount = "INVALID_AMOUNT";
-    public const string InvalidPrice = "INVALID_PRICE";
-    public const string InvalidStrategy = "INVALID_STRATEGY";
-    
-    // Trading Errors
-    public const string InsufficientFunds = "INSUFFICIENT_FUNDS";
-    public const string PositionLimitExceeded = "POSITION_LIMIT_EXCEEDED";
-    public const string RiskLimitExceeded = "RISK_LIMIT_EXCEEDED";
-    public const string TradingDisabled = "TRADING_DISABLED";
-    
-    // System Errors
-    public const string ServiceUnavailable = "SERVICE_UNAVAILABLE";
-    public const string DataUnavailable = "DATA_UNAVAILABLE";
-    public const string AnalysisFailed = "ANALYSIS_FAILED";
-    public const string PersistenceFailed = "PERSISTENCE_FAILED";
-    
-    // AI Errors
-    public const string AIAnalysisFailed = "AI_ANALYSIS_FAILED";
-    public const string InsufficientData = "INSUFFICIENT_DATA";
-    public const string ModelUnavailable = "MODEL_UNAVAILABLE";
-    public const string ConfidenceTooLow = "CONFIDENCE_TOO_LOW";
-}
+```typescript
+const ErrorCodes = {
+  // Portfolio Errors
+  PORTFOLIO_NOT_FOUND: 'PORTFOLIO_NOT_FOUND',
+  INSUFFICIENT_BUDGET: 'INSUFFICIENT_BUDGET',
+  SYMBOL_ALREADY_EXISTS: 'SYMBOL_ALREADY_EXISTS',
+  SYMBOL_NOT_FOUND: 'SYMBOL_NOT_FOUND',
+  
+  // Trading Errors
+  INSUFFICIENT_FUNDS: 'INSUFFICIENT_FUNDS',
+  POSITION_LIMIT_EXCEEDED: 'POSITION_LIMIT_EXCEEDED',
+  RISK_LIMIT_EXCEEDED: 'RISK_LIMIT_EXCEEDED',
+  TRADING_DISABLED: 'TRADING_DISABLED',
+  
+  // Sentiment Errors
+  SENTIMENT_SOURCE_UNAVAILABLE: 'SENTIMENT_SOURCE_UNAVAILABLE',
+  SENTIMENT_POLLING_FAILED: 'SENTIMENT_POLLING_FAILED',
+  SENTIMENT_DATA_INVALID: 'SENTIMENT_DATA_INVALID',
+  
+  // System Errors
+  SERVICE_UNAVAILABLE: 'SERVICE_UNAVAILABLE',
+  DATA_UNAVAILABLE: 'DATA_UNAVAILABLE',
+  ANALYSIS_FAILED: 'ANALYSIS_FAILED',
+  PERSISTENCE_FAILED: 'PERSISTENCE_FAILED',
+  
+  // AI Errors
+  AI_ANALYSIS_FAILED: 'AI_ANALYSIS_FAILED',
+  INSUFFICIENT_DATA: 'INSUFFICIENT_DATA',
+  MODEL_UNAVAILABLE: 'MODEL_UNAVAILABLE',
+  CONFIDENCE_TOO_LOW: 'CONFIDENCE_TOO_LOW',
+} as const;
 ```
 
 ## Configuration & Settings
 
 ### User Configuration Model
 
-```csharp
-public class UserConfiguration
-{
-    // Budget & Limits
-    public decimal TotalBudget { get; set; }
-    public decimal MaxPositionSize { get; set; } // Percentage of total budget
-    public decimal DailyLossLimit { get; set; }
-    public decimal MaxTotalPositions { get; set; }
-    
-    // Risk Profile
-    public string RiskLevel { get; set; } = string.Empty; // CONSERVATIVE, MODERATE, AGGRESSIVE
-    public decimal MaxDrawdown { get; set; }
-    public decimal MinConfidence { get; set; }
-    
-    // Trading Preferences
-    public List<string> EnabledSymbols { get; set; } = [];
-    public List<string> EnabledStrategies { get; set; } = [];
-    public bool EnableAutoTrading { get; set; }
-    public bool EnableRiskManagement { get; set; }
-    
-    // AI Configuration
-    public decimal MinAIConfidence { get; set; }
-    public string AnalysisFrequency { get; set; } = string.Empty; // REAL_TIME, MINUTE_5, MINUTE_15
-    public bool EnableSentimentAnalysis { get; set; }
-    public bool EnableNewsAnalysis { get; set; }
+```typescript
+interface UserConfiguration {
+  // Portfolio Configuration
+  defaultPortfolioSettings: {
+    maxPositionSize: number;
+    maxDailyLoss: number;
+    maxDrawdown: number;
+    stopLossPercentage: number;
+    takeProfitPercentage: number;
+  };
+  
+  // Trading Configuration
+  tradingSettings: {
+    enableAutomation: boolean;
+    minConfidence: number;
+    maxConcurrentPositions: number;
+    tradingHours: {
+      start: string;
+      end: string;
+    };
+  };
+  
+  // Sentiment Configuration
+  sentimentSettings: {
+    enableSentimentAnalysis: boolean;
+    pollingInterval: number; // Minutes
+    minSentimentConfidence: number;
+    sentimentWeight: number; // 0.0 to 1.0
+  };
+  
+  // Risk Configuration
+  riskSettings: {
+    maxPortfolioRisk: number;
+    correlationLimit: number;
+    volatilityLimit: number;
+    enableCircuitBreakers: boolean;
+  };
+  
+  // Analytics Configuration
+  analyticsSettings: {
+    enableRealTimeAnalytics: boolean;
+    analyticsUpdateInterval: number; // Minutes
+    enablePerformanceAlerts: boolean;
+    enableRiskAlerts: boolean;
+  };
 }
 ```
 
-This API specification provides a comprehensive foundation for implementing the Rockefeller AI Trading System with clear interfaces, data models, and error handling patterns.
+This API specification provides a comprehensive foundation for implementing the Rockefeller AI Trading System with clear Next.js API routes, TypeScript interfaces, and error handling patterns for automated portfolio management and trading.
