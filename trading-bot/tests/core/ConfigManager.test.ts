@@ -66,14 +66,10 @@ describe('ConfigManager', () => {
       expect(binanceConfig.useServerTime).toBe(true);
     });
 
-    it('should return database configuration', () => {
-      const dbConfig = configManager.databaseConfig;
-      expect(dbConfig.host).toBe('localhost');
-      expect(dbConfig.port).toBe(5432);
-      expect(dbConfig.database).toBe('trading_bot');
-      expect(dbConfig.user).toBe('trading_bot_user');
-      expect(dbConfig.ssl).toBe(false);
-      expect(dbConfig.connectionPool).toBe(10);
+    it('should return session configuration', () => {
+      const sessionConfig = configManager.sessionConfig;
+      expect(sessionConfig.sessionDir).toBe('sessions');
+      expect(sessionConfig.cleanupInterval).toBe(3600000);
     });
 
     it('should return trading configuration', () => {
@@ -149,8 +145,8 @@ describe('ConfigManager', () => {
       const config = configManager.getConfig();
       expect(config.PORT).toBe(3000);
       expect(config.APP_NAME).toBe('TradingBot');
-      expect(config.DB_HOST).toBe('localhost');
-      expect(config.DB_PORT).toBe(5432);
+      expect(config.SESSION_DIR).toBe('sessions');
+      expect(config.SESSION_CLEANUP_INTERVAL).toBe(3600000);
     });
   });
 });

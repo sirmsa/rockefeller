@@ -1,9 +1,10 @@
-# AI-Regulated Trading Bot
+# AI-Regulated Trading Bot (Local Environment)
 
-An automated trading bot leveraging technical analysis and AI sentiment analysis, built on Binance as the primary data and broker provider.
+An automated trading bot leveraging technical analysis and AI sentiment analysis, built for **local operation** with Binance as the primary data and broker provider.
 
 ## 🚀 Features
 
+- **Local-First Architecture**: No external databases or Redis required
 - **Binance API Integration**: Full integration with Binance REST API and WebSocket streams
 - **AI Sentiment Analysis**: Real-time sentiment polling from multiple sources
 - **Technical Analysis**: AI-optimized technical indicators and trend analysis
@@ -11,14 +12,14 @@ An automated trading bot leveraging technical analysis and AI sentiment analysis
 - **Risk Management**: Advanced risk metrics and position sizing
 - **Real-time Monitoring**: WebSocket-based real-time data and alerts
 - **Comprehensive Logging**: Structured logging with daily file rotation
+- **Local Session Storage**: File-based data persistence with import/export
 - **Backtesting Engine**: Historical data simulation and strategy validation
 
 ## 📋 Prerequisites
 
 - Node.js 18+ 
-- PostgreSQL 12+
-- Redis 6+
 - Binance API account with trading permissions
+- Local file system access for session storage
 
 ## 🛠️ Installation
 
@@ -39,19 +40,17 @@ An automated trading bot leveraging technical analysis and AI sentiment analysis
    # Edit .env with your configuration
    ```
 
-4. **Set up database**
+4. **Start the application**
    ```bash
-   # Create PostgreSQL database
-   createdb trading_bot
+   # Development mode
+   npm run dev
    
-   # Run migrations
-   npm run migrate
+   # Or production mode
+   npm run build
+   npm start
    ```
 
-5. **Start Redis server**
-   ```bash
-   redis-server
-   ```
+**That's it!** No database setup, Redis installation, or complex configuration required.
 
 ## ⚙️ Configuration
 
@@ -66,17 +65,37 @@ BINANCE_SECRET_KEY=your_binance_secret_key
 JWT_SECRET=your_jwt_secret
 ENCRYPTION_KEY=your_encryption_key
 
-# Database (Required)
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=trading_bot
-DB_USER=trading_bot_user
-DB_PASSWORD=your_db_password
-
-# Redis (Required)
-REDIS_HOST=localhost
-REDIS_PORT=6379
+# Session Storage (Optional - defaults provided)
+SESSION_DIR=sessions
+SESSION_CLEANUP_INTERVAL=3600000
 ```
+
+### Local Session Storage
+
+The trading bot uses local file-based storage for all data:
+
+```
+trading-bot/
+├── sessions/           # Session data storage
+│   ├── session1.json  # Portfolio and trade data
+│   ├── session2.json  # AI analysis results
+│   └── ...            # Additional sessions
+├── logs/              # Application logs
+└── config/            # Configuration files
+```
+
+**Session data includes:**
+- Portfolio configurations and balances
+- Trade history and performance metrics
+- AI sentiment analysis results
+- Technical analysis data
+- Cache and temporary data
+
+**Benefits:**
+- No external database required
+- Easy backup and restore
+- Portable between machines
+- Fast local access
 
 ### Optional Configuration
 
@@ -129,7 +148,38 @@ trading-bot/
 └── docs/                     # Documentation
 ```
 
+## 📁 Project Structure
+
+```
+trading-bot/
+├── src/
+│   ├── core/              # Core application logic
+│   │   ├── ConfigManager.ts
+│   │   └── models/
+│   ├── utils/             # Utility functions
+│   │   ├── SessionManager.ts    # Local file storage
+│   │   ├── RateLimiter.ts       # In-memory rate limiting
+│   │   ├── WebSocketManager.ts  # WebSocket connections
+│   │   ├── CryptoUtils.ts       # Cryptographic utilities
+│   │   └── ValidationUtils.ts   # Data validation
+│   ├── logging/           # Logging system
+│   ├── portfolio/         # Portfolio management
+│   ├── ai/               # AI analysis engine
+│   ├── trading/          # Trading engine
+│   └── api/              # REST API endpoints
+├── sessions/             # Local session storage
+├── logs/                 # Application logs
+├── config/               # Configuration files
+└── tests/                # Test files
+```
+
 ## 🔧 Core Components
+
+### SessionManager
+- Local file-based data persistence
+- Portfolio and trade data storage
+- AI analysis result caching
+- Session import/export functionality
 
 ### BinanceManager
 - REST API integration with rate limiting
@@ -194,8 +244,10 @@ npm test -- ConfigManager.test.ts
 
 - **Latency**: < 100ms for trade execution
 - **Throughput**: Handle 1000+ symbols simultaneously
-- **Uptime**: 99.9% availability target
+- **Local Storage**: Fast file-based data access
+- **Memory Usage**: Efficient in-memory rate limiting and caching
 - **Rate Limits**: Compliant with Binance API limits
+- **No External Dependencies**: No database or Redis overhead
 
 ## 🤝 Contributing
 

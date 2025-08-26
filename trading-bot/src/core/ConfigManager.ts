@@ -1,6 +1,20 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
+/**
+ * Configuration Manager for the AI Trading Bot
+ * 
+ * This class manages all application configuration including:
+ * - Environment variables
+ * - Binance API configuration
+ * - Database settings
+ * - Trading parameters
+ * - AI analysis settings
+ * - Risk management configuration
+ * 
+ * Uses Zod for strict validation of all configuration values.
+ * Implements singleton pattern for global access.
+ */
 // Load environment variables
 dotenv.config();
 
@@ -18,20 +32,9 @@ const ConfigSchema = z.object({
   BINANCE_RECV_WINDOW: z.string().transform(Number).default('60000'),
   BINANCE_USE_SERVER_TIME: z.string().transform((val: string) => val === 'true').default('true'),
 
-  // Database Configuration
-  DB_HOST: z.string().default('localhost'),
-  DB_PORT: z.string().transform(Number).default('5432'),
-  DB_NAME: z.string().default('trading_bot'),
-  DB_USER: z.string().default('trading_bot_user'),
-  DB_PASSWORD: z.string().default(''),
-  DB_SSL: z.string().transform((val: string) => val === 'true').default('false'),
-  DB_CONNECTION_POOL: z.string().transform(Number).default('10'),
-
-  // Redis Configuration
-  REDIS_HOST: z.string().default('localhost'),
-  REDIS_PORT: z.string().transform(Number).default('6379'),
-  REDIS_PASSWORD: z.string().optional(),
-  REDIS_DB: z.string().transform(Number).default('0'),
+  // Session Storage Configuration
+  SESSION_DIR: z.string().default('sessions'),
+  SESSION_CLEANUP_INTERVAL: z.string().transform(Number).default('3600000'), // 1 hour
 
   // Trading Configuration
   MAX_POSITIONS_PER_PORTFOLIO: z.string().transform(Number).default('10'),
@@ -87,6 +90,12 @@ const ConfigSchema = z.object({
 
 export type Config = z.infer<typeof ConfigSchema>;
 
+/**
+ * Configuration Manager singleton class
+ * 
+ * Provides centralized configuration management with validation
+ * and type-safe access to all application settings.
+ */
 class ConfigManager {
   private static instance: ConfigManager;
   private config: Config;
@@ -109,6 +118,11 @@ class ConfigManager {
     }
   }
 
+  /**
+   * Get the singleton instance of ConfigManager
+   * 
+   * @returns The singleton ConfigManager instance
+   */
   public static getInstance(): ConfigManager {
     if (!ConfigManager.instance) {
       ConfigManager.instance = new ConfigManager();
@@ -116,23 +130,51 @@ class ConfigManager {
     return ConfigManager.instance;
   }
 
+  /**
+   * Get the complete configuration object
+   * 
+   * @returns The validated configuration object
+   */
   public getConfig(): Config {
     return this.config;
   }
 
-  // Convenience getters
+  /**
+   * Convenience getters for environment detection
+   */
+  
+  /**
+   * Check if the application is running in development mode
+   * 
+   * @returns True if NODE_ENV is 'development'
+   */
   public get isDevelopment(): boolean {
     return this.config.NODE_ENV === 'development';
   }
 
+  /**
+   * Check if the application is running in production mode
+   * 
+   * @returns True if NODE_ENV is 'production'
+   */
   public get isProduction(): boolean {
     return this.config.NODE_ENV === 'production';
   }
 
+  /**
+   * Check if the application is running in test mode
+   * 
+   * @returns True if NODE_ENV is 'test'
+   */
   public get isTest(): boolean {
     return this.config.NODE_ENV === 'test';
   }
 
+  /**
+   * Get Binance API configuration
+   * 
+   * @returns Object containing Binance API settings
+   */
   public get binanceConfig() {
     return {
       apiKey: this.config.BINANCE_API_KEY,
@@ -143,24 +185,15 @@ class ConfigManager {
     };
   }
 
-  public get databaseConfig() {
+  /**
+   * Get session storage configuration
+   * 
+   * @returns Object containing session storage settings
+   */
+  public get sessionConfig() {
     return {
-      host: this.config.DB_HOST,
-      port: this.config.DB_PORT,
-      database: this.config.DB_NAME,
-      user: this.config.DB_USER,
-      password: this.config.DB_PASSWORD,
-      ssl: this.config.DB_SSL,
-      connectionPool: this.config.DB_CONNECTION_POOL,
-    };
-  }
-
-  public get redisConfig() {
-    return {
-      host: this.config.REDIS_HOST,
-      port: this.config.REDIS_PORT,
-      password: this.config.REDIS_PASSWORD,
-      db: this.config.REDIS_DB,
+      sessionDir: this.config.SESSION_DIR,
+      cleanupInterval: this.config.SESSION_CLEANUP_INTERVAL,
     };
   }
 

@@ -13,8 +13,9 @@
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
-    "migrate": "ts-node src/database/migrate.ts",
-    "seed": "ts-node src/database/seed.ts"
+    "session:clean": "rm -rf sessions/*",
+    "session:backup": "cp -r sessions/ backup-sessions-$(date +%Y%m%d)/",
+    "session:list": "ls -la sessions/"
   },
   "keywords": [
     "trading",
@@ -39,8 +40,6 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "node-cron": "^3.0.3",
-    "pg": "^8.11.3",
-    "redis": "^4.6.10",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
     "ws": "^8.14.2",
@@ -53,7 +52,6 @@
     "@types/jest": "^29.5.8",
     "@types/lodash": "^4.14.200",
     "@types/node": "^20.8.10",
-    "@types/pg": "^8.10.7",
     "@types/uuid": "^9.0.7",
     "@types/ws": "^8.5.8",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
