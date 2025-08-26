@@ -41,10 +41,10 @@ trading-bot/
 │   │   ├── DatabaseManager.ts
 │   │   ├── migrations/
 │   │   └── models/
-│   ├── api/
-│   │   ├── routes/
-│   │   ├── middleware/
-│   │   └── websocket/
+│   ├── local/
+│   │   ├── components/
+│   │   ├── events/
+│   │   └── webhooks/
 │   └── utils/
 │       ├── indicators.ts
 │       ├── calculations.ts

@@ -120,3 +120,8 @@ dump.rdb
 # Temporary files
 tmp/
 temp/
+
+# Backup files
+*.bak
+*.backup
+*.orig
