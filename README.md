@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🚀 Rockefeller Trading Bot
 
-## Getting Started
+A professional desktop trading bot application built with Electron, featuring a beautiful red monochromatic design system.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **🎨 Beautiful Design System** - Complete component library with red monochromatic theme
+- **🖥️ Desktop Application** - Native desktop experience with Electron
+- **🔐 Secure Architecture** - Built with security best practices
+- **📱 Responsive Interface** - Works seamlessly across different screen sizes
+- **⚡ Fast Performance** - Optimized for smooth user experience
+
+## 🛠️ Technology Stack
+
+- **Electron** - Desktop application framework
+- **HTML/CSS/JavaScript** - Frontend technologies
+- **Custom Design System** - Red monochromatic theme with professional components
+
+## 📦 Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd rockefeller
+   ```
+
+2. **Install dependencies**
+   ```bash
+   cd app
+   npm install
+   ```
+
+3. **Run the application**
+   ```bash
+   npm run dev
+   ```
+
+## 🚀 Development
+
+### Available Scripts
+
+- `npm run dev` - Start the application in development mode
+- `npm run build` - Build the application for production
+- `npm run dist` - Create distributable packages
+- `npm run pack` - Package the application
+
+### Project Structure
+
+```
+rockefeller/
+├── app/                    # Main Electron application
+│   ├── src/
+│   │   ├── main.js        # Main process
+│   │   ├── preload.js     # Preload script
+│   │   ├── index.html     # Main window
+│   │   ├── design-system.html  # Design system showcase
+│   │   └── styles.css     # Complete design system
+│   ├── package.json       # Dependencies and scripts
+│   └── README.md          # App documentation
+├── shared/                # Shared resources
+└── README.md             # Project documentation
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎨 Design System
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The application features a comprehensive design system with:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Red Monochromatic Theme** - Professional color palette
+- **Interactive Components** - Buttons, forms, cards, and more
+- **SVG Icons** - Custom icon library
+- **Smooth Animations** - Professional transitions and effects
+- **Responsive Layout** - Adapts to different screen sizes
 
-## Learn More
+### Key Components
 
-To learn more about Next.js, take a look at the following resources:
+- **Form Elements** - Enhanced selects, checkboxes, radio buttons
+- **Buttons** - Primary, secondary, glass, and ghost variants
+- **Cards** - Interactive cards with icons and hover effects
+- **Status Indicators** - Success, warning, error, and info states
+- **Navigation** - Clean navigation with glass effects
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔧 Configuration
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The application can be configured through:
 
-## Deploy on Vercel
+- **Environment Variables** - For API keys and settings
+- **Electron Configuration** - Window settings and security
+- **Design System** - Customizable CSS variables
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📱 Building for Production
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Build the application**
+   ```bash
+   npm run build
+   ```
+
+2. **Create distributable packages**
+   ```bash
+   npm run dist
+   ```
+
+3. **Package for specific platforms**
+   ```bash
+   npm run pack
+   ```
+
+## 🔒 Security
+
+- **Context Isolation** - Secure communication between processes
+- **Preload Scripts** - Safe API exposure to renderer
+- **Input Validation** - Secure form handling
+- **Environment Variables** - Secure configuration management
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🆘 Support
+
+For support and questions, please open an issue in the repository.
+
+---
+
+**Rockefeller Trading Bot** - Professional desktop trading platform with beautiful design. 🚀

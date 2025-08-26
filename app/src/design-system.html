@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rockefeller Design System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="design-system-container">
+        <!-- App Bar -->
+        <nav class="app-bar glass-effect">
+            <div class="nav-container">
+                <div class="nav-content">
+                    <!-- Logo -->
+                    <div class="logo-section">
+                        <div class="logo-icon gradient-clean">
+                            <span class="logo-text">R</span>
+                        </div>
+                        <span class="logo-title">Rockefeller</span>
+                    </div>
+
+                    <!-- Navigation Links -->
+                    <div class="nav-links">
+                        <a href="#" class="nav-link">Dashboard</a>
+                        <a href="#design-system" class="nav-link active">Design System</a>
+                        <a href="#components" class="nav-link">Components</a>
+                        <a href="#guidelines" class="nav-link">Guidelines</a>
+                    </div>
+
+                    <!-- Right Side Actions -->
+                    <div class="nav-actions">
+                        <button class="btn-secondary" id="backToMainBtn">Back to Dashboard</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-background"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="text-gradient">Design System</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Complete Component Library for
+                    <span class="hero-accent animate-pulse-subtle">Rockefeller Platform</span>
+                </p>
+                <p class="hero-description">
+                    Comprehensive design system showcasing all UI components, typography, colors, and interactive elements 
+                    used throughout the Rockefeller trading platform.
+                </p>
+            </div>
+        </section>
+
+        <!-- Enhanced Design System Showcase -->
+        <section class="showcase-section">
+            <div class="container">
+                <h2 class="section-title">
+                    <span class="text-gradient">Enhanced Design System</span>
+                </h2>
+
+                <!-- Font Variants -->
+                <div class="component-section">
+                    <h3 class="component-title">Font Variants</h3>
+                    <div class="component-grid">
+                        <div class="component-card">
+                            <h4 class="card-title">Monospace Font</h4>
+                            <p class="font-mono card-description">Perfect for code, data, and technical content.</p>
+                            <code class="code-example">font-mono</code>
+                        </div>
+                        
+                        <div class="component-card">
+                            <h4 class="card-title">UI Font</h4>
+                            <p class="font-ui card-description">Clean sans-serif for user interface elements.</p>
+                            <code class="code-example">font-ui</code>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Form Elements -->
+                <div class="component-section">
+                    <h3 class="component-title">Enhanced Form Elements</h3>
+                    
+                    <!-- Enhanced Select Dropdowns -->
+                    <div class="form-section">
+                        <h4 class="form-title">Enhanced Select Dropdowns</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Glass Select</label>
+                                <select class="form-select select-glass">
+                                    <option value="">Choose an option...</option>
+                                    <option value="option1">Trading Strategy</option>
+                                    <option value="option2">Risk Level</option>
+                                    <option value="option3">Portfolio Type</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Dark Grey Select</label>
+                                <select class="form-select select-clean">
+                                    <option value="">Choose an option...</option>
+                                    <option value="option1">Conservative</option>
+                                    <option value="option2">Moderate</option>
+                                    <option value="option3">Aggressive</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Red Outline Select</label>
+                                <select class="form-select select-red-outline">
+                                    <option value="">Choose an option...</option>
+                                    <option value="option1">Daily</option>
+                                    <option value="option2">Weekly</option>
+                                    <option value="option3">Monthly</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Gradient Select</label>
+                                <select class="form-select select-gradient">
+                                    <option value="">Choose an option...</option>
+                                    <option value="option1">Stocks</option>
+                                    <option value="option2">Crypto</option>
+                                    <option value="option3">Forex</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkboxes and Radio Buttons -->
+                    <div class="form-section">
+                        <h4 class="form-title">Checkboxes & Radio Buttons</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <h5 class="form-subtitle">Checkboxes</h5>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" class="checkbox-clean" />
+                                        <span>Enable notifications</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" class="checkbox-clean" checked />
+                                        <span>Auto-trading enabled</span>
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" class="checkbox-clean" />
+                                        <span>Risk management</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <h5 class="form-subtitle">Radio Buttons</h5>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="strategy" class="radio-clean" checked />
+                                        <span>Conservative</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="strategy" class="radio-clean" />
+                                        <span>Moderate</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="strategy" class="radio-clean" />
+                                        <span>Aggressive</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Fields -->
+                    <div class="form-section">
+                        <h4 class="form-title">Enhanced Input Fields</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Glass Input</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter your portfolio name..."
+                                    class="form-input glass-effect"
+                                />
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Dark Grey Input</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter investment amount..."
+                                    class="form-input bg-dark-grey border-clean"
+                                />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Red Outline Input</label>
+                                <input 
+                                    type="text" 
+                                    placeholder="Enter risk tolerance level..."
+                                    class="form-input bg-dark-grey border-red-subtle"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="form-section">
+                        <h4 class="form-title">Enhanced Buttons</h4>
+                        <div class="button-grid">
+                            <div class="button-group">
+                                <button class="btn-primary gradient-clean">
+                                    Primary Button
+                                </button>
+                                <p class="button-description">Main action</p>
+                            </div>
+
+                            <div class="button-group">
+                                <button class="btn-secondary">
+                                    Secondary Button
+                                </button>
+                                <p class="button-description">Secondary action</p>
+                            </div>
+
+                            <div class="button-group">
+                                <button class="btn-glass glass-effect">
+                                    Glass Button
+                                </button>
+                                <p class="button-description">Glass effect</p>
+                            </div>
+
+                            <div class="button-group">
+                                <button class="btn-ghost">
+                                    Ghost Button
+                                </button>
+                                <p class="button-description">Subtle action</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Examples with Icons -->
+                <div class="component-section">
+                    <h3 class="component-title">Card Examples with Icons</h3>
+                    <div class="card-grid">
+                        <div class="card-icon bg-dark-grey">
+                            <div class="card-icon-svg icon-trending-up"></div>
+                            <div class="card-icon-content">
+                                <div class="card-icon-title">Trading Performance</div>
+                                <div class="card-icon-subtitle">+23.4% this month</div>
+                            </div>
+                        </div>
+
+                        <div class="card-icon bg-dark-grey">
+                            <div class="card-icon-svg icon-chart"></div>
+                            <div class="card-icon-content">
+                                <div class="card-icon-title">Analytics Dashboard</div>
+                                <div class="card-icon-subtitle">Real-time insights</div>
+                            </div>
+                        </div>
+
+                        <div class="card-icon bg-dark-grey">
+                            <div class="card-icon-svg icon-shield"></div>
+                            <div class="card-icon-content">
+                                <div class="card-icon-title">Security</div>
+                                <div class="card-icon-subtitle">Bank-grade protection</div>
+                            </div>
+                        </div>
+
+                        <div class="card-icon bg-dark-grey">
+                            <div class="card-icon-svg icon-cog"></div>
+                            <div class="card-icon-content">
+                                <div class="card-icon-title">Settings</div>
+                                <div class="card-icon-subtitle">Customize your experience</div>
+                            </div>
+                        </div>
+
+                        <div class="card-icon bg-dark-grey">
+                            <div class="card-icon-svg icon-bell"></div>
+                            <div class="card-icon-content">
+                                <div class="card-icon-title">Notifications</div>
+                                <div class="card-icon-subtitle">Stay updated</div>
+                            </div>
+                        </div>
+
+                        <div class="card-icon bg-dark-grey">
+                            <div class="card-icon-svg icon-user"></div>
+                            <div class="card-icon-content">
+                                <div class="card-icon-title">Profile</div>
+                                <div class="card-icon-subtitle">Manage your account</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Indicators -->
+                <div class="component-section">
+                    <h3 class="component-title">Status Indicators</h3>
+                    <div class="status-grid">
+                        <div class="status-card status-success">
+                            <h4 class="status-title">Success</h4>
+                            <p class="status-description">Operation completed successfully</p>
+                        </div>
+                        
+                        <div class="status-card status-warning">
+                            <h4 class="status-title">Warning</h4>
+                            <p class="status-description">Please review your settings</p>
+                        </div>
+                        
+                        <div class="status-card status-error">
+                            <h4 class="status-title">Error</h4>
+                            <p class="status-description">Something went wrong</p>
+                        </div>
+                        
+                        <div class="status-card status-info">
+                            <h4 class="status-title">Info</h4>
+                            <p class="status-description">Here's some information</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <style>
+        /* Design System Specific Styles */
+        .design-system-container {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--black-pure) 0%, var(--dark-grey) 50%, var(--dark-grey-light) 100%);
+        }
+
+        /* App Bar */
+        .app-bar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+            backdrop-filter: blur(20px);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .nav-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 4rem;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-text {
+            color: black;
+            font-weight: 900;
+            font-size: 0.875rem;
+        }
+
+        .logo-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: white;
+            letter-spacing: -0.025em;
+        }
+
+        .nav-links {
+            display: none;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-background {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--black-pure) 0%, var(--black-pure) 50%, var(--dark-grey) 100%);
+        }
+
+        .hero-background::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent 0%, transparent 50%, rgba(220, 38, 38, 0.05) 100%);
+        }
+
+        .hero-background::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(220, 38, 38, 0.03) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 3.75rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.025em;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: white;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            letter-spacing: 0.025em;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .hero-accent {
+            color: var(--primary-red);
+            font-weight: 900;
+            margin-left: 0.5rem;
+        }
+
+        .hero-description {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 3rem;
+            max-width: 48rem;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.75;
+            font-weight: 500;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Showcase Section */
+        .showcase-section {
+            padding: 5rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .section-title {
+            font-size: 2.25rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 4rem;
+            letter-spacing: -0.025em;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .component-section {
+            margin-bottom: 5rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .component-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 2rem;
+            letter-spacing: 0.025em;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .component-card {
+            background: var(--dark-grey);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.025em;
+        }
+
+        .card-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .code-example {
+            font-size: 0.75rem;
+            color: var(--primary-red);
+            font-weight: bold;
+            display: block;
+        }
+
+        /* Form Elements */
+        .form-section {
+            margin-bottom: 3rem;
+        }
+
+        .form-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.025em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-select, .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            color: white;
+            border: none;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-select::placeholder, .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .checkbox-group, .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .checkbox-label, .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-subtitle {
+            font-size: 1.125rem;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 1rem;
+            letter-spacing: 0.025em;
+        }
+
+        /* Buttons */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-primary, .btn-secondary, .btn-glass, .btn-ghost {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            outline: none;
+        }
+
+        .btn-glass {
+            color: white;
+        }
+
+        .btn-ghost {
+            background: var(--dark-grey);
+            color: var(--primary-red);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(220, 38, 38, 0.1);
+        }
+
+        .button-description {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 0.5rem;
+        }
+
+        /* Cards with Icons */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card-icon {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-icon:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon-svg {
+            width: 2rem;
+            height: 2rem;
+            flex-shrink: 0;
+        }
+
+        .card-icon-content {
+            flex: 1;
+        }
+
+        .card-icon-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-icon-subtitle {
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
+        /* Status Indicators */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .status-card {
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+        }
+
+        .status-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-description {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .nav-links {
+                display: flex;
+                align-items: center;
+                gap: 2rem;
+            }
+
+            .nav-link {
+                color: rgba(255, 255, 255, 0.8);
+                font-weight: 500;
+                transition: color 0.2s ease;
+                text-decoration: none;
+            }
+
+            .nav-link:hover {
+                color: white;
+            }
+
+            .nav-link.active {
+                color: white;
+            }
+
+            .hero-title {
+                font-size: 6rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.875rem;
+            }
+
+            .component-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .button-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .card-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .status-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+
+    <script>
+        // Back to main app button
+        document.getElementById('backToMainBtn').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
